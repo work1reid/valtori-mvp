@@ -170,7 +170,7 @@
         <button class="nav-btn" onclick="goBack()" title="Back">←</button>
     </div>
     
-    <div class="beta-badge" onclick="if(confirm('Reset OpenAI API key?')){localStorage.removeItem('openaiKey');location.reload()}">🔑 API</div>
+    <div class="beta-badge" onclick="setupOpenAIKey()">🔑 API Key</div>
     
     <!-- EMOTION CAPTURE MODAL -->
     <div class="emotion-modal" id="emotionModal">
@@ -449,7 +449,7 @@ const BENCHMARKS = {
 };
 
 // STATE
-let selectedIndustry=null,isFirstCall=true,callActive=false,callStart=null,timer=null,duration=0,synthesis=window.speechSynthesis,conversation=[],session=null,selectedEmotion=null,stats={
+let selectedIndustry=null,isFirstCall=true,callActive=false,callStart=null,timer=null,duration=0,synthesis=window.speechSynthesis,conversation=[],session=null,selectedEmotion=null,openaiKey='',stats={
     totalCalls:0,totalSales:0,totalEarnings:0,totalTime:0,scores:[],history:[],
     // 🔥 NEW STATS
     emotionHistory:[],
@@ -457,7 +457,7 @@ let selectedIndustry=null,isFirstCall=true,callActive=false,callStart=null,timer
     weeklyCallCounts:{},
     confidenceHistory:[],
     earningsHistory:[]
-},openaiKey='';
+};
 
 // INIT
 function init(){
@@ -564,18 +564,146 @@ function startTimer(){
     },1000);
 }
 
-function toggleMic(){
-    if(!openaiKey){
-        if(confirm('OpenAI API key required. Set one now?')){
-            const key=prompt('Enter your OpenAI API key:');
-            if(key&&key.startsWith('sk-')){
-                openaiKey=key;
-                localStorage.setItem('openaiKey',key);
+let recognition=null,isRecording=false,mediaRecorder=null,audioChunks=[];
+
+function setupOpenAIKey(){
+    const current=openaiKey?'Current key: '+openaiKey.substring(0,10)+'...':'No key set';
+    const key=prompt(`Enter your OpenAI API key for Whisper voice input:\n\n${current}\n\n(Leave blank to keep current)`);
+    if(key&&key.trim().startsWith('sk-')){
+        openaiKey=key.trim();
+        localStorage.setItem('openaiKey',key.trim());
+        alert('✅ API key saved! You can now use voice input with Whisper.');
+    }else if(key&&key.trim()){
+        alert('❌ Invalid API key. Must start with "sk-"');
+    }
+}
+
+async function toggleMic(){
+    if(!callActive)return;
+    
+    const micBtn=document.getElementById('micBtn');
+    
+    if(isRecording){
+        stopRecording();
+        micBtn.classList.remove('recording');
+        micBtn.textContent='🎤';
+        isRecording=false;
+    }else{
+        // Check if API key is set for Whisper
+        const hasKey=!!openaiKey;
+        if(!hasKey){
+            if(confirm('Voice input works best with OpenAI Whisper API. Set your API key now?\n\n(You can also use browser speech recognition without a key)')){
+                setupOpenAIKey();
             }
         }
-        return;
+        
+        await startRecording();
+        micBtn.classList.add('recording');
+        micBtn.textContent='⏹️';
+        isRecording=true;
     }
-    alert('Voice recording not implemented in this version. Use text input.');
+}
+
+async function startRecording(){
+    // If OpenAI key is set, use Whisper API with MediaRecorder
+    if(openaiKey){
+        try{
+            const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+            mediaRecorder=new MediaRecorder(stream);
+            audioChunks=[];
+            
+            mediaRecorder.ondataavailable=(event)=>{
+                audioChunks.push(event.data);
+            };
+            
+            mediaRecorder.onstop=async()=>{
+                const audioBlob=new Blob(audioChunks,{type:'audio/webm'});
+                await transcribeWithWhisper(audioBlob);
+                stream.getTracks().forEach(track=>track.stop());
+            };
+            
+            mediaRecorder.start();
+        }catch(error){
+            console.error('Microphone access denied:',error);
+            alert('Microphone access denied. Please allow microphone access or use text input.');
+            stopRecording();
+        }
+    }
+    // Otherwise try browser speech recognition (free but less accurate)
+    else if('webkitSpeechRecognition' in window||'SpeechRecognition' in window){
+        const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+        recognition=new SpeechRecognition();
+        recognition.continuous=false;
+        recognition.interimResults=false;
+        
+        recognition.onresult=(event)=>{
+            const text=event.results[0][0].transcript;
+            handleUserSpeech(text);
+            stopRecording();
+        };
+        
+        recognition.onerror=(event)=>{
+            console.error('Speech recognition error:',event.error);
+            if(event.error==='no-speech'){
+                alert('No speech detected. Please try again or use text input.');
+            }else{
+                alert('Speech recognition failed. Try setting an OpenAI API key for better accuracy.');
+            }
+            stopRecording();
+        };
+        
+        recognition.start();
+    }else{
+        alert('Voice input not available. Please use text input or set an OpenAI API key.');
+        stopRecording();
+    }
+}
+
+async function transcribeWithWhisper(audioBlob){
+    try{
+        const formData=new FormData();
+        formData.append('file',audioBlob,'audio.webm');
+        formData.append('model','whisper-1');
+        
+        const response=await fetch('https://api.openai.com/v1/audio/transcriptions',{
+            method:'POST',
+            headers:{
+                'Authorization':`Bearer ${openaiKey}`
+            },
+            body:formData
+        });
+        
+        if(!response.ok){
+            const error=await response.text();
+            throw new Error(`Whisper API error: ${response.status} - ${error}`);
+        }
+        
+        const data=await response.json();
+        const text=data.text;
+        
+        if(text&&text.trim()){
+            handleUserSpeech(text);
+        }else{
+            alert('No speech detected. Please try again.');
+        }
+    }catch(error){
+        console.error('Whisper transcription error:',error);
+        alert('Transcription failed. Check your API key or try text input.');
+    }
+}
+
+function stopRecording(){
+    if(mediaRecorder&&mediaRecorder.state!=='inactive'){
+        mediaRecorder.stop();
+    }
+    if(recognition){
+        recognition.stop();
+        recognition=null;
+    }
+    const micBtn=document.getElementById('micBtn');
+    micBtn.classList.remove('recording');
+    micBtn.textContent='🎤';
+    isRecording=false;
 }
 
 function sendTextInput(){
@@ -594,10 +722,66 @@ function handleUserSpeech(text){
 }
 
 async function getAIResponse(userText){
-    const aiText="I'm not sure I understand. Can you explain more?";
-    addMessage('ai',aiText);
-    session.conversation.push({speaker:'ai',text:aiText,timestamp:duration});
-    if(Math.random()>0.7)handleSale();
+    // Build conversation history
+    const conversationHistory=session.conversation.map(m=>`${m.speaker.toUpperCase()}: ${m.text}`).join('\n');
+    
+    const industry=INDUSTRIES[selectedIndustry];
+    const systemPrompt=`You are a realistic B2B customer receiving a cold call about ${industry.product} priced at $${industry.price.toLocaleString()}.
+
+CONVERSATION SO FAR:
+${conversationHistory}
+USER: ${userText}
+
+You are a busy professional who:
+- Starts skeptical
+- Has common objections (price, time, existing solution)
+- Can be convinced with good technique
+- Only says yes if the value is clear and the rep asks properly
+
+Respond in 1-2 sentences. You may:
+- Ask questions
+- Give objections ("too expensive", "not interested", "we have something")
+- Say yes if impressed ("let's do it", "sounds good")
+- Push back if rushed
+
+${Math.random()>0.7?'Give a realistic objection.':''}`;
+
+    try {
+        const response=await fetch('https://api.anthropic.com/v1/messages',{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({
+                model:'claude-sonnet-4-20250514',
+                max_tokens:150,
+                messages:[{role:'user',content:systemPrompt}]
+            })
+        });
+        
+        const data=await response.json();
+        const aiText=data.content[0].text;
+        
+        addMessage('ai',aiText);
+        session.conversation.push({speaker:'ai',text:aiText,timestamp:duration});
+        
+        // Check for sale signals
+        const aiLower=aiText.toLowerCase();
+        if(aiLower.includes('let\'s do it')||aiLower.includes('yes, i\'m interested')||aiLower.includes('i\'ll buy')||aiLower.includes('sounds good')||aiLower.includes('sign me up')){
+            handleSale();
+        }
+        
+        // Speak response
+        if(synthesis){
+            const utterance=new SpeechSynthesisUtterance(aiText);
+            utterance.rate=1.1;
+            synthesis.speak(utterance);
+        }
+        
+    }catch(error){
+        console.error('AI Error:',error);
+        const fallback="I'm not sure I understand. Can you explain differently?";
+        addMessage('ai',fallback);
+        session.conversation.push({speaker:'ai',text:fallback,timestamp:duration});
+    }
 }
 
 function handleSale(){
@@ -647,30 +831,99 @@ function submitEmotion(){
     endCallScore();
 }
 
-// SCORING
+// SCORING WITH AI
 async function endCallScore(){
-    const score=calculateQuickScore();
+    const score=await calculateQuickScore();
+    
+    // Display results
+    displayResults(score);
+    
+    // Save stats
     session.score=score;
     session.duration=duration;
     stats.totalCalls++;
     stats.totalTime+=duration;
     stats.scores.push(score.overall);
     stats.history.unshift(session);
-    
-    // Track for sparklines
     stats.confidenceHistory.push(score.metrics.confidence);
     stats.earningsHistory.push(session.closed?session.commission:0);
-    
-    // Check badges
     checkBadges();
-    
     saveStats();
     if(isFirstCall)isFirstCall=false;
-    displayResults(score);
     switchScreen('results');
 }
 
-function calculateQuickScore(){
+async function calculateQuickScore(){
+    const transcript=session.conversation.map(m=>`${m.speaker.toUpperCase()}: ${m.text}`).join('\n');
+    const industry=INDUSTRIES[selectedIndustry];
+    
+    const analysisPrompt=`Analyze this sales call and score the performance.
+
+PRODUCT: ${industry.product}
+PRICE: $${industry.price.toLocaleString()}
+DURATION: ${Math.floor(duration/60)}:${String(duration%60).padStart(2,'0')}
+OUTCOME: ${session.closed?'CLOSED':'NO SALE'}
+
+TRANSCRIPT:
+${transcript}
+
+Rate these skills 0-100:
+- CLOSING: Did they ask for the sale clearly?
+- OBJECTION: How well handled pushback?
+- CONFIDENCE: Tone and certainty
+- RAPPORT: Connection built
+
+Also provide 3 strengths, 3 improvements, and 3 tips.
+
+Return ONLY this JSON:
+{
+  "closing": number,
+  "objection": number,
+  "confidence": number,
+  "rapport": number,
+  "strengths": ["...", "...", "..."],
+  "improvements": ["...", "...", "..."],
+  "tips": ["...", "...", "..."]
+}`;
+
+    try{
+        const response=await fetch('https://api.anthropic.com/v1/messages',{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({
+                model:'claude-sonnet-4-20250514',
+                max_tokens:1000,
+                messages:[{role:'user',content:analysisPrompt}]
+            })
+        });
+        
+        const data=await response.json();
+        const aiAnalysis=data.content[0].text;
+        
+        const jsonMatch=aiAnalysis.match(/\{[\s\S]*\}/);
+        if(jsonMatch){
+            const analysis=JSON.parse(jsonMatch[0]);
+            const overall=Math.round((analysis.closing+analysis.objection+analysis.confidence+analysis.rapport)/4);
+            
+            return{
+                overall,
+                metrics:{
+                    closing:analysis.closing,
+                    objection:analysis.objection,
+                    confidence:analysis.confidence,
+                    rapport:analysis.rapport
+                },
+                feedback:{
+                    strengths:analysis.strengths,
+                    improvements:analysis.improvements
+                }
+            };
+        }
+    }catch(error){
+        console.error('Scoring error:',error);
+    }
+    
+    // Fallback scoring
     return{
         overall:session.closed?75:45,
         metrics:{
