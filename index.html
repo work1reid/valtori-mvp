@@ -1149,7 +1149,7 @@
             if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
                 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
                 recognition = new SpeechRecognition();
-                recognition.continuous = false;
+                recognition.continuous = true;
                 recognition.interimResults = false;
                 recognition.lang = 'en-US';
 
@@ -1190,10 +1190,10 @@
             const btn = document.getElementById('micBtn');
             if (isRecording) {
                 btn.classList.add('recording');
-                btn.innerHTML = '⏹️<div class="mic-label">Recording...</div>';
+                btn.innerHTML = '⏹️<div class="mic-label">Click to Stop</div>';
             } else {
                 btn.classList.remove('recording');
-                btn.innerHTML = '🎤<div class="mic-label">Click to Speak</div>';
+                btn.innerHTML = '🎤<div class="mic-label">Click to Start</div>';;
             }
         }
 
