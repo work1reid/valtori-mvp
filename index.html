@@ -3,22 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Valtori AI - Sales Practice Simulator</title>
+    <title>Valtori - Elite Sales Training</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
             --bg-dark: #0a0e1a; --bg-darker: #060811; --bg-card: #141824;
             --cyan: #00f5ff; --green: #00ff88; --yellow: #ffd500;
-            --orange: #ff8800; --red: #ff3366;
+            --orange: #ff8800; --red: #ff3366; --purple: #a855f7;
             --text: #e8ecf8; --text-dim: #8b93b0; --text-dimmer: #5a6279;
         }
         body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text); line-height: 1.6; }
         .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
-        .beta-badge { position: fixed; top: 1.5rem; right: 1.5rem; background: rgba(0, 245, 255, 0.1); border: 1px solid var(--cyan); padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; color: var(--cyan); z-index: 1000; cursor: pointer; }
+        
+        /* BADGES */
+        .badge-row { position: fixed; top: 1.5rem; right: 1.5rem; display: flex; gap: 0.5rem; z-index: 1000; }
+        .badge { background: rgba(0, 245, 255, 0.1); border: 1px solid var(--cyan); padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; color: var(--cyan); cursor: pointer; transition: all 0.3s; }
+        .badge:hover { background: rgba(0, 245, 255, 0.2); transform: translateY(-2px); }
+        
         .screen { display: none; animation: fadeIn 0.4s ease; }
         .screen.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* LANDING */
         .hero { text-align: center; padding: 6rem 0; }
         h1 { font-size: 4rem; font-weight: 900; line-height: 1.1; margin-bottom: 1.5rem; }
         .gradient { background: linear-gradient(135deg, var(--cyan), var(--green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -27,174 +34,173 @@
         .btn-primary { background: var(--cyan); color: var(--bg-dark); box-shadow: 0 0 30px rgba(0, 245, 255, 0.3); }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 40px rgba(0, 245, 255, 0.5); }
         .btn-secondary { background: var(--bg-card); color: var(--text); border: 1px solid var(--cyan); }
+        .btn-danger { background: var(--red); color: white; }
+        
+        /* FEATURES */
         .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-top: 4rem; }
         .feature { background: var(--bg-card); padding: 2rem; border-radius: 12px; border: 1px solid rgba(0, 245, 255, 0.1); transition: all 0.3s; }
         .feature:hover { border-color: var(--cyan); transform: translateY(-5px); }
         .feature-icon { font-size: 2.5rem; margin-bottom: 1rem; }
         .feature-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; }
         .feature-desc { color: var(--text-dim); font-size: 0.95rem; }
+        
+        /* SELECTION */
         .selection-screen { max-width: 700px; margin: 4rem auto; text-align: center; }
         .selection-screen h2 { font-size: 2.5rem; margin-bottom: 1rem; }
         .selection-screen p { color: var(--text-dim); margin-bottom: 3rem; font-size: 1.1rem; }
         select { width: 100%; max-width: 400px; padding: 1rem 1.5rem; font-size: 1.1rem; background: var(--bg-card); border: 2px solid var(--cyan); border-radius: 8px; color: var(--text); cursor: pointer; margin-bottom: 2rem; }
         .product-card { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 2rem; margin: 2rem auto; max-width: 500px; opacity: 0; transform: translateY(20px); transition: all 0.5s; }
         .product-card.show { opacity: 1; transform: translateY(0); }
-        .product-label { font-size: 0.85rem; color: var(--text-dimmer); text-transform: uppercase; margin-bottom: 0.5rem; }
-        .product-value { font-size: 1.8rem; font-weight: 700; color: var(--cyan); margin-bottom: 1.5rem; font-family: 'JetBrains Mono', monospace; }
-        .commission-box { background: rgba(0, 255, 136, 0.1); padding: 1rem 1.5rem; border-radius: 8px; border: 1px solid var(--green); display: flex; justify-content: space-between; align-items: center; }
-        .commission-value { font-size: 1.5rem; font-weight: 700; color: var(--green); font-family: 'JetBrains Mono', monospace; }
-        .call-screen { max-width: 900px; margin: 0 auto; }
-        .call-header { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; }
-        .timer { font-size: 2.5rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--cyan); }
-        .status { font-size: 1.1rem; color: var(--green); font-weight: 600; }
-        .avatar { width: 120px; height: 120px; margin: 2rem auto; border-radius: 50%; background: linear-gradient(135deg, var(--cyan), var(--green)); display: flex; align-items: center; justify-content: center; font-size: 3.5rem; animation: pulse 2s ease-in-out infinite; }
-        @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(0, 245, 255, 0.4); } 50% { box-shadow: 0 0 0 30px rgba(0, 245, 255, 0); } }
-        .avatar.speaking { animation: speaking 0.4s ease-in-out infinite; }
-        @keyframes speaking { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
-        .transcript { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 1.5rem; max-height: 400px; overflow-y: auto; margin: 2rem 0; }
-        .message { margin-bottom: 1rem; padding: 1rem; border-radius: 8px; animation: slideIn 0.3s ease; }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
-        .message.user { background: rgba(0, 245, 255, 0.08); border-left: 3px solid var(--cyan); }
-        .message.ai { background: rgba(0, 255, 136, 0.08); border-left: 3px solid var(--green); }
-        .speaker { font-weight: 700; font-size: 0.85rem; margin-bottom: 0.4rem; text-transform: uppercase; }
-        .message.user .speaker { color: var(--cyan); }
-        .message.ai .speaker { color: var(--green); }
-        .prompt-box { background: linear-gradient(135deg, rgba(0, 245, 255, 0.15), rgba(0, 255, 136, 0.15)); border: 2px solid var(--cyan); border-radius: 8px; padding: 1.5rem; margin: 1rem 0; }
-        .prompt-label { font-size: 0.8rem; text-transform: uppercase; color: var(--cyan); margin-bottom: 0.5rem; font-weight: 700; }
-        .controls { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; margin: 2rem 0; padding-bottom: 2rem; }
-        .mic-btn { width: 100px; height: 100px; border-radius: 50%; border: none; background: var(--red); color: white; font-size: 2.5rem; cursor: pointer; transition: all 0.3s; box-shadow: 0 5px 30px rgba(255, 51, 102, 0.4); position: relative; }
-        .mic-btn:hover { transform: scale(1.05); }
-        .mic-btn.recording { background: var(--cyan); animation: recordPulse 1.5s ease-in-out infinite; }
-        @keyframes recordPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(0, 245, 255, 0.6); } 50% { box-shadow: 0 0 0 25px rgba(0, 245, 255, 0); } }
-        .mic-label { position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%); font-size: 0.85rem; color: var(--text-dim); white-space: nowrap; }
-        .input-row { display: flex; gap: 0.5rem; width: 100%; max-width: 600px; }
-        .text-input { flex: 1; padding: 1rem; font-size: 1rem; border-radius: 8px; border: 2px solid var(--cyan); background: var(--bg-card); color: var(--text); }
-        .or-divider { color: var(--text-dimmer); font-size: 0.9rem; }
-        .warning { background: rgba(255, 213, 0, 0.15); border: 1px solid var(--yellow); color: var(--yellow); padding: 1rem; border-radius: 8px; text-align: center; margin: 1rem 0; }
         
-        /* RESULTS - FXReplay Style */
-        .results { max-width: 1400px; margin: 0 auto; }
-        .results-header { text-align: center; margin-bottom: 3rem; }
-        .results-header h2 { font-size: 3rem; margin-bottom: 0.5rem; }
-        .session-summary { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 16px; padding: 2rem; margin-bottom: 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; }
-        .summary-item { text-align: center; }
-        .summary-label { font-size: 0.85rem; color: var(--text-dimmer); text-transform: uppercase; margin-bottom: 0.5rem; }
-        .summary-value { font-size: 2.5rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
-        .summary-value.cyan { color: var(--cyan); }
-        .summary-value.green { color: var(--green); }
-        .summary-value.yellow { color: var(--yellow); }
-        .summary-value.red { color: var(--red); }
-        
-        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-        .kpi-card { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 1.5rem; }
-        .kpi-title { font-size: 0.9rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
-        .kpi-value { font-size: 3rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; margin-bottom: 0.5rem; }
-        .kpi-subtitle { font-size: 0.85rem; color: var(--text-dimmer); }
-        .kpi-bar { height: 8px; background: var(--bg-darker); border-radius: 4px; margin-top: 1rem; overflow: hidden; }
-        .kpi-bar-fill { height: 100%; background: linear-gradient(90deg, var(--cyan), var(--green)); transition: width 1.5s ease; width: 0; }
-        
-        .equity-curve { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 2rem; margin-bottom: 2rem; }
-        .equity-curve h3 { margin-bottom: 1.5rem; font-size: 1.4rem; }
-        .chart-placeholder { height: 300px; background: var(--bg-darker); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--text-dimmer); font-size: 1.2rem; }
-        
-        .breakdown-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 2rem; margin-bottom: 2rem; }
-        .breakdown-card { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 2rem; }
-        .breakdown-card h3 { margin-bottom: 1.5rem; font-size: 1.3rem; }
-        .breakdown-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--bg-darker); border-radius: 8px; margin-bottom: 0.8rem; border-left: 3px solid transparent; }
-        .breakdown-item.positive { border-left-color: var(--green); }
-        .breakdown-item.negative { border-left-color: var(--red); }
-        .breakdown-item.neutral { border-left-color: var(--cyan); }
-        .breakdown-label { font-size: 1rem; }
-        .breakdown-value { font-size: 1.3rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
-        
-        .insights { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 2rem; margin-bottom: 2rem; }
-        .insights h3 { margin-bottom: 1.5rem; font-size: 1.4rem; }
-        .insight-item { display: flex; gap: 1rem; margin-bottom: 1rem; padding: 1.2rem; background: var(--bg-darker); border-radius: 8px; border-left: 4px solid transparent; }
-        .insight-item.strength { border-left-color: var(--green); background: rgba(0, 255, 136, 0.05); }
-        .insight-item.weakness { border-left-color: var(--orange); background: rgba(255, 136, 0, 0.05); }
-        .insight-item.opportunity { border-left-color: var(--cyan); background: rgba(0, 245, 255, 0.05); }
-        .insight-icon { font-size: 1.8rem; }
-        .insight-content { flex: 1; }
-        .insight-title { font-weight: 700; margin-bottom: 0.3rem; font-size: 1.1rem; }
-        .insight-desc { color: var(--text-dim); font-size: 0.95rem; }
-        
-        .action-buttons { display: flex; gap: 1rem; justify-content: center; margin-top: 3rem; }
-        
-        /* DASHBOARD - Enhanced */
-        .dashboard { max-width: 1400px; margin: 0 auto; }
-        .dashboard h2 { text-align: center; font-size: 2.5rem; margin-bottom: 0.5rem; }
-        .dashboard-subtitle { text-align: center; color: var(--text-dim); margin-bottom: 3rem; }
-        .performance-overview { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
-        .perf-card { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 2rem; transition: all 0.3s; }
-        .perf-card:hover { border-color: var(--cyan); transform: translateY(-5px); }
-        .perf-label { font-size: 0.85rem; color: var(--text-dimmer); text-transform: uppercase; margin-bottom: 0.8rem; }
-        .perf-value { font-size: 3rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; background: linear-gradient(135deg, var(--cyan), var(--green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .perf-sub { font-size: 1rem; color: var(--text-dim); margin-top: 0.5rem; }
-        
-        .history { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 2rem; }
-        .history h3 { margin-bottom: 1.5rem; font-size: 1.4rem; }
-        .history-item { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 1rem; align-items: center; padding: 1rem; background: var(--bg-darker); border-radius: 8px; border: 1px solid rgba(0, 245, 255, 0.1); margin-bottom: 1rem; transition: all 0.3s; }
-        .history-item:hover { border-color: var(--cyan); transform: translateX(5px); }
-        .history-date { font-size: 0.85rem; color: var(--text-dimmer); margin-bottom: 0.3rem; }
-        .history-details { color: var(--text-dim); font-size: 0.95rem; }
-        .history-score { font-size: 1.8rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--cyan); text-align: center; }
-        .history-outcome { font-size: 1.5rem; text-align: center; }
-        .history-earnings { text-align: right; font-size: 1.2rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
-        .history-earnings.positive { color: var(--green); }
-        .history-earnings.negative { color: var(--red); }
-        
-        .empty { text-align: center; padding: 4rem 2rem; color: var(--text-dimmer); }
-        .empty-icon { font-size: 4rem; margin-bottom: 1rem; opacity: 0.5; }
-        
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(6, 8, 17, 0.95); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 2000; }
+        /* 🔥 GOAL SETTING MODAL */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(6, 8, 17, 0.95); backdrop-filter: blur(15px); display: none; align-items: center; justify-content: center; z-index: 5000; }
         .modal-overlay.active { display: flex; }
-        .modal { background: var(--bg-card); border: 1px solid var(--cyan); border-radius: 16px; padding: 3rem; max-width: 600px; width: 90%; box-shadow: 0 20px 60px rgba(0, 245, 255, 0.3); }
-        .modal h2 { font-size: 2rem; margin-bottom: 1rem; background: linear-gradient(135deg, var(--cyan), var(--green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .modal p { color: var(--text-dim); margin-bottom: 1rem; font-size: 1.05rem; }
-        .modal ul { color: var(--text-dim); margin-left: 1.5rem; margin-bottom: 1rem; }
-        .modal-actions { display: flex; gap: 1rem; margin-top: 2rem; }
+        .modal { background: var(--bg-card); border: 2px solid var(--cyan); border-radius: 20px; padding: 3rem; max-width: 600px; width: 90%; }
+        .modal h2 { font-size: 2rem; margin-bottom: 1.5rem; }
+        .modal p { color: var(--text-dim); margin-bottom: 2rem; }
+        .goal-options { display: grid; gap: 1rem; margin-bottom: 2rem; }
+        .goal-option { padding: 1rem; background: var(--bg-darker); border: 2px solid rgba(0, 245, 255, 0.2); border-radius: 8px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 1rem; }
+        .goal-option:hover { border-color: var(--cyan); }
+        .goal-option.selected { border-color: var(--cyan); background: rgba(0, 245, 255, 0.1); }
+        .goal-checkbox { width: 24px; height: 24px; border: 2px solid var(--cyan); border-radius: 4px; display: flex; align-items: center; justify-content: center; }
+        .goal-option.selected .goal-checkbox { background: var(--cyan); }
+        .goal-option.selected .goal-checkbox:after { content: '✓'; color: var(--bg-dark); font-weight: 700; }
         
-        .sale-banner { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: linear-gradient(135deg, var(--green), var(--cyan)); padding: 2rem 4rem; border-radius: 16px; font-size: 2.5rem; font-weight: 700; color: var(--bg-dark); z-index: 4000; box-shadow: 0 20px 60px rgba(0, 255, 136, 0.6); animation: salePopIn 0.5s ease; display: none; }
-        .sale-banner.active { display: block; }
-        @keyframes salePopIn { 0% { transform: translate(-50%, -50%) scale(0); } 50% { transform: translate(-50%, -50%) scale(1.1); } 100% { transform: translate(-50%, -50%) scale(1); } }
+        /* 🔥 ELITE CALL SCREEN */
+        .call-container { max-width: 1200px; margin: 0 auto; }
         
-        .prompt-toggle { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-card); border-top: 1px solid rgba(0, 245, 255, 0.1); padding: 1rem; display: none; justify-content: center; align-items: center; gap: 1rem; z-index: 100; }
-        .toggle { width: 60px; height: 30px; background: var(--bg-darker); border-radius: 15px; cursor: pointer; border: 1px solid rgba(0, 245, 255, 0.1); position: relative; transition: all 0.3s; }
-        .toggle.active { background: var(--cyan); }
-        .toggle-slider { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; background: white; border-radius: 50%; transition: all 0.3s; }
-        .toggle.active .toggle-slider { transform: translateX(30px); }
+        /* Compact Header */
+        .call-header { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 1rem 1.5rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; }
+        .call-header-left { display: flex; align-items: center; gap: 1rem; }
+        .avatar-small { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--cyan), var(--green)); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        .call-info h3 { font-size: 1rem; margin-bottom: 0.2rem; }
+        .call-info p { font-size: 0.85rem; color: var(--text-dim); }
+        .timer { font-size: 2rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--cyan); }
+        .btn-end { background: var(--red); color: white; padding: 0.5rem 1.5rem; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.3s; }
+        .btn-end:hover { transform: scale(1.05); box-shadow: 0 5px 20px rgba(255, 51, 102, 0.5); }
+        
+        /* 🔥 PROGRESS BAR */
+        .progress-container { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
+        .progress-label { text-align: center; font-size: 0.9rem; color: var(--text-dim); margin-bottom: 0.8rem; }
+        .progress-bar { height: 12px; background: var(--bg-darker); border-radius: 6px; overflow: hidden; position: relative; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--cyan), var(--green)); transition: width 0.5s ease; position: relative; }
+        .progress-fill:after { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 4px; background: white; animation: progressPulse 1s ease-in-out infinite; }
+        @keyframes progressPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .progress-stages { display: flex; justify-content: space-between; margin-top: 0.8rem; }
+        .progress-stage { font-size: 0.75rem; color: var(--text-dimmer); text-align: center; flex: 1; }
+        .progress-stage.active { color: var(--cyan); font-weight: 700; }
+        .progress-stage.complete { color: var(--green); }
+        
+        /* 🔥 CONTEXT CARD */
+        .context-card { background: linear-gradient(135deg, rgba(0, 245, 255, 0.05), rgba(0, 255, 136, 0.05)); border: 1px solid rgba(0, 245, 255, 0.2); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; }
+        .context-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+        .context-item { }
+        .context-label { font-size: 0.75rem; color: var(--text-dimmer); text-transform: uppercase; margin-bottom: 0.3rem; }
+        .context-value { font-size: 1.2rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--cyan); }
+        .context-tip { grid-column: 1 / -1; margin-top: 0.5rem; padding: 0.8rem; background: rgba(255, 213, 0, 0.1); border-left: 3px solid var(--yellow); border-radius: 4px; }
+        .context-tip strong { color: var(--yellow); }
+        
+        /* 🔥 TRANSCRIPT */
+        .transcript { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 1.5rem; height: 400px; overflow-y: auto; margin-bottom: 1rem; position: relative; }
+        .transcript:before { content: ''; position: sticky; top: 0; left: 0; right: 0; height: 20px; background: linear-gradient(to bottom, var(--bg-card), transparent); display: block; margin-bottom: -20px; z-index: 1; }
+        .message { margin-bottom: 1.5rem; animation: messageSlideIn 0.3s ease; }
+        @keyframes messageSlideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .message-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+        .message-speaker { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+        .message-time { font-size: 0.75rem; color: var(--text-dimmer); font-family: 'JetBrains Mono', monospace; }
+        .message-text { padding: 1rem; border-radius: 8px; }
+        .message.customer .message-speaker { color: var(--green); }
+        .message.customer .message-text { background: rgba(0, 255, 136, 0.1); border-left: 3px solid var(--green); }
+        .message.user .message-speaker { color: var(--cyan); }
+        .message.user .message-text { background: rgba(0, 245, 255, 0.1); border-left: 3px solid var(--cyan); }
+        
+        /* 🔥 TYPING INDICATOR */
+        .typing-indicator { display: none; padding: 1rem; background: rgba(0, 255, 136, 0.1); border-left: 3px solid var(--green); border-radius: 8px; margin-bottom: 1rem; }
+        .typing-indicator.active { display: block; }
+        .typing-dots { display: inline-flex; gap: 0.3rem; }
+        .typing-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; animation: typingBounce 1.4s ease-in-out infinite; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typingBounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-8px); } }
+        
+        /* 🔥 LIVE FEEDBACK BUBBLES */
+        .live-feedback { position: fixed; top: 50%; right: 2rem; transform: translateY(-50%); display: none; flex-direction: column; gap: 1rem; z-index: 100; }
+        .live-feedback.active { display: flex; }
+        .feedback-bubble { background: var(--bg-card); border: 2px solid var(--cyan); border-radius: 12px; padding: 1rem; max-width: 250px; box-shadow: 0 10px 30px rgba(0, 245, 255, 0.3); animation: bubbleSlideIn 0.5s ease; }
+        @keyframes bubbleSlideIn { from { opacity: 0; transform: translateX(50px); } to { opacity: 1; transform: translateX(0); } }
+        .feedback-bubble.positive { border-color: var(--green); }
+        .feedback-bubble.warning { border-color: var(--orange); }
+        
+        /* CONTROLS */
+        .controls { display: flex; flex-direction: column; gap: 1rem; align-items: center; }
+        .mic-container { text-align: center; }
+        .mic-btn { width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg, var(--cyan), var(--green)); border: none; font-size: 2.5rem; cursor: pointer; transition: all 0.3s; box-shadow: 0 10px 40px rgba(0, 245, 255, 0.3); position: relative; }
+        .mic-btn:hover { transform: scale(1.05); }
+        .mic-btn.recording { background: var(--red); animation: recordPulse 1s ease-in-out infinite; }
+        @keyframes recordPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(255, 51, 102, 0.7); } 50% { box-shadow: 0 0 0 20px rgba(255, 51, 102, 0); } }
+        .mic-btn.processing { background: var(--orange); }
+        .mic-label { font-size: 0.9rem; color: var(--text-dim); margin-top: 0.5rem; }
+        
+        .text-input-row { display: flex; gap: 1rem; width: 100%; max-width: 600px; }
+        .text-input { flex: 1; padding: 1rem 1.5rem; background: var(--bg-card); border: 2px solid rgba(0, 245, 255, 0.1); border-radius: 8px; color: var(--text); font-size: 1rem; }
+        .text-input:focus { outline: none; border-color: var(--cyan); }
+        
+        /* PERSONA INDICATOR */
+        .persona-indicator { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.8rem; background: rgba(168, 85, 247, 0.1); border: 1px solid var(--purple); border-radius: 12px; font-size: 0.75rem; font-weight: 600; color: var(--purple); }
         
         @media (max-width: 768px) {
             h1 { font-size: 2.5rem; }
-            .subtitle { font-size: 1.1rem; }
-            .kpi-value { font-size: 2rem; }
-            .timer { font-size: 2rem; }
+            .context-grid { grid-template-columns: 1fr; }
+            .live-feedback { display: none !important; }
             .mic-btn { width: 80px; height: 80px; font-size: 2rem; }
-            .breakdown-grid { grid-template-columns: 1fr; }
-            .history-item { grid-template-columns: 1fr; text-align: center; }
         }
     </style>
 </head>
 <body>
-    <div class="beta-badge" onclick="setupAPIKey()">🔑 API Key</div>
+    <div class="badge-row">
+        <div class="badge" onclick="setupAPIKey()">🔑 API Key</div>
+        <div class="badge" id="xpBadge">XP: 0</div>
+    </div>
+    
     <div class="container">
+        
+        <!-- LANDING -->
         <div class="screen active" id="landing">
             <div class="hero">
-                <h1>Master Sales.<br><span class="gradient">Without The Risk.</span></h1>
-                <p class="subtitle">Practice with AI customers. Get FXReplay-style analytics. Improve with data.</p>
-                <button class="btn btn-primary" onclick="goToIndustry()">Get Started</button>
-                <div class="features">
-                    <div class="feature"><div class="feature-icon">🎤</div><div class="feature-title">Real Voice Calls</div><div class="feature-desc">Speak naturally with AI customers who respond, object, and challenge</div></div>
-                    <div class="feature"><div class="feature-icon">📊</div><div class="feature-title">FXReplay-Style Analytics</div><div class="feature-desc">Win rate, expectancy, drawdowns, performance curves - everything traders use</div></div>
-                    <div class="feature"><div class="feature-icon">🎯</div><div class="feature-title">Adaptive Difficulty</div><div class="feature-desc">AI gets harder as you improve, pushing you to master every scenario</div></div>
+                <h1>Turn Reps Into <span class="gradient">Closers</span></h1>
+                <p class="subtitle">Train like a pro. Track like a trader. Improve with AI.</p>
+                <button class="btn btn-primary" onclick="switchScreen('industry')">Start Training →</button>
+            </div>
+            
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">🎯</div>
+                    <div class="feature-title">Set Your Goals</div>
+                    <div class="feature-desc">Choose what to improve each session. Track progress.</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🎭</div>
+                    <div class="feature-title">Dynamic AI Personas</div>
+                    <div class="feature-desc">Face skeptics, gatekeepers, and champions.</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📊</div>
+                    <div class="feature-title">Pattern Recognition</div>
+                    <div class="feature-desc">AI spots your habits and blind spots.</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🏆</div>
+                    <div class="feature-title">Earn XP & Badges</div>
+                    <div class="feature-desc">Level up your skills. Build momentum.</div>
                 </div>
             </div>
         </div>
         
+        <!-- INDUSTRY SELECTION -->
         <div class="screen" id="industry">
             <div class="selection-screen">
-                <h2>Choose Your Industry</h2>
-                <p>Select the industry you're selling in</p>
+                <h2><span class="gradient">Choose Your Industry</span></h2>
+                <p>Select what you're selling</p>
                 <select id="industrySelect" onchange="showProduct()">
                     <option value="">-- Select Industry --</option>
                     <option value="saas">SaaS / Software</option>
@@ -203,208 +209,194 @@
                     <option value="consulting">Consulting</option>
                     <option value="insurance">Insurance</option>
                     <option value="healthcare">Healthcare</option>
-                    <option value="manufacturing">Manufacturing</option>
-                    <option value="ecommerce">E-commerce</option>
-                    <option value="marketing">Marketing Services</option>
-                    <option value="business">Business Services</option>
                 </select>
+                
                 <div class="product-card" id="productCard">
-                    <div class="product-label">Your Product</div>
-                    <div class="product-value" id="productName">--</div>
-                    <div class="product-label">Price</div>
-                    <div class="product-value" id="productPrice">--</div>
-                    <div class="commission-box">
-                        <div class="commission-label">Your Commission Per Sale</div>
-                        <div class="commission-value" id="commissionValue">--</div>
+                    <div style="font-size: 0.85rem; color: var(--text-dimmer); text-transform: uppercase; margin-bottom: 0.5rem;">PRODUCT</div>
+                    <div style="font-size: 1.8rem; font-weight: 700; color: var(--cyan); margin-bottom: 1.5rem; font-family: 'JetBrains Mono', monospace;" id="productName">--</div>
+                    <div style="font-size: 0.85rem; color: var(--text-dimmer); text-transform: uppercase; margin-bottom: 0.5rem;">PRICE</div>
+                    <div style="font-size: 1.8rem; font-weight: 700; color: var(--cyan); margin-bottom: 1.5rem; font-family: 'JetBrains Mono', monospace;" id="productPrice">--</div>
+                    <div style="background: rgba(0, 255, 136, 0.1); padding: 1rem 1.5rem; border-radius: 8px; border: 1px solid var(--green); display: flex; justify-content: space-between; align-items: center;">
+                        <span>YOUR COMMISSION</span>
+                        <span style="font-size: 1.5rem; font-weight: 700; color: var(--green); font-family: 'JetBrains Mono', monospace;" id="commissionValue">--</span>
                     </div>
                 </div>
-                <button class="btn btn-primary" id="startBtn" onclick="showTutorial()" disabled>Begin Practice Call</button>
+                
+                <button class="btn btn-primary" id="startBtn" onclick="showGoalModal()" disabled>Start Call →</button>
             </div>
         </div>
         
-        <div class="screen" id="call">
-            <div class="call-screen">
-                <div class="call-header">
-                    <div><div class="status">Call in Progress</div><div style="font-size: 0.9rem; color: var(--text-dimmer); margin-top: 0.3rem;">Cold Call</div></div>
-                    <div class="timer" id="timer">00:00</div>
-                </div>
-                <div id="warning"></div>
-                <div style="text-align: center;">
-                    <div class="avatar" id="avatar">🤖</div>
-                    <div style="color: var(--text-dim); margin-top: 1rem;">AI Customer</div>
-                </div>
-                <div id="prompt"></div>
-                <div class="transcript" id="transcript"></div>
-                <div class="controls">
-                    <button class="mic-btn" id="micBtn" onclick="toggleMic()">🎤<div class="mic-label">Click to Speak</div></button>
-                    <div class="or-divider">— or type —</div>
-                    <div class="input-row">
-                        <input type="text" id="textInput" class="text-input" placeholder="Type your response..." onkeypress="if(event.key==='Enter') sendTextInput()"/>
-                        <button class="btn btn-primary" onclick="sendTextInput()">Send</button>
+        <!-- 🔥 GOAL SETTING MODAL -->
+        <div class="modal-overlay" id="goalModal">
+            <div class="modal">
+                <h2>🎯 Set Your Goal</h2>
+                <p>What do you want to improve this call?</p>
+                <div class="goal-options">
+                    <div class="goal-option" data-goal="objection" onclick="selectGoal(this)">
+                        <div class="goal-checkbox"></div>
+                        <div>
+                            <div style="font-weight: 700;">Handle an Objection</div>
+                            <div style="font-size: 0.9rem; color: var(--text-dim);">Practice price, time, or authority objections</div>
+                        </div>
                     </div>
-                    <button class="btn btn-secondary" onclick="endCall()">End Call</button>
-                </div>
-            </div>
-        </div>
-        
-        <div class="screen" id="results">
-            <div class="results">
-                <div class="results-header">
-                    <h2>Session Analysis</h2>
-                    <p style="color: var(--text-dim); font-size: 1.1rem;">FXReplay-Style Performance Breakdown</p>
-                </div>
-                
-                <div class="session-summary">
-                    <div class="summary-item">
-                        <div class="summary-label">Overall Score</div>
-                        <div class="summary-value cyan" id="overallScore">--</div>
+                    <div class="goal-option" data-goal="discovery" onclick="selectGoal(this)">
+                        <div class="goal-checkbox"></div>
+                        <div>
+                            <div style="font-weight: 700;">Ask 3 Discovery Questions</div>
+                            <div style="font-size: 0.9rem; color: var(--text-dim);">Uncover pain points and needs</div>
+                        </div>
                     </div>
-                    <div class="summary-item">
-                        <div class="summary-label">Outcome</div>
-                        <div class="summary-value" id="outcomeIcon">--</div>
+                    <div class="goal-option" data-goal="confidence" onclick="selectGoal(this)">
+                        <div class="goal-checkbox"></div>
+                        <div>
+                            <div style="font-weight: 700;">Improve Confidence</div>
+                            <div style="font-size: 0.9rem; color: var(--text-dim);">Reduce filler words, speak clearly</div>
+                        </div>
                     </div>
-                    <div class="summary-item">
-                        <div class="summary-label">Duration</div>
-                        <div class="summary-value yellow" id="callDuration">--</div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="summary-label">Commission</div>
-                        <div class="summary-value green" id="commissionEarned">--</div>
-                    </div>
-                </div>
-                
-                <div class="kpi-grid">
-                    <div class="kpi-card">
-                        <div class="kpi-title">📞 Closing Ability</div>
-                        <div class="kpi-value" style="color: var(--cyan);" id="kpiClosing">--</div>
-                        <div class="kpi-subtitle">How well you asked for the sale</div>
-                        <div class="kpi-bar"><div class="kpi-bar-fill" id="barClosing"></div></div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="kpi-title">🛡️ Objection Handling</div>
-                        <div class="kpi-value" style="color: var(--green);" id="kpiObjection">--</div>
-                        <div class="kpi-subtitle">Response to pushback</div>
-                        <div class="kpi-bar"><div class="kpi-bar-fill" id="barObjection"></div></div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="kpi-title">⚡ Confidence & Energy</div>
-                        <div class="kpi-value" style="color: var(--yellow);" id="kpiConfidence">--</div>
-                        <div class="kpi-subtitle">Tone and conviction</div>
-                        <div class="kpi-bar"><div class="kpi-bar-fill" id="barConfidence"></div></div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="kpi-title">🤝 Rapport Building</div>
-                        <div class="kpi-value" style="color: var(--orange);" id="kpiRapport">--</div>
-                        <div class="kpi-subtitle">Connection with prospect</div>
-                        <div class="kpi-bar"><div class="kpi-bar-fill" id="barRapport"></div></div>
-                    </div>
-                </div>
-                
-                <div class="breakdown-grid">
-                    <div class="breakdown-card">
-                        <h3>💪 What Worked</h3>
-                        <div id="strengthsList"></div>
-                    </div>
-                    <div class="breakdown-card">
-                        <h3>🎯 Areas to Improve</h3>
-                        <div id="improvementsList"></div>
-                    </div>
-                </div>
-                
-                <div class="insights">
-                    <h3>🧠 AI-Powered Insights</h3>
-                    <div id="insightsList"></div>
-                </div>
-                
-                <div class="action-buttons">
-                    <button class="btn btn-primary" onclick="practiceAgain()">Practice Again</button>
-                    <button class="btn btn-secondary" onclick="goToDashboard()">View Full Dashboard</button>
-                </div>
-            </div>
-        </div>
-        
-        <div class="screen" id="dashboard">
-            <div class="dashboard">
-                <h2>Performance Dashboard</h2>
-                <p class="dashboard-subtitle">Track your progress with FXReplay-style analytics</p>
-                
-                <div class="performance-overview">
-                    <div class="perf-card">
-                        <div class="perf-label">Close Rate</div>
-                        <div class="perf-value" id="dCloseRate">0%</div>
-                        <div class="perf-sub" id="dCloseSub">0 / 0 calls</div>
-                    </div>
-                    <div class="perf-card">
-                        <div class="perf-label">Total Earnings</div>
-                        <div class="perf-value" id="dEarnings">$0</div>
-                        <div class="perf-sub" id="dEarningSub">0 sales closed</div>
-                    </div>
-                    <div class="perf-card">
-                        <div class="perf-label">Average Score</div>
-                        <div class="perf-value" id="dAvgScore">--</div>
-                        <div class="perf-sub" id="dScoreTrend">--</div>
-                    </div>
-                    <div class="perf-card">
-                        <div class="perf-label">Practice Time</div>
-                        <div class="perf-value" id="dTime">0h</div>
-                        <div class="perf-sub" id="dCallCount">0 calls</div>
-                    </div>
-                    <div class="perf-card">
-                        <div class="perf-label">Expectancy</div>
-                        <div class="perf-value" id="dExpectancy">--</div>
-                        <div class="perf-sub">Average per call</div>
-                    </div>
-                    <div class="perf-card">
-                        <div class="perf-label">Win Streak</div>
-                        <div class="perf-value" id="dWinStreak">0</div>
-                        <div class="perf-sub" id="dStreakSub">Current: 0</div>
-                    </div>
-                </div>
-                
-                <div class="history">
-                    <h3>Call History</h3>
-                    <div id="historyList">
-                        <div class="empty">
-                            <div class="empty-icon">📊</div>
-                            <p>No practice sessions yet</p>
-                            <button class="btn btn-primary" onclick="practiceAgain()" style="margin-top: 1rem;">Start Practicing</button>
+                    <div class="goal-option" data-goal="close" onclick="selectGoal(this)">
+                        <div class="goal-checkbox"></div>
+                        <div>
+                            <div style="font-weight: 700;">Ask for the Sale</div>
+                            <div style="font-size: 0.9rem; color: var(--text-dim);">Practice closing clearly and directly</div>
                         </div>
                     </div>
                 </div>
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button class="btn btn-secondary" onclick="skipGoal()">Skip →</button>
+                    <button class="btn btn-primary" id="startCallBtn" onclick="startCall()" disabled>Start Call</button>
+                </div>
             </div>
         </div>
-    </div>
-    
-    <div class="modal-overlay" id="tutorialModal">
-        <div class="modal">
-            <h2>Welcome to Valtori AI</h2>
-            <p>You're about to practice a real sales call with an AI customer.</p>
-            <p><strong>How it works:</strong></p>
-            <ul>
-                <li>Click mic to speak OR type your response</li>
-                <li>AI responds with voice and may throw objections</li>
-                <li>Watch for helpful prompts (toggle on/off)</li>
-                <li>Get detailed analytics like FXReplay traders</li>
-            </ul>
-            <p>Ready?</p>
-            <div class="modal-actions">
-                <button class="btn btn-primary" onclick="startCall()">Let's Go!</button>
-                <button class="btn btn-secondary" onclick="skipTutorial()">Skip</button>
+        
+        <!-- 🔥 ELITE CALL SCREEN -->
+        <div class="screen" id="call">
+            <div class="call-container">
+                
+                <!-- Compact Header -->
+                <div class="call-header">
+                    <div class="call-header-left">
+                        <div class="avatar-small">🤖</div>
+                        <div class="call-info">
+                            <h3>Cold Call <span class="persona-indicator" id="personaIndicator">😐 Neutral</span></h3>
+                            <p id="callSubtitle">Professional decision maker</p>
+                        </div>
+                    </div>
+                    <div class="timer" id="timer">00:00</div>
+                    <button class="btn-end" onclick="confirmEndCall()">END CALL</button>
+                </div>
+                
+                <!-- 🔥 Progress Bar -->
+                <div class="progress-container">
+                    <div class="progress-label"><strong id="currentStage">Rapport Building</strong> • <span id="progressPercent">10%</span></div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 10%"></div>
+                    </div>
+                    <div class="progress-stages">
+                        <div class="progress-stage active">🤝 Rapport</div>
+                        <div class="progress-stage">🔍 Discovery</div>
+                        <div class="progress-stage">🛡️ Objections</div>
+                        <div class="progress-stage">🎯 Close</div>
+                        <div class="progress-stage">📊 Feedback</div>
+                    </div>
+                </div>
+                
+                <!-- 🔥 Context Card -->
+                <div class="context-card">
+                    <div class="context-grid">
+                        <div class="context-item">
+                            <div class="context-label">📦 SELLING</div>
+                            <div class="context-value" id="contextProduct">--</div>
+                        </div>
+                        <div class="context-item">
+                            <div class="context-label">💰 PRICE</div>
+                            <div class="context-value" id="contextPrice">--</div>
+                        </div>
+                        <div class="context-item">
+                            <div class="context-label">🎁 COMMISSION</div>
+                            <div class="context-value" id="contextCommission">--</div>
+                        </div>
+                        <div class="context-tip">
+                            <strong>💡 TIP:</strong> <span id="stageTip">Start with a strong hook. Get their attention.</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 🔥 Transcript with Timestamps -->
+                <div class="transcript" id="transcript">
+                    <!-- Messages appear here -->
+                </div>
+                
+                <!-- 🔥 Typing Indicator -->
+                <div class="typing-indicator" id="typingIndicator">
+                    <strong style="color: var(--green);">CUSTOMER</strong> is typing
+                    <span class="typing-dots">
+                        <span class="typing-dot"></span>
+                        <span class="typing-dot"></span>
+                        <span class="typing-dot"></span>
+                    </span>
+                </div>
+                
+                <!-- Controls -->
+                <div class="controls">
+                    <div class="mic-container">
+                        <button class="mic-btn" id="micBtn" onclick="toggleMic()">🎤</button>
+                        <div class="mic-label" id="micLabel">Click to Speak</div>
+                    </div>
+                    <div style="color: var(--text-dimmer); font-size: 0.95rem;">— or type —</div>
+                    <div class="text-input-row">
+                        <input type="text" class="text-input" id="textInput" placeholder="Type your response..." onkeypress="if(event.key==='Enter') sendTextInput()">
+                        <button class="btn btn-primary" onclick="sendTextInput()">SEND</button>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-    
-    <div class="sale-banner" id="saleBanner">🎉 SALE CLOSED! 🎉</div>
-    
-    <div class="prompt-toggle" id="promptToggle">
-        <span>💡 Prompts:</span>
-        <div class="toggle active" id="toggle" onclick="togglePrompts()"><div class="toggle-slider"></div></div>
+        
+        <!-- 🔥 LIVE FEEDBACK (COACHING) -->
+        <div class="live-feedback" id="liveFeedback">
+            <!-- Feedback bubbles appear here -->
+        </div>
+        
     </div>
     
     <script>
-const INDUSTRIES={saas:{product:'Enterprise CRM Software',price:8500,commission:.15},realestate:{product:'Premium Property Listing',price:450000,commission:.03},financial:{product:'Wealth Management Package',price:25000,commission:.08},consulting:{product:'Business Strategy Engagement',price:15000,commission:.20},insurance:{product:'Commercial Insurance Policy',price:12000,commission:.10},healthcare:{product:'Medical Equipment System',price:35000,commission:.12},manufacturing:{product:'Industrial Automation Solution',price:75000,commission:.08},ecommerce:{product:'E-commerce Platform Package',price:18000,commission:.15},marketing:{product:'Annual Marketing Retainer',price:48000,commission:.18},business:{product:'Managed Services Contract',price:24000,commission:.15}};
-const STAGES={opening:['Introduce yourself professionally','State your company clearly','Ask if now is a good time'],permission:['Respect their time','Ask for 2-3 minutes','Create curiosity'],value:['Mention a pain point','Share a result','Make them curious'],discovery:['Ask about their situation','Listen more than talk','Dig deeper'],objection:['Acknowledge concern','Ask clarifying questions','Provide proof'],close:['Ask for next step','Suggest specific time','Be confident']};
-let currentScreen='landing',selectedIndustry=null,isFirstCall=true,promptsOn=true,stage='opening',callActive=false,callStart=null,timer=null,duration=0,warningShown=false,synthesis=window.speechSynthesis,conversation=[],session=null,stats={totalCalls:0,totalSales:0,totalEarnings:0,totalTime:0,scores:[],history:[],winStreak:0,currentStreak:0,maxWinStreak:0},openaiKey='',mediaRecorder=null,audioChunks=[],isRecording=false;
+// 🔥 VALTORI GAME MODE - ELITE SALES TRAINING
+// ============================================
+
+// INDUSTRY CONFIG
+const INDUSTRIES={
+    saas:{product:'Marketing CRM',price:8500,commission:1275},
+    realestate:{product:'Premium Property',price:850000,commission:25500},
+    financial:{product:'Wealth Package',price:15000,commission:2250},
+    consulting:{product:'Strategy Engagement',price:45000,commission:6750},
+    insurance:{product:'Business Policy',price:12000,commission:1800},
+    healthcare:{product:'Medical Software',price:25000,commission:3750}
+};
+
+// 🔥 AI PERSONAS
+const PERSONAS={
+    skeptical:{name:'Skeptical CFO',emoji:'😠',subtitle:'Budget-conscious, needs proof',difficulty:'hard'},
+    friendly:{name:'Startup Founder',emoji:'🤝',subtitle:'Open but busy, values speed',difficulty:'medium'},
+    neutral:{name:'Decision Maker',emoji:'😐',subtitle:'Professional, needs clarity',difficulty:'easy'}
+};
+
+// STATE
+let selectedIndustry=null,selectedGoal=null,callActive=false,callStart=null,timer=null,duration=0,synthesis=window.speechSynthesis,conversation=[],session=null,openaiKey='',mediaRecorder=null,audioChunks=[],isRecording=false;
+let callStage='rapport',stageProgress=10,fillerCount=0,discoveryQuestions=0,objectionCount=0,closeAttempts=0,xp=0;
+let currentPersona='neutral';
+
+// INIT
+function init(){
+    const saved=localStorage.getItem('openaiKey');
+    if(saved){
+        openaiKey=saved;
+        console.log('✅ OpenAI API key loaded');
+    }
+    const savedXP=localStorage.getItem('valtoriXP');
+    if(savedXP){
+        xp=parseInt(savedXP);
+        document.getElementById('xpBadge').textContent='XP: '+xp;
+    }
+}
 
 function setupAPIKey(){
     const current=openaiKey?`Current: ${openaiKey.substring(0,12)}...${openaiKey.substring(openaiKey.length-4)}`:'Not set';
@@ -415,49 +407,202 @@ function setupAPIKey(){
         if(key.startsWith('sk-')){
             openaiKey=key.trim();
             localStorage.setItem('openaiKey',key.trim());
-            alert('✅ API Key saved!\n\nYou can now use voice input during calls.');
+            alert('✅ API Key saved!');
         }else{
             alert('❌ Invalid key format.\n\nOpenAI keys start with "sk-"');
         }
     }
 }
 
-function init(){
-    loadStats();
-    updateDashboard();
-    const saved=localStorage.getItem('openaiKey');
-    if(saved){
-        openaiKey=saved;
-        console.log('✅ OpenAI API key loaded');
-    }else{
-        console.log('ℹ️ No API key set. Click 🔑 API Key to set one for voice input.');
+// NAVIGATION
+function switchScreen(screen){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.getElementById(screen).classList.add('active');
+}
+
+// INDUSTRY SELECTION
+function showProduct(){
+    const select=document.getElementById('industrySelect');
+    const industry=select.value;
+    if(!industry){
+        document.getElementById('productCard').classList.remove('show');
+        document.getElementById('startBtn').disabled=true;
+        return;
+    }
+    selectedIndustry=industry;
+    const config=INDUSTRIES[industry];
+    document.getElementById('productName').textContent=config.product;
+    document.getElementById('productPrice').textContent='$'+config.price.toLocaleString();
+    document.getElementById('commissionValue').textContent='$'+config.commission.toLocaleString();
+    document.getElementById('productCard').classList.add('show');
+    document.getElementById('startBtn').disabled=false;
+}
+
+// 🔥 GOAL SETTING
+function showGoalModal(){
+    document.getElementById('goalModal').classList.add('active');
+}
+
+function selectGoal(element){
+    document.querySelectorAll('.goal-option').forEach(opt=>opt.classList.remove('selected'));
+    element.classList.add('selected');
+    selectedGoal=element.getAttribute('data-goal');
+    document.getElementById('startCallBtn').disabled=false;
+}
+
+function skipGoal(){
+    selectedGoal=null;
+    document.getElementById('goalModal').classList.remove('active');
+    startCall();
+}
+
+// 🔥 START CALL
+function startCall(){
+    document.getElementById('goalModal').classList.remove('active');
+    switchScreen('call');
+    
+    // Reset state
+    callActive=true;
+    callStart=Date.now();
+    duration=0;
+    conversation=[];
+    callStage='rapport';
+    stageProgress=10;
+    fillerCount=0;
+    discoveryQuestions=0;
+    objectionCount=0;
+    closeAttempts=0;
+    
+    // Pick random persona
+    const personaKeys=Object.keys(PERSONAS);
+    currentPersona=personaKeys[Math.floor(Math.random()*personaKeys.length)];
+    const persona=PERSONAS[currentPersona];
+    document.getElementById('personaIndicator').textContent=persona.emoji+' '+persona.name;
+    document.getElementById('callSubtitle').textContent=persona.subtitle;
+    
+    // Setup context card
+    const industry=INDUSTRIES[selectedIndustry];
+    document.getElementById('contextProduct').textContent=industry.product;
+    document.getElementById('contextPrice').textContent='$'+industry.price.toLocaleString();
+    document.getElementById('contextCommission').textContent='$'+industry.commission.toLocaleString();
+    
+    // Start timer
+    startTimer();
+    
+    // First message from AI
+    setTimeout(()=>{
+        const greetings=["Hello?","Yes, who's this?","Hi there."];
+        const greeting=greetings[Math.floor(Math.random()*greetings.length)];
+        addMessage('customer',greeting);
+    },1000);
+}
+
+function startTimer(){
+    timer=setInterval(()=>{
+        duration++;
+        const mins=Math.floor(duration/60);
+        const secs=duration%60;
+        document.getElementById('timer').textContent=`${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+        
+        // Auto-advance stages
+        if(duration===15&&callStage==='rapport'){
+            advanceStage('discovery');
+        }else if(duration===30&&callStage==='discovery'){
+            advanceStage('objection');
+        }else if(duration===50&&callStage==='objection'){
+            advanceStage('close');
+        }
+    },1000);
+}
+
+// 🔥 STAGE MANAGEMENT
+function advanceStage(newStage){
+    callStage=newStage;
+    const stages={
+        rapport:{label:'Rapport Building',tip:'Build trust. Use their name.',progress:10},
+        discovery:{label:'Discovery',tip:'Ask questions. Find their pain.',progress:30},
+        objection:{label:'Handling Objections',tip:'Address concerns directly.',progress:60},
+        close:{label:'Closing',tip:'Ask for the sale clearly.',progress:90}
+    };
+    
+    const stage=stages[newStage];
+    document.getElementById('currentStage').textContent=stage.label;
+    document.getElementById('progressPercent').textContent=stage.progress+'%';
+    document.getElementById('progressFill').style.width=stage.progress+'%';
+    document.getElementById('stageTip').textContent=stage.tip;
+    
+    // Update progress stage indicators
+    document.querySelectorAll('.progress-stage').forEach((el,idx)=>{
+        el.classList.remove('active','complete');
+        const stageIndex=['rapport','discovery','objection','close','feedback'].indexOf(newStage);
+        if(idx<stageIndex)el.classList.add('complete');
+        else if(idx===stageIndex)el.classList.add('active');
+    });
+    
+    // Show live feedback
+    showLiveFeedback('Stage: '+stage.label,'positive');
+}
+
+// 🔥 MESSAGES WITH TIMESTAMPS
+function addMessage(speaker,text){
+    const transcript=document.getElementById('transcript');
+    const msg=document.createElement('div');
+    msg.className=`message ${speaker}`;
+    
+    const mins=Math.floor(duration/60);
+    const secs=duration%60;
+    const timestamp=`${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+    
+    msg.innerHTML=`
+        <div class="message-header">
+            <div class="message-speaker">${speaker==='customer'?'CUSTOMER':'YOU'}</div>
+            <div class="message-time">${timestamp}</div>
+        </div>
+        <div class="message-text">${text}</div>
+    `;
+    
+    transcript.appendChild(msg);
+    transcript.scrollTop=transcript.scrollHeight;
+    conversation.push({speaker,text,timestamp:duration});
+    
+    // Track patterns
+    if(speaker==='user'){
+        // Count filler words
+        const fillers=['uh','um','like','you know','sort of','kind of'];
+        fillers.forEach(filler=>{
+            if(text.toLowerCase().includes(filler))fillerCount++;
+        });
+        
+        // Count questions
+        if(text.includes('?'))discoveryQuestions++;
+        
+        // Detect close attempts
+        if(text.toLowerCase().includes('buy')||text.toLowerCase().includes('sign up')||text.toLowerCase().includes('get started')){
+            closeAttempts++;
+        }
     }
 }
-function loadStats(){const saved=localStorage.getItem('valtoriStats');if(saved)stats=JSON.parse(saved)}
-function saveStats(){localStorage.setItem('valtoriStats',JSON.stringify(stats))}
-function speak(text,callback){if(!synthesis){if(callback)callback();return}synthesis.cancel();const utterance=new SpeechSynthesisUtterance(text);const voices=synthesis.getVoices();if(voices.length>0){const english=voices.filter(v=>v.lang.startsWith('en'));if(english.length>0)utterance.voice=english[0]}utterance.rate=.95;utterance.pitch=1;utterance.onstart=()=>{document.getElementById('avatar').classList.add('speaking')};utterance.onend=()=>{document.getElementById('avatar').classList.remove('speaking');if(callback)callback()};synthesis.speak(utterance)}
-function switchScreen(screen){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(screen).classList.add('active');currentScreen=screen;const promptToggle=document.getElementById('promptToggle');promptToggle.style.display=screen==='call'?'flex':'none'}
-function goToIndustry(){switchScreen('industry')}
-function showProduct(){const select=document.getElementById('industrySelect');const industry=select.value;if(!industry){document.getElementById('productCard').classList.remove('show');document.getElementById('startBtn').disabled=true;return}selectedIndustry=industry;const config=INDUSTRIES[industry];document.getElementById('productName').textContent=config.product;document.getElementById('productPrice').textContent='$'+config.price.toLocaleString();document.getElementById('commissionValue').textContent='$'+(config.price*config.commission).toLocaleString();document.getElementById('productCard').classList.add('show');document.getElementById('startBtn').disabled=false}
-function showTutorial(){if(isFirstCall)document.getElementById('tutorialModal').classList.add('active');else startCall()}
-function skipTutorial(){document.getElementById('tutorialModal').classList.remove('active');isFirstCall=false;startCall()}
-function startCall(){console.log('Starting call...');document.getElementById('tutorialModal').classList.remove('active');switchScreen('call');callActive=true;callStart=Date.now();duration=0;warningShown=false;conversation=[];stage='opening';session={timestamp:new Date(),industry:selectedIndustry,product:INDUSTRIES[selectedIndustry].product,price:INDUSTRIES[selectedIndustry].price,commission:INDUSTRIES[selectedIndustry].price*INDUSTRIES[selectedIndustry].commission,conversation:[],closed:false,saleAmount:0};startTimer();setTimeout(()=>{const greetings=["Hello?","Yes, this is speaking.","Hi, who's calling?","Hello, how can I help you?"];const greeting=greetings[Math.floor(Math.random()*greetings.length)];addMessage('ai',greeting);speak(greeting,()=>{updatePrompt()})},1000)}
-function startTimer(){timer=setInterval(()=>{duration++;const mins=Math.floor(duration/60);const secs=duration%60;document.getElementById('timer').textContent=`${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;if(duration===60&&!warningShown){warningShown=true;document.getElementById('warning').innerHTML='<div class="warning">⚠️ 60 seconds elapsed - Consider closing soon</div>'}},1000)}
 
+// 🔥 VOICE INPUT WITH WHISPER
 async function toggleMic(){
+    if(!callActive)return;
+    
     if(!openaiKey){
-        if(confirm('Voice input requires OpenAI API key for Whisper.\n\nSet your key now?\n\n(You can also use text input without a key)')){
+        if(confirm('Voice input requires OpenAI API key.\n\nSet your key now?')){
             setupAPIKey();
         }
         return;
     }
     
     const btn=document.getElementById('micBtn');
+    const label=document.getElementById('micLabel');
     
     if(isRecording){
         isRecording=false;
         btn.classList.remove('recording');
-        btn.innerHTML='🎤<div class="mic-label">Processing...</div>';
+        btn.classList.add('processing');
+        btn.textContent='⏳';
+        label.textContent='Processing...';
         if(mediaRecorder&&mediaRecorder.state==='recording')mediaRecorder.stop();
     }else{
         try{
@@ -471,17 +616,19 @@ async function toggleMic(){
                 const audioBlob=new Blob(audioChunks,{type:'audio/webm'});
                 await transcribeAudio(audioBlob);
                 stream.getTracks().forEach(track=>track.stop());
-                btn.innerHTML='🎤<div class="mic-label">Click to Speak</div>';
+                btn.classList.remove('processing');
+                btn.textContent='🎤';
+                label.textContent='Click to Speak';
             };
             
             mediaRecorder.start();
             isRecording=true;
             btn.classList.add('recording');
-            btn.innerHTML='🎤<div class="mic-label">Recording...</div>';
-            console.log('Recording started');
+            btn.textContent='⏹️';
+            label.textContent='Recording...';
         }catch(err){
             console.error('Mic error:',err);
-            alert('Could not access microphone.\n\nCheck browser permissions or use text input.');
+            alert('Could not access microphone. Use text input.');
         }
     }
 }
@@ -499,10 +646,8 @@ async function transcribeAudio(audioBlob){
         });
         
         if(!response.ok){
-            const errorText=await response.text();
-            console.error('Whisper API error:',response.status,errorText);
             if(response.status===401){
-                alert('❌ Invalid API key.\n\nClick 🔑 API Key to update it.');
+                alert('❌ Invalid API key. Click 🔑 to update.');
             }else{
                 alert('Transcription failed. Try text input.');
             }
@@ -512,96 +657,167 @@ async function transcribeAudio(audioBlob){
         const data=await response.json();
         
         if(data.text&&data.text.trim()){
-            console.log('✅ Transcribed:',data.text);
             handleUserSpeech(data.text);
         }else{
-            console.error('Empty transcription:',data);
-            alert('No speech detected. Try again or use text input.');
+            alert('No speech detected. Try again.');
         }
     }catch(error){
         console.error('Whisper error:',error);
-        alert('Transcription failed.\n\nCheck your connection or use text input.');
+        alert('Transcription failed. Use text input.');
     }
 }
 
-function sendTextInput(){const input=document.getElementById('textInput');const text=input.value.trim();if(!text)return;if(!callActive){alert('Start a call first');return}console.log('📝 Text:',text);input.value='';handleUserSpeech(text)}
-function handleUserSpeech(text){if(!callActive)return;addMessage('user',text);session.conversation.push({speaker:'user',text,timestamp:duration});updateStage(text);setTimeout(()=>{getAIResponse(text)},500)}
-function updateStage(text){const lower=text.toLowerCase();if(stage==='opening'&&(lower.includes('my name')||lower.includes('calling from')))stage='permission';else if(stage==='permission'&&(lower.includes('help')||lower.includes('benefit')))stage='value';else if(stage==='value'&&lower.includes('?'))stage='discovery';else if(lower.includes('buy')||lower.includes('when can'))stage='close';updatePrompt()}
-function updatePrompt(){if(!promptsOn)return;const prompts=STAGES[stage];if(!prompts)return;const randomPrompt=prompts[Math.floor(Math.random()*prompts.length)];document.getElementById('prompt').innerHTML=`<div class="prompt-box"><div class="prompt-label">💡 ${stage.toUpperCase()}</div><div>${randomPrompt}</div></div>`;setTimeout(()=>{document.getElementById('prompt').innerHTML=''},8000)}
+// TEXT INPUT
+function sendTextInput(){
+    const input=document.getElementById('textInput');
+    const text=input.value.trim();
+    if(!text||!callActive)return;
+    input.value='';
+    handleUserSpeech(text);
+}
 
-async function getAIResponse(userText){const avgScore=stats.scores.length>0?stats.scores.reduce((a,b)=>a+b,0)/stats.scores.length:50;let difficulty='medium';if(avgScore>75)difficulty='hard';if(avgScore<50)difficulty='easy';const systemPrompt=`You are a ${difficulty} sales prospect.
-Industry: ${selectedIndustry}
-Product: ${INDUSTRIES[selectedIndustry].product} $${INDUSTRIES[selectedIndustry].price.toLocaleString()}
+// 🔥 HANDLE USER INPUT
+function handleUserSpeech(text){
+    if(!callActive)return;
+    
+    addMessage('user',text);
+    
+    // Show typing indicator
+    document.getElementById('typingIndicator').classList.add('active');
+    
+    // Get AI response
+    setTimeout(()=>{getAIResponse(text)},800);
+}
 
-${difficulty==='easy'?'Receptive and friendly.':''}
-${difficulty==='medium'?'Skeptical but professional.':''}
-${difficulty==='hard'?'Very busy. May hang up.':''}
+// 🔥 AI RESPONSE WITH PERSONAS
+async function getAIResponse(userText){
+    const conversationHistory=conversation.map(m=>`${m.speaker.toUpperCase()}: ${m.text}`).join('\n');
+    const industry=INDUSTRIES[selectedIndustry];
+    const persona=PERSONAS[currentPersona];
+    
+    const systemPrompt=`You are a ${persona.name} receiving a cold call about ${industry.product} priced at $${industry.price.toLocaleString()}.
 
-Conversation:
-${conversation.map(c=>`${c.speaker}: ${c.text}`).join('\n')}
+PERSONA: ${persona.name}
+ATTITUDE: ${persona.subtitle}
+DIFFICULTY: ${persona.difficulty}
 
-Respond 1-2 sentences. You may:
-- Ask questions
-- Give objections
-- Say yes if impressed
-- Hang up if poor call
+CONVERSATION SO FAR:
+${conversationHistory}
+USER: ${userText}
 
-${Math.random()>.7?'Give an objection.':''}`;try{const response=await fetch('/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:150,messages:[{role:'user',content:systemPrompt}]})});const data=await response.json();const aiText=data.content[0].text;addMessage('ai',aiText);session.conversation.push({speaker:'ai',text:aiText,timestamp:duration});if(aiText.toLowerCase().includes("let's do it")||aiText.toLowerCase().includes("yes, i'm interested")||aiText.toLowerCase().includes("i'll buy")||aiText.toLowerCase().includes('sounds good'))handleSale();else if(aiText.toLowerCase().includes('goodbye')||aiText.toLowerCase().includes('have to go')||aiText.toLowerCase().includes('not interested')||aiText.toLowerCase().includes("can't talk")||aiText.toLowerCase().includes('busy')){speak(aiText,()=>{setTimeout(()=>handleHangUp(),1500)})}else speak(aiText)}catch(error){console.error('AI Error:',error);const fallback="I'm not sure I understand. Can you explain?";addMessage('ai',fallback);speak(fallback)}}
+Current call stage: ${callStage}
 
-function handleSale(){session.closed=true;session.saleAmount=INDUSTRIES[selectedIndustry].price;const audio=new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuAy/DajTwJEmiy6OyNPwwSVa7n77BLDQw7k9fzx3UjBSt8x+3akD0IEGCv5+WcUAwMUKXh8bJQDgsxhcXtypRBAw==');audio.play().catch(e=>console.log('Audio:',e));const banner=document.getElementById('saleBanner');banner.classList.add('active');setTimeout(()=>{banner.classList.remove('active')},2000);stats.totalSales++;stats.totalEarnings+=session.commission;stats.currentStreak++;if(stats.currentStreak>stats.maxWinStreak)stats.maxWinStreak=stats.currentStreak;const closing=["Great! I'll send details.","Perfect! Let me set that up.","Excellent choice!"];const msg=closing[Math.floor(Math.random()*closing.length)];addMessage('ai',msg);speak(msg,()=>{setTimeout(()=>endCallScore(),2000)})}
+Behave according to your persona:
+- Skeptical CFO: Very budget-conscious, demands ROI, interrupts, challenges everything
+- Startup Founder: Friendly but busy, asks sharp questions, wants speed
+- Decision Maker: Professional, needs clarity, gives reasonable objections
 
-function handleHangUp(){clearInterval(timer);callActive=false;stats.currentStreak=0;setTimeout(()=>endCallScore(),2000)}
+Respond in 1-2 sentences. Match the call stage:
+- Rapport: Be cautious, ask who they are
+- Discovery: Engage if they ask good questions
+- Objection: Push back on price/time/authority
+- Close: Say yes ONLY if they've built value and asked clearly
 
-function endCall(){clearInterval(timer);callActive=false;endCallScore()}
+${Math.random()>0.6?'Give a realistic objection.':''}`;
 
-async function endCallScore(){const score=await calculateScore();session.score=score;session.duration=duration;stats.totalCalls++;stats.totalTime+=duration;stats.scores.push(score.overall);stats.history.unshift(session);saveStats();if(isFirstCall)isFirstCall=false;displayResults(score);switchScreen('results')}
+    try{
+        document.getElementById('typingIndicator').classList.add('active');
+        
+        const response=await fetch('https://api.anthropic.com/v1/messages',{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({
+                model:'claude-sonnet-4-20250514',
+                max_tokens:150,
+                messages:[{role:'user',content:systemPrompt}]
+            })
+        });
+        
+        const data=await response.json();
+        const aiText=data.content[0].text;
+        
+        document.getElementById('typingIndicator').classList.remove('active');
+        addMessage('customer',aiText);
+        
+        // Check for sale
+        const aiLower=aiText.toLowerCase();
+        if(aiLower.includes('let\'s do it')||aiLower.includes('yes')||aiLower.includes('i\'ll buy')||aiLower.includes('sounds good')||aiLower.includes('sign me up')){
+            handleSale();
+        }
+        
+        // Speak response
+        if(synthesis){
+            const utterance=new SpeechSynthesisUtterance(aiText);
+            utterance.rate=1.1;
+            synthesis.speak(utterance);
+        }
+        
+    }catch(error){
+        console.error('AI Error:',error);
+        document.getElementById('typingIndicator').classList.remove('active');
+        addMessage('customer',"I'm not sure I understand. Can you explain differently?");
+    }
+}
 
-async function calculateScore(){const transcript=session.conversation.map(c=>`${c.speaker.toUpperCase()}: ${c.text}`).join('\n');const analysisPrompt=`Analyze this sales call. Score 0-100 on each metric.
+// 🔥 SALE HANDLING
+function handleSale(){
+    advanceStage('feedback');
+    showLiveFeedback('🎉 Sale Closed! +50 XP','positive');
+    earnXP(50);
+    setTimeout(()=>endCall(),2000);
+}
 
-TRANSCRIPT:
-${transcript}
+// 🔥 XP SYSTEM
+function earnXP(amount){
+    xp+=amount;
+    localStorage.setItem('valtoriXP',xp);
+    document.getElementById('xpBadge').textContent='XP: '+xp;
+}
 
-CONTEXT:
-- Product: ${session.product}
-- Price: $${session.price}
-- Duration: ${duration}s
-- Outcome: ${session.closed?'CLOSED':'No sale'}
+// 🔥 LIVE FEEDBACK
+function showLiveFeedback(text,type='positive'){
+    const container=document.getElementById('liveFeedback');
+    container.classList.add('active');
+    
+    const bubble=document.createElement('div');
+    bubble.className='feedback-bubble '+type;
+    bubble.textContent=text;
+    container.appendChild(bubble);
+    
+    setTimeout(()=>{
+        bubble.remove();
+        if(container.children.length===0)container.classList.remove('active');
+    },3000);
+}
 
-Score 4 metrics (0-100):
-1. Closing Ability - Asked for sale, created urgency
-2. Objection Handling - Handled pushback
-3. Confidence & Energy - Tone and conviction
-4. Rapport Building - Connection with prospect
+// END CALL
+function confirmEndCall(){
+    if(confirm('End call and see results?')){
+        endCall();
+    }
+}
 
-Also provide:
-- 2 strengths (what worked)
-- 2 improvements (what to fix)
-- 3 insights (patterns, opportunities, warnings)
+function endCall(){
+    clearInterval(timer);
+    callActive=false;
+    
+    // Calculate XP based on performance
+    let earnedXP=10; // Base XP
+    if(discoveryQuestions>=3)earnedXP+=20;
+    if(closeAttempts>=1)earnedXP+=15;
+    if(fillerCount<5)earnedXP+=10;
+    
+    earnXP(earnedXP);
+    
+    alert(`Call Complete!\n\n📊 Stats:\n• ${discoveryQuestions} questions asked\n• ${fillerCount} filler words\n• ${closeAttempts} close attempts\n\n🏆 Earned: +${earnedXP} XP`);
+    
+    switchScreen('industry');
+}
 
-JSON only:
-{
-  "closing": number,
-  "objection": number,
-  "confidence": number,
-  "rapport": number,
-  "strengths": ["...","..."],
-  "improvements": ["...","..."],
-  "insights": [
-    {"type":"strength|weakness|opportunity","title":"...","desc":"..."},
-    ...
-  ]
-}`;try{const response=await fetch('/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:analysisPrompt}]})});const data=await response.json();const aiAnalysis=data.content[0].text;const jsonMatch=aiAnalysis.match(/\{[\s\S]*\}/);if(jsonMatch){const analysis=JSON.parse(jsonMatch[0]);const overall=Math.round((analysis.closing+analysis.objection+analysis.confidence+analysis.rapport)/4);return{overall,metrics:{closing:analysis.closing,objection:analysis.objection,confidence:analysis.confidence,rapport:analysis.rapport},feedback:{strengths:analysis.strengths,improvements:analysis.improvements,insights:analysis.insights||[]}}}}catch(error){console.error('Scoring error:',error)}return{overall:65,metrics:{closing:session.closed?85:50,objection:60,confidence:70,rapport:65},feedback:{strengths:['Completed the call','Showed up to practice'],improvements:['Ask more questions','Work on objection handling'],insights:[{type:'opportunity',title:'More Practice Needed',desc:'Keep practicing to build consistency'}]}}}
-
-function displayResults(score){document.getElementById('overallScore').textContent=score.overall;document.getElementById('outcomeIcon').textContent=session.closed?'✅ CLOSED':'❌ NO SALE';const mins=Math.floor(duration/60);const secs=duration%60;document.getElementById('callDuration').textContent=`${mins}:${String(secs).padStart(2,'0')}`;document.getElementById('commissionEarned').textContent=session.closed?'+$'+session.commission.toLocaleString():'$0';['closing','objection','confidence','rapport'].forEach(m=>{const val=score.metrics[m];const cap=m.charAt(0).toUpperCase()+m.slice(1);document.getElementById('kpi'+cap).textContent=val;setTimeout(()=>{document.getElementById('bar'+cap).style.width=val+'%'},100)});const strengthsList=document.getElementById('strengthsList');strengthsList.innerHTML='';score.feedback.strengths.forEach(s=>{strengthsList.innerHTML+=`<div class="breakdown-item positive"><div class="breakdown-label">✅ ${s}</div></div>`});const improvementsList=document.getElementById('improvementsList');improvementsList.innerHTML='';score.feedback.improvements.forEach(i=>{improvementsList.innerHTML+=`<div class="breakdown-item negative"><div class="breakdown-label">💡 ${i}</div></div>`});const insightsList=document.getElementById('insightsList');insightsList.innerHTML='';score.feedback.insights.forEach(ins=>{const icons={strength:'💪',weakness:'⚠️',opportunity:'🎯'};insightsList.innerHTML+=`<div class="insight-item ${ins.type}"><div class="insight-icon">${icons[ins.type]||'💡'}</div><div class="insight-content"><div class="insight-title">${ins.title}</div><div class="insight-desc">${ins.desc}</div></div></div>`})}
-
-function goToDashboard(){updateDashboard();switchScreen('dashboard')}
-
-function updateDashboard(){const closeRate=stats.totalCalls>0?Math.round((stats.totalSales/stats.totalCalls)*100):0;document.getElementById('dCloseRate').textContent=closeRate+'%';document.getElementById('dCloseSub').textContent=`${stats.totalSales} / ${stats.totalCalls} calls`;document.getElementById('dEarnings').textContent='$'+stats.totalEarnings.toLocaleString();document.getElementById('dEarningSub').textContent=`${stats.totalSales} closed`;if(stats.scores.length>0){const avg=Math.round(stats.scores.reduce((a,b)=>a+b,0)/stats.scores.length);document.getElementById('dAvgScore').textContent=avg;if(stats.scores.length>=2){const recent=stats.scores.slice(-3).reduce((a,b)=>a+b,0)/Math.min(3,stats.scores.length);const overall=stats.scores.reduce((a,b)=>a+b,0)/stats.scores.length;const trend=recent>overall?'📈 Improving':recent<overall?'📉 Declining':'➡️ Stable';document.getElementById('dScoreTrend').textContent=trend}else document.getElementById('dScoreTrend').textContent='Getting started'}else{document.getElementById('dAvgScore').textContent='--';document.getElementById('dScoreTrend').textContent='No data'}const hours=Math.floor(stats.totalTime/3600);const mins=Math.floor((stats.totalTime%3600)/60);document.getElementById('dTime').textContent=hours>0?`${hours}h ${mins}m`:`${mins}m`;document.getElementById('dCallCount').textContent=`${stats.totalCalls} calls`;const expectancy=stats.totalCalls>0?(stats.totalEarnings/stats.totalCalls):0;document.getElementById('dExpectancy').textContent=expectancy>0?'+$'+Math.round(expectancy).toLocaleString():'$0';document.getElementById('dWinStreak').textContent=stats.maxWinStreak;document.getElementById('dStreakSub').textContent=`Current: ${stats.currentStreak}`;const historyList=document.getElementById('historyList');if(stats.history.length===0)historyList.innerHTML='<div class="empty"><div class="empty-icon">📊</div><p>No calls yet</p><button class="btn btn-primary" onclick="practiceAgain()" style="margin-top: 1rem;">Start Practicing</button></div>';else{historyList.innerHTML='';stats.history.slice(0,20).forEach(s=>{const date=new Date(s.timestamp);const earnClass=s.closed?'positive':'negative';const earnText=s.closed?'+$'+s.commission.toLocaleString():'$0';historyList.innerHTML+=`<div class="history-item"><div><div class="history-date">${date.toLocaleDateString()} ${date.toLocaleTimeString()}</div><div class="history-details">${s.product} • ${Math.floor(s.duration/60)}:${String(s.duration%60).padStart(2,'0')}</div></div><div class="history-score">${s.score.overall}</div><div class="history-outcome">${s.closed?'✅':'❌'}</div><div class="history-earnings ${earnClass}">${earnText}</div></div>`})}}
-
-function addMessage(speaker,text){const transcript=document.getElementById('transcript');const msg=document.createElement('div');msg.className=`message ${speaker}`;msg.innerHTML=`<div class="speaker">${speaker==='user'?'You':'Customer'}</div><div>${text}</div>`;transcript.appendChild(msg);transcript.scrollTop=transcript.scrollHeight;conversation.push({speaker,text})}
-function togglePrompts(){promptsOn=!promptsOn;const toggle=document.getElementById('toggle');if(promptsOn){toggle.classList.add('active');updatePrompt()}else{toggle.classList.remove('active');document.getElementById('prompt').innerHTML=''}}
-function practiceAgain(){document.getElementById('transcript').innerHTML='';document.getElementById('warning').innerHTML='';document.getElementById('prompt').innerHTML='';if(selectedIndustry)startCall();else switchScreen('industry')}
-window.addEventListener('load',()=>{init();if(window.speechSynthesis){speechSynthesis.getVoices();window.speechSynthesis.onvoiceschanged=()=>{speechSynthesis.getVoices()}}});
+// INIT
+window.addEventListener('load',()=>{
+    init();
+});
     </script>
 </body>
 </html>
