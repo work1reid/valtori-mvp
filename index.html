@@ -1145,57 +1145,123 @@
             localStorage.setItem('valtoriStats', JSON.stringify(stats));
         }
 
-        function setupSpeech() {
-            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                recognition = new SpeechRecognition();
-                recognition.continuous = true;
-                recognition.interimResults = false;
-                recognition.lang = 'en-US';
+  function setupSpeech() {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.continuous = true;  // CHANGED: Keep listening
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+        recognition.maxAlternatives = 1;
 
-                recognition.onresult = (e) => {
-                    const text = e.results[0][0].transcript;
-                    handleUserSpeech(text);
-                };
+        recognition.onresult = (e) => {
+            const text = e.results[e.results.length - 1][0].transcript;
+            console.log('Speech captured:', text);
+            handleUserSpeech(text);
+        };
 
-                recognition.onerror = (e) => {
-                    console.error('Speech error:', e.error);
-                    isRecording = false;
-                    updateMicBtn();
-                };
-
-                recognition.onend = () => {
-                    isRecording = false;
-                    updateMicBtn();
-                };
-            }
-        }
-
-        function toggleMic() {
-            if (!recognition) {
-                alert('Speech recognition not supported. Use Chrome or Edge.');
+        recognition.onerror = (e) => {
+            console.error('Speech recognition error:', e.error);
+            
+            // Handle network errors gracefully
+            if (e.error === 'network') {
+                console.log('Network error - will retry on next speech');
+                // Don't stop recording state, just let it restart
                 return;
             }
-
-            if (isRecording) {
-                recognition.stop();
-            } else {
-                isRecording = true;
-                updateMicBtn();
-                recognition.start();
+            
+            // For other errors, stop recording
+            if (e.error === 'no-speech') {
+                console.log('No speech detected, but keeping mic on');
+                return;
             }
+            
+            if (e.error === 'aborted') {
+                console.log('Recognition aborted by user');
+                isRecording = false;
+                updateMicBtn();
+                return;
+            }
+            
+            // Critical errors
+            if (e.error === 'not-allowed' || e.error === 'audio-capture') {
+                alert('Microphone access error. Please check your browser permissions.');
+                isRecording = false;
+                updateMicBtn();
+            }
+        };
+
+        recognition.onend = () => {
+            console.log('Recognition ended');
+            // If still in recording mode, restart it
+            if (isRecording && callActive) {
+                console.log('Auto-restarting recognition...');
+                setTimeout(() => {
+                    if (isRecording && callActive) {
+                        try {
+                            recognition.start();
+                        } catch (e) {
+                            console.log('Could not restart:', e.message);
+                        }
+                    }
+                }, 100);
+            } else {
+                isRecording = false;
+                updateMicBtn();
+            }
+        };
+    }
+}
+
+        async function toggleMic() {
+    if (!recognition) {
+        alert('Speech recognition not supported. Use Chrome or Edge.');
+        return;
+    }
+
+    if (isRecording) {
+        // Stop recording
+        console.log('Stopping microphone...');
+        isRecording = false;
+        try {
+            recognition.stop();
+        } catch (e) {
+            console.log('Stop error (ok to ignore):', e.message);
         }
+        updateMicBtn();
+    } else {
+        // Start recording
+        try {
+            // Check microphone permissions first
+            await navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    stream.getTracks().forEach(track => track.stop());
+                    console.log('Microphone permission granted');
+                });
+            
+            isRecording = true;
+            updateMicBtn();
+            console.log('Starting speech recognition...');
+            recognition.start();
+        } catch (err) {
+            console.error('Microphone error:', err);
+            alert('Please allow microphone access.\n\nClick the 🔒 or 🎤 icon in your browser address bar.');
+            isRecording = false;
+            updateMicBtn();
+        }
+    }
+}
 
         function updateMicBtn() {
-            const btn = document.getElementById('micBtn');
-            if (isRecording) {
-                btn.classList.add('recording');
-                btn.innerHTML = '⏹️<div class="mic-label">Click to Stop</div>';
-            } else {
-                btn.classList.remove('recording');
-                btn.innerHTML = '🎤<div class="mic-label">Click to Start</div>';;
-            }
-        }
+    const btn = document.getElementById('micBtn');
+    if (isRecording) {
+        btn.classList.add('recording');
+        btn.innerHTML = '⏹️<div class="mic-label">Click to Stop</div>';
+    } else {
+        btn.classList.remove('recording');
+        btn.innerHTML = '🎤<div class="mic-label">Click to Start</div>';
+    }
+}
 
         function speak(text, callback) {
             if (!synthesis) {
