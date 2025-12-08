@@ -1,22 +1,41 @@
 {
-  "name": "valtori-mvp",
+  "name": "valtori-ai",
   "version": "0.1.0",
-  "private": true,
+  "description": "AI-powered sales practice simulator with voice recognition and real-time feedback",
+  "main": "index.html",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "start": "python3 -m http.server 8000",
+    "dev": "python3 -m http.server 8000",
+    "deploy": "echo 'See DEPLOYMENT.md for deployment instructions'"
   },
-  "dependencies": {
-    "next": "14.0.4",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "lucide-react": "^0.263.1",
-    "@supabase/supabase-js": "^2.39.0"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/valtori-ai.git"
   },
-  "devDependencies": {
-    "eslint": "^8.56.0",
-    "eslint-config-next": "14.0.4"
-  }
+  "keywords": [
+    "sales",
+    "training",
+    "ai",
+    "voice-recognition",
+    "sales-simulator",
+    "practice",
+    "coaching",
+    "machine-learning",
+    "speech-recognition",
+    "claude-ai"
+  ],
+  "author": {
+    "name": "Max Reid",
+    "email": "max@workreid.com",
+    "url": "https://workreid.com"
+  },
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/yourusername/valtori-ai/issues"
+  },
+  "homepage": "https://github.com/yourusername/valtori-ai#readme",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "private": true
 }
