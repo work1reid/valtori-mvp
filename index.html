@@ -40,7 +40,6 @@
             padding: 2rem;
         }
 
-        /* Beta Badge */
         .beta-badge {
             position: fixed;
             top: 1.5rem;
@@ -62,7 +61,6 @@
             background: rgba(0, 245, 255, 0.2);
         }
 
-        /* Screens */
         .screen {
             display: none;
             animation: fadeIn 0.4s ease;
@@ -77,7 +75,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Landing */
         .hero {
             text-align: center;
             padding: 6rem 0;
@@ -170,7 +167,6 @@
             font-size: 0.95rem;
         }
 
-        /* Industry Selection */
         .selection-screen {
             max-width: 700px;
             margin: 4rem auto;
@@ -261,7 +257,6 @@
             font-family: 'JetBrains Mono', monospace;
         }
 
-        /* Call Screen */
         .call-screen {
             max-width: 900px;
             margin: 0 auto;
@@ -380,10 +375,11 @@
 
         .controls {
             display: flex;
-            justify-content: center;
-            gap: 1.5rem;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
             margin: 2rem 0;
-            padding-bottom: 6rem;
+            padding-bottom: 2rem;
         }
 
         .mic-btn {
@@ -424,6 +420,35 @@
             white-space: nowrap;
         }
 
+        .input-row {
+            display: flex;
+            gap: 0.5rem;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .text-input {
+            flex: 1;
+            padding: 1rem;
+            font-size: 1rem;
+            border-radius: 8px;
+            border: 2px solid var(--cyan);
+            background: var(--bg-card);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .text-input:focus {
+            outline: none;
+            box-shadow: 0 0 20px rgba(0, 245, 255, 0.4);
+        }
+
+        .or-divider {
+            color: var(--text-dimmer);
+            font-size: 0.9rem;
+            margin: 0.5rem 0;
+        }
+
         .warning {
             background: rgba(255, 213, 0, 0.15);
             border: 1px solid var(--yellow);
@@ -435,7 +460,6 @@
             font-weight: 600;
         }
 
-        /* Results */
         .results {
             max-width: 1000px;
             margin: 0 auto;
@@ -570,7 +594,6 @@
             font-size: 1.5rem;
         }
 
-        /* Dashboard */
         .dashboard {
             max-width: 1200px;
             margin: 0 auto;
@@ -691,7 +714,6 @@
             opacity: 0.5;
         }
 
-        /* Modal */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -851,7 +873,7 @@
     </style>
 </head>
 <body>
-    <div class="beta-badge" onclick="window.open('https://forms.gle/feedback', '_blank')">FREE BETA</div>
+    <div class="beta-badge">FREE BETA</div>
 
     <div class="container">
         <!-- LANDING -->
@@ -869,8 +891,8 @@
                     </div>
                     <div class="feature">
                         <div class="feature-icon">📊</div>
-                        <div class="feature-title">Data-Driven Scoring</div>
-                        <div class="feature-desc">Track close rates, earnings, and improvement like FXReplay for traders</div>
+                        <div class="feature-title">FXReplay-Style Analytics</div>
+                        <div class="feature-desc">Track close rates, earnings, and improvement like a trader</div>
                     </div>
                     <div class="feature">
                         <div class="feature-icon">🎯</div>
@@ -939,33 +961,28 @@
                 <div class="transcript" id="transcript"></div>
 
                 <div class="controls">
-    <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
-        <button class="mic-btn" id="micBtn" onclick="toggleMic()">
-            🎤
-            <div class="mic-label">Click to Speak</div>
-        </button>
-        
-        
-        <!-- Text Input Fallback -->
-        <div style="display: flex; gap: 0.5rem; width: 100%; max-width: 500px;">
-            <input 
-                type="text" 
-                id="textInput" 
-                placeholder="Or type your response here..."
-                style="flex: 1; padding: 1rem; font-size: 1rem; border-radius: 8px; border: 2px solid var(--cyan); background: var(--bg-card); color: var(--text); font-family: 'Inter', sans-serif;"
-                onkeypress="if(event.key === 'Enter') sendTextInput()"
-            />
-            <button 
-                class="btn btn-primary" 
-                onclick="sendTextInput()"
-                style="padding: 1rem 2rem; white-space: nowrap;"
-            >
-                Send
-            </button>
+                    <button class="mic-btn" id="micBtn" onclick="toggleMic()">
+                        🎤
+                        <div class="mic-label">Click to Speak</div>
+                    </button>
+                    
+                    <div class="or-divider">— or type —</div>
+                    
+                    <div class="input-row">
+                        <input 
+                            type="text" 
+                            id="textInput" 
+                            class="text-input"
+                            placeholder="Type your response here..."
+                            onkeypress="if(event.key === 'Enter') sendTextInput()"
+                        />
+                        <button class="btn btn-primary" onclick="sendTextInput()">Send</button>
+                    </div>
+                    
+                    <button class="btn btn-secondary" onclick="endCall()">End Call</button>
+                </div>
+            </div>
         </div>
-    </div>
-    <button class="btn btn-secondary" onclick="endCall()">End Call</button>
-</div>
 
         <!-- RESULTS -->
         <div class="screen" id="results">
@@ -1063,9 +1080,9 @@
             <p>You're about to practice a real sales call with an AI customer.</p>
             <p><strong>How it works:</strong></p>
             <ul>
-                <li>Click the mic button to speak</li>
-                <li>The AI will respond and may throw objections</li>
-                <li>Watch for helpful prompts</li>
+                <li>Click the mic button and speak OR type your response</li>
+                <li>The AI will respond with voice and may throw objections</li>
+                <li>Watch for helpful prompts (you can toggle them on/off)</li>
                 <li>You'll get scored at the end</li>
             </ul>
             <p>Ready to make your first call?</p>
@@ -1095,7 +1112,6 @@
     </div>
 
     <script>
-        // CONFIG
         const INDUSTRIES = {
             saas: { product: 'Enterprise CRM Software', price: 8500, commission: 0.15 },
             realestate: { product: 'Premium Property Listing', price: 450000, commission: 0.03 },
@@ -1118,7 +1134,6 @@
             close: ['Ask for next step', 'Suggest specific time', 'Be confident']
         };
 
-        // STATE
         let currentScreen = 'landing';
         let selectedIndustry = null;
         let isFirstCall = true;
@@ -1148,7 +1163,6 @@
             history: []
         };
 
-        // INIT
         function init() {
             loadStats();
             setupSpeech();
@@ -1164,102 +1178,98 @@
             localStorage.setItem('valtoriStats', JSON.stringify(stats));
         }
 
-       function setupSpeech() {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        recognition = new SpeechRecognition();
-        recognition.continuous = false;
-        recognition.interimResults = false;
-        recognition.lang = 'en-US';
+        function setupSpeech() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
 
-        recognition.onresult = (e) => {
-            const text = e.results[0][0].transcript;
-            console.log('✅ Voice captured:', text);
+                recognition.onresult = (e) => {
+                    const text = e.results[0][0].transcript;
+                    console.log('✅ Voice captured:', text);
+                    handleUserSpeech(text);
+                };
+
+                recognition.onerror = (e) => {
+                    console.error('Voice error:', e.error);
+                    isRecording = false;
+                    updateMicBtn();
+                    
+                    if (e.error === 'not-allowed') {
+                        alert('Microphone access denied. Please enable it in your browser settings, or use the text input below.');
+                    }
+                };
+
+                recognition.onend = () => {
+                    console.log('Voice ended');
+                    isRecording = false;
+                    updateMicBtn();
+                };
+
+                recognition.onstart = () => {
+                    console.log('🎤 Listening...');
+                };
+            } else {
+                console.log('Speech recognition not supported - text input available');
+            }
+        }
+
+        async function toggleMic() {
+            if (!recognition) {
+                alert('Voice recognition not supported in this browser.\n\nPlease use Chrome or Edge, or use the text input below!');
+                return;
+            }
+
+            if (isRecording) {
+                console.log('Stopping mic');
+                isRecording = false;
+                recognition.abort();
+                updateMicBtn();
+                return;
+            }
+
+            try {
+                console.log('Starting mic...');
+                isRecording = true;
+                updateMicBtn();
+                recognition.start();
+            } catch (err) {
+                console.error('Mic error:', err);
+                alert('Voice input failed. Please use the text input below!');
+                isRecording = false;
+                updateMicBtn();
+            }
+        }
+
+        function sendTextInput() {
+            const input = document.getElementById('textInput');
+            const text = input.value.trim();
+            
+            if (!text) return;
+            if (!callActive) {
+                alert('Start a call first');
+                return;
+            }
+            
+            console.log('📝 Text input:', text);
+            input.value = '';
             handleUserSpeech(text);
-        };
-
-        recognition.onerror = (e) => {
-            console.error('Voice error:', e.error);
-            alert('Voice input failed. Please use the text input instead!');
-        };
-
-        recognition.onend = () => {
-            console.log('Voice ended');
-            isRecording = false;
-            updateMicBtn();
-        };
-
-        recognition.onstart = () => {
-            console.log('🎤 Listening...');
-        };
-    } else {
-        console.log('Speech recognition not supported - text input available');
-    }
-}
-
-async function toggleMic() {
-    if (!recognition) {
-        alert('Speech recognition not supported in this browser.\n\nPlease use the text input below instead!');
-        return;
-    }
-
-    if (isRecording) {
-        console.log('Stopping mic');
-        isRecording = false;
-        recognition.abort();
-        updateMicBtn();
-        return;
-    }
-
-    try {
-        console.log('Starting mic...');
-        isRecording = true;
-        updateMicBtn();
-        recognition.start();
-    } catch (err) {
-        console.error('Mic error:', err);
-        alert('Voice input not working.\n\nPlease use the text input below instead!');
-        isRecording = false;
-        updateMicBtn();
-    }
-}
-
-function sendTextInput() {
-    const input = document.getElementById('textInput');
-    const text = input.value.trim();
-    
-    if (!text) {
-        alert('Please type a message first');
-        return;
-    }
-    
-    if (!callActive) {
-        alert('Start a call first');
-        return;
-    }
-    
-    console.log('📝 Text input:', text);
-    
-    // Clear the input
-    input.value = '';
-    
-    // Handle the speech (same as voice)
-    handleUserSpeech(text);
-}
-
+        }
 
         function updateMicBtn() {
-    const btn = document.getElementById('micBtn');
-    if (!btn) return;
-    
-    if (isRecording) {
-        btn.classList.add('recording');
-        btn.innerHTML = '🎤<div class="mic-label">Listening...</div>';
-    } else {
-        btn.classList.remove('recording');
-        btn.innerHTML = '🎤<div class="mic-label">Click to Speak</div>';
-    }
-}
+            const btn = document.getElementById('micBtn');
+            if (!btn) return;
+            
+            if (isRecording) {
+                btn.classList.add('recording');
+                btn.innerHTML = '🎤<div class="mic-label">Listening...</div>';
+            } else {
+                btn.classList.remove('recording');
+                btn.innerHTML = '🎤<div class="mic-label">Click to Speak</div>';
+            }
+        }
 
         function speak(text, callback) {
             if (!synthesis) {
@@ -1293,7 +1303,6 @@ function sendTextInput() {
             synthesis.speak(utterance);
         }
 
-        // NAVIGATION
         function switchScreen(screen) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screen).classList.add('active');
@@ -1342,8 +1351,8 @@ function sendTextInput() {
             startCall();
         }
 
-        // CALL
         function startCall() {
+            console.log('Starting call...');
             document.getElementById('tutorialModal').classList.remove('active');
             switchScreen('call');
             callActive = true;
@@ -1459,13 +1468,13 @@ ${difficulty === 'easy' ? 'You are receptive and friendly.' : ''}
 ${difficulty === 'medium' ? 'You are skeptical but professional.' : ''}
 ${difficulty === 'hard' ? 'You are very busy and skeptical. You may hang up.' : ''}
 
-Conversation:
+Conversation so far:
 ${conversation.map(c => `${c.speaker}: ${c.text}`).join('\n')}
 
-Respond in 1-2 sentences. You may:
+Respond in 1-2 sentences as this prospect. You may:
 - Ask questions
 - Give objections
-- Say yes if impressed
+- Say yes if truly impressed
 - Hang up if call is poor
 
 ${Math.random() > 0.7 ? 'Give an objection.' : ''}`;
@@ -1489,10 +1498,12 @@ ${Math.random() > 0.7 ? 'Give an objection.' : ''}`;
 
                 if (aiText.toLowerCase().includes('let\'s do it') || 
                     aiText.toLowerCase().includes('yes, i\'m interested') ||
-                    aiText.toLowerCase().includes('i\'ll buy')) {
+                    aiText.toLowerCase().includes('i\'ll buy') ||
+                    aiText.toLowerCase().includes('sounds good')) {
                     handleSale();
                 } else if (aiText.toLowerCase().includes('goodbye') || 
-                           aiText.toLowerCase().includes('have to go')) {
+                           aiText.toLowerCase().includes('have to go') ||
+                           aiText.toLowerCase().includes('not interested')) {
                     if (Math.random() > 0.5) {
                         handleHangUp();
                     } else {
@@ -1514,7 +1525,6 @@ ${Math.random() > 0.7 ? 'Give an objection.' : ''}`;
             session.closed = true;
             session.saleAmount = INDUSTRIES[selectedIndustry].price;
             
-            // Cha-ching
             const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuAy/DajTwJEmiy6OyNPwwSVa7n77BLDQw7k9fzx3UjBSt8x+3akD0IEGCv5+WcUAwMUKXh8bJQDgsxhcXtypRBAw==');
             audio.play().catch(e => console.log('Audio failed:', e));
 
@@ -1587,18 +1597,18 @@ CONTEXT:
 - Duration: ${duration}s
 - Outcome: ${session.closed ? 'SALE CLOSED' : 'No sale'}
 
-Score on:
-1. Closing Ability
-2. Objection Handling
-3. Confidence & Energy
-4. Rapport Building
+Score on these 4 metrics (0-100 each):
+1. Closing Ability - Did they ask for the sale and create urgency?
+2. Objection Handling - How well did they handle pushback?
+3. Confidence & Energy - Did they sound confident and energetic?
+4. Rapport Building - Did they build connection and trust?
 
 Also provide:
-- 2 strengths
-- 2 improvements
-- 2 tips
+- 2 strengths (what they did well)
+- 2 improvements (what to work on)
+- 2 actionable tips (specific next steps)
 
-Format as JSON:
+IMPORTANT: Respond ONLY with valid JSON, no markdown, no backticks:
 {
   "closing": number,
   "objection": number,
