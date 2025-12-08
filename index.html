@@ -939,14 +939,33 @@
                 <div class="transcript" id="transcript"></div>
 
                 <div class="controls">
-                    <button class="mic-btn" id="micBtn" onclick="toggleMic()">
-                        🎤
-                        <div class="mic-label">Click to Speak</div>
-                    </button>
-                    <button class="btn btn-secondary" onclick="endCall()">End Call</button>
-                </div>
-            </div>
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+        <button class="mic-btn" id="micBtn" onclick="toggleMic()">
+            🎤
+            <div class="mic-label">Click to Speak</div>
+        </button>
+        
+        
+        <!-- Text Input Fallback -->
+        <div style="display: flex; gap: 0.5rem; width: 100%; max-width: 500px;">
+            <input 
+                type="text" 
+                id="textInput" 
+                placeholder="Or type your response here..."
+                style="flex: 1; padding: 1rem; font-size: 1rem; border-radius: 8px; border: 2px solid var(--cyan); background: var(--bg-card); color: var(--text); font-family: 'Inter', sans-serif;"
+                onkeypress="if(event.key === 'Enter') sendTextInput()"
+            />
+            <button 
+                class="btn btn-primary" 
+                onclick="sendTextInput()"
+                style="padding: 1rem 2rem; white-space: nowrap;"
+            >
+                Send
+            </button>
         </div>
+    </div>
+    <button class="btn btn-secondary" onclick="endCall()">End Call</button>
+</div>
 
         <!-- RESULTS -->
         <div class="screen" id="results">
@@ -1155,96 +1174,80 @@
 
         recognition.onresult = (e) => {
             const text = e.results[0][0].transcript;
-            console.log('✅ Speech captured:', text);
-            
-            // Handle the speech
+            console.log('✅ Voice captured:', text);
             handleUserSpeech(text);
-            
-            // Important: DON'T auto-restart here
-            // Let the user click again when ready
-            isRecording = false;
-            updateMicBtn();
         };
 
         recognition.onerror = (e) => {
-            console.error('Speech error:', e.error);
-            
-            // Always stop on ANY error
-            isRecording = false;
-            updateMicBtn();
-            
-            // Only alert on critical errors
-            if (e.error === 'not-allowed') {
-                alert('❌ Microphone access denied.\n\nPlease:\n1. Click the 🔒 icon in your address bar\n2. Allow microphone access\n3. Refresh the page');
-            } else if (e.error === 'audio-capture') {
-                alert('❌ No microphone found. Please connect a microphone.');
-            }
-            // Silently ignore network/no-speech errors
+            console.error('Voice error:', e.error);
+            alert('Voice input failed. Please use the text input instead!');
         };
 
         recognition.onend = () => {
-            console.log('Recognition ended');
-            // Always ensure we're in the correct state
-            if (isRecording) {
-                isRecording = false;
-                updateMicBtn();
-            }
+            console.log('Voice ended');
+            isRecording = false;
+            updateMicBtn();
         };
 
         recognition.onstart = () => {
-            console.log('🎤 Microphone active - speak now');
+            console.log('🎤 Listening...');
         };
+    } else {
+        console.log('Speech recognition not supported - text input available');
     }
 }
 
-        async function toggleMic() {
+async function toggleMic() {
     if (!recognition) {
-        alert('Speech recognition not supported. Please use Chrome or Edge.');
+        alert('Speech recognition not supported in this browser.\n\nPlease use the text input below instead!');
         return;
     }
 
-    // If already recording, stop it
     if (isRecording) {
-        console.log('Stopping...');
+        console.log('Stopping mic');
         isRecording = false;
-        try {
-            recognition.stop();
-        } catch (e) {
-            console.log('Already stopped');
-        }
+        recognition.abort();
         updateMicBtn();
         return;
     }
 
-    // Start recording
     try {
-        console.log('🎤 Starting microphone...');
-        
-        // Request permission first
-        await navigator.mediaDevices.getUserMedia({ audio: true })
-            .then(stream => {
-                console.log('✅ Microphone permission granted');
-                // Stop the test stream
-                stream.getTracks().forEach(track => track.stop());
-            });
-        
-        // Now start recognition
+        console.log('Starting mic...');
         isRecording = true;
         updateMicBtn();
-        
-        // Small delay to ensure state is set
-        setTimeout(() => {
-            recognition.start();
-        }, 100);
-        
+        recognition.start();
     } catch (err) {
-        console.error('Microphone error:', err);
+        console.error('Mic error:', err);
+        alert('Voice input not working.\n\nPlease use the text input below instead!');
         isRecording = false;
         updateMicBtn();
-        
-        alert('❌ Cannot access microphone.\n\nPlease:\n1. Click the 🔒 icon in your browser\n2. Allow microphone access\n3. Try again');
     }
 }
+
+function sendTextInput() {
+    const input = document.getElementById('textInput');
+    const text = input.value.trim();
+    
+    if (!text) {
+        alert('Please type a message first');
+        return;
+    }
+    
+    if (!callActive) {
+        alert('Start a call first');
+        return;
+    }
+    
+    console.log('📝 Text input:', text);
+    
+    // Clear the input
+    input.value = '';
+    
+    // Handle the speech (same as voice)
+    handleUserSpeech(text);
+}
+
+
         function updateMicBtn() {
     const btn = document.getElementById('micBtn');
     if (!btn) return;
