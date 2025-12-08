@@ -1145,138 +1145,116 @@
             localStorage.setItem('valtoriStats', JSON.stringify(stats));
         }
 
-        function setupSpeech() {
+       function setupSpeech() {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         recognition = new SpeechRecognition();
-        recognition.continuous = false;  // Single utterance mode (reliable!)
+        recognition.continuous = false;
         recognition.interimResults = false;
         recognition.lang = 'en-US';
-        recognition.maxAlternatives = 1;
 
         recognition.onresult = (e) => {
             const text = e.results[0][0].transcript;
-            console.log('✅ Captured:', text);
+            console.log('✅ Speech captured:', text);
+            
+            // Handle the speech
             handleUserSpeech(text);
             
-            // Auto-restart if still in toggle mode
-            setTimeout(() => {
-                if (isRecording && callActive) {
-                    console.log('🔄 Auto-restarting mic...');
-                    try {
-                        recognition.start();
-                    } catch (e) {
-                        console.log('Restart skipped (already running)');
-                    }
-                }
-            }, 100);
+            // Important: DON'T auto-restart here
+            // Let the user click again when ready
+            isRecording = false;
+            updateMicBtn();
         };
 
         recognition.onerror = (e) => {
-            console.log('Speech error:', e.error);
+            console.error('Speech error:', e.error);
             
-            // Silently handle common non-critical errors
-            if (e.error === 'no-speech' || e.error === 'aborted') {
-                // Just restart
-                if (isRecording && callActive) {
-                    setTimeout(() => {
-                        try {
-                            recognition.start();
-                        } catch (err) {
-                            // Ignore
-                        }
-                    }, 200);
-                }
-                return;
-            }
+            // Always stop on ANY error
+            isRecording = false;
+            updateMicBtn();
             
-            // Network error - restart with delay
-            if (e.error === 'network') {
-                console.log('Network timeout - restarting...');
-                if (isRecording && callActive) {
-                    setTimeout(() => {
-                        try {
-                            recognition.start();
-                        } catch (err) {
-                            // Ignore
-                        }
-                    }, 500);
-                }
-                return;
+            // Only alert on critical errors
+            if (e.error === 'not-allowed') {
+                alert('❌ Microphone access denied.\n\nPlease:\n1. Click the 🔒 icon in your address bar\n2. Allow microphone access\n3. Refresh the page');
+            } else if (e.error === 'audio-capture') {
+                alert('❌ No microphone found. Please connect a microphone.');
             }
-            
-            // Critical errors - stop completely
-            if (e.error === 'not-allowed' || e.error === 'audio-capture') {
-                alert('Microphone access denied. Please enable it in browser settings.');
-                isRecording = false;
-                updateMicBtn();
-            }
+            // Silently ignore network/no-speech errors
         };
 
         recognition.onend = () => {
-            console.log('Recognition cycle ended');
-            // Only restart if user hasn't clicked stop
-            if (isRecording && callActive) {
-                setTimeout(() => {
-                    if (isRecording && callActive) {
-                        try {
-                            recognition.start();
-                        } catch (e) {
-                            console.log('Could not restart');
-                        }
-                    }
-                }, 300);
-            } else {
+            console.log('Recognition ended');
+            // Always ensure we're in the correct state
+            if (isRecording) {
                 isRecording = false;
                 updateMicBtn();
             }
         };
 
         recognition.onstart = () => {
-            console.log('🎤 Listening...');
+            console.log('🎤 Microphone active - speak now');
         };
     }
 }
 
         async function toggleMic() {
     if (!recognition) {
-        alert('Speech recognition not supported. Use Chrome or Edge.');
+        alert('Speech recognition not supported. Please use Chrome or Edge.');
         return;
     }
 
+    // If already recording, stop it
     if (isRecording) {
-        // Stop
-        console.log('🛑 Stopping microphone');
+        console.log('Stopping...');
         isRecording = false;
         try {
             recognition.stop();
         } catch (e) {
-            // Already stopped
+            console.log('Already stopped');
         }
         updateMicBtn();
-    } else {
-        // Start
-        try {
-            console.log('🎤 Starting microphone');
-            isRecording = true;
-            updateMicBtn();
+        return;
+    }
+
+    // Start recording
+    try {
+        console.log('🎤 Starting microphone...');
+        
+        // Request permission first
+        await navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+                console.log('✅ Microphone permission granted');
+                // Stop the test stream
+                stream.getTracks().forEach(track => track.stop());
+            });
+        
+        // Now start recognition
+        isRecording = true;
+        updateMicBtn();
+        
+        // Small delay to ensure state is set
+        setTimeout(() => {
             recognition.start();
-        } catch (err) {
-            console.error('Start error:', err);
-            isRecording = false;
-            updateMicBtn();
-            alert('Could not start microphone. Please refresh and try again.');
-        }
+        }, 100);
+        
+    } catch (err) {
+        console.error('Microphone error:', err);
+        isRecording = false;
+        updateMicBtn();
+        
+        alert('❌ Cannot access microphone.\n\nPlease:\n1. Click the 🔒 icon in your browser\n2. Allow microphone access\n3. Try again');
     }
 }
         function updateMicBtn() {
     const btn = document.getElementById('micBtn');
+    if (!btn) return;
+    
     if (isRecording) {
         btn.classList.add('recording');
-        btn.innerHTML = '⏹️<div class="mic-label">Click to Stop</div>';
+        btn.innerHTML = '🎤<div class="mic-label">Listening...</div>';
     } else {
         btn.classList.remove('recording');
-        btn.innerHTML = '🎤<div class="mic-label">Click to Start</div>';
+        btn.innerHTML = '🎤<div class="mic-label">Click to Speak</div>';
     }
 }
 
