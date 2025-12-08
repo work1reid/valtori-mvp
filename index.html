@@ -1145,118 +1145,95 @@
             localStorage.setItem('valtoriStats', JSON.stringify(stats));
         }
 
-function setupSpeech() {
+        function setupSpeech() {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         recognition = new SpeechRecognition();
-        recognition.continuous = true;
+        recognition.continuous = false;  // Single utterance mode (reliable!)
         recognition.interimResults = false;
         recognition.lang = 'en-US';
         recognition.maxAlternatives = 1;
 
-        let restartAttempts = 0;
-        let lastRestartTime = 0;
-        const MAX_RESTART_ATTEMPTS = 3;
-        const RESTART_COOLDOWN = 3000; // 3 seconds
-
         recognition.onresult = (e) => {
-            const text = e.results[e.results.length - 1][0].transcript;
-            console.log('✅ Speech captured:', text);
-            restartAttempts = 0; // Reset on successful capture
+            const text = e.results[0][0].transcript;
+            console.log('✅ Captured:', text);
             handleUserSpeech(text);
+            
+            // Auto-restart if still in toggle mode
+            setTimeout(() => {
+                if (isRecording && callActive) {
+                    console.log('🔄 Auto-restarting mic...');
+                    try {
+                        recognition.start();
+                    } catch (e) {
+                        console.log('Restart skipped (already running)');
+                    }
+                }
+            }, 100);
         };
 
         recognition.onerror = (e) => {
-            console.log('Speech recognition error:', e.error);
+            console.log('Speech error:', e.error);
             
-            // Handle network errors without stopping
+            // Silently handle common non-critical errors
+            if (e.error === 'no-speech' || e.error === 'aborted') {
+                // Just restart
+                if (isRecording && callActive) {
+                    setTimeout(() => {
+                        try {
+                            recognition.start();
+                        } catch (err) {
+                            // Ignore
+                        }
+                    }, 200);
+                }
+                return;
+            }
+            
+            // Network error - restart with delay
             if (e.error === 'network') {
-                console.log('⚠️ Network error (usually means silence timeout)');
-                // Don't restart immediately - let onend handle it
+                console.log('Network timeout - restarting...');
+                if (isRecording && callActive) {
+                    setTimeout(() => {
+                        try {
+                            recognition.start();
+                        } catch (err) {
+                            // Ignore
+                        }
+                    }, 500);
+                }
                 return;
             }
             
-            // Handle no-speech gracefully
-            if (e.error === 'no-speech') {
-                console.log('No speech detected - keep listening');
-                return;
-            }
-            
-            // User stopped it
-            if (e.error === 'aborted') {
-                console.log('User stopped recording');
-                isRecording = false;
-                updateMicBtn();
-                restartAttempts = 0;
-                return;
-            }
-            
-            // Critical errors - stop everything
+            // Critical errors - stop completely
             if (e.error === 'not-allowed' || e.error === 'audio-capture') {
-                alert('❌ Microphone access denied. Please enable microphone permissions in your browser.');
+                alert('Microphone access denied. Please enable it in browser settings.');
                 isRecording = false;
                 updateMicBtn();
-                restartAttempts = 0;
             }
         };
 
         recognition.onend = () => {
-            console.log('Recognition ended');
-            
-            // Only restart if:
-            // 1. Still in recording mode
-            // 2. Call is active
-            // 3. Haven't exceeded restart attempts
-            // 4. Cooldown period has passed
-            
-            if (!isRecording || !callActive) {
-                console.log('Stopped by user or call ended');
-                isRecording = false;
-                updateMicBtn();
-                restartAttempts = 0;
-                return;
-            }
-
-            const now = Date.now();
-            const timeSinceLastRestart = now - lastRestartTime;
-
-            if (restartAttempts >= MAX_RESTART_ATTEMPTS) {
-                console.log('⚠️ Too many restart attempts. Please click mic again to restart.');
-                isRecording = false;
-                updateMicBtn();
-                restartAttempts = 0;
-                alert('Microphone stopped after multiple errors. Click the mic button to restart.');
-                return;
-            }
-
-            if (timeSinceLastRestart < RESTART_COOLDOWN) {
-                console.log('⚠️ Cooling down before restart...');
-                return;
-            }
-
-            // Safe to restart
-            restartAttempts++;
-            lastRestartTime = now;
-            console.log(`🔄 Auto-restart attempt ${restartAttempts}/${MAX_RESTART_ATTEMPTS}`);
-            
-            setTimeout(() => {
-                if (isRecording && callActive) {
-                    try {
-                        recognition.start();
-                    } catch (e) {
-                        console.log('❌ Could not restart:', e.message);
-                        if (e.message.includes('already started')) {
-                            console.log('Recognition already running');
-                            restartAttempts = 0;
+            console.log('Recognition cycle ended');
+            // Only restart if user hasn't clicked stop
+            if (isRecording && callActive) {
+                setTimeout(() => {
+                    if (isRecording && callActive) {
+                        try {
+                            recognition.start();
+                        } catch (e) {
+                            console.log('Could not restart');
                         }
                     }
-                }
-            }, 500); // Half second delay
+                }, 300);
+            } else {
+                isRecording = false;
+                updateMicBtn();
+            }
         };
 
         recognition.onstart = () => {
-            console.log('🎤 Speech recognition started');
-            restartAttempts = 0; // Reset on successful start
+            console.log('🎤 Listening...');
         };
     }
 }
@@ -1268,38 +1245,30 @@ function setupSpeech() {
     }
 
     if (isRecording) {
-        // Stop recording
-        console.log('Stopping microphone...');
+        // Stop
+        console.log('🛑 Stopping microphone');
         isRecording = false;
         try {
             recognition.stop();
         } catch (e) {
-            console.log('Stop error (ok to ignore):', e.message);
+            // Already stopped
         }
         updateMicBtn();
     } else {
-        // Start recording
+        // Start
         try {
-            // Check microphone permissions first
-            await navigator.mediaDevices.getUserMedia({ audio: true })
-                .then(stream => {
-                    stream.getTracks().forEach(track => track.stop());
-                    console.log('Microphone permission granted');
-                });
-            
+            console.log('🎤 Starting microphone');
             isRecording = true;
             updateMicBtn();
-            console.log('Starting speech recognition...');
             recognition.start();
         } catch (err) {
-            console.error('Microphone error:', err);
-            alert('Please allow microphone access.\n\nClick the 🔒 or 🎤 icon in your browser address bar.');
+            console.error('Start error:', err);
             isRecording = false;
             updateMicBtn();
+            alert('Could not start microphone. Please refresh and try again.');
         }
     }
 }
-
         function updateMicBtn() {
     const btn = document.getElementById('micBtn');
     if (isRecording) {
