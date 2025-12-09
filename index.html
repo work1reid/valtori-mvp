@@ -1170,7 +1170,7 @@ Only say YES if:
     }
     
     try {
-        const response = await fetch('/api/anthropic', {
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -1235,39 +1235,24 @@ async function endCallScore() {
     
     stats.totalCalls++;
     stats.totalTime += duration;
-async function endCallScore() {
-    console.log('📊 Calculating score...');
-    addMessage('system', 'Analyzing performance...');
-    
-    // Show results INSTANTLY with quick scores
-    const quickScore = getDefaultScore();
-    displayResults(quickScore);
-    switchScreen('results');
-    
-    // Save quick scores
-    session.score = quickScore;
-    session.duration = duration;
-    session.conversation = [...conversation];
-    stats.totalCalls++;
-    stats.totalTime += duration;
-    stats.scores.push(quickScore.overall);
+    stats.scores.push(score.overall);
     stats.history.unshift(session);
-    if (stats.history.length > 100) stats.history = stats.history.slice(0, 100);
-    saveStats();
-    if (isFirstCall) { isFirstCall = false; savePreferences(); }
     
-    // Then update with AI analysis in background
-    try {
-        const aiScore = await calculateScore();
-        displayResults(aiScore);
-        session.score = aiScore;
-        stats.scores[stats.scores.length - 1] = aiScore.overall;
-        stats.history[0].score = aiScore;
-        saveStats();
-    } catch (e) {
-        console.error('AI scoring failed:', e);
-    }
+    saveStats();
+    
+    if (isFirstCall) isFirstCall = false;
+    
+    displayResults(score);
+    switchScreen('results');
 }
+
+async function calculateScore() {
+    const transcript = session.conversation
+        .map(c => `${c.speaker.toUpperCase()}: ${c.text}`)
+        .join('\n');
+    
+    const analysisPrompt = `Analyze this sales call. Score 0-100 on each metric.
+
 TRANSCRIPT:
 ${transcript}
 
@@ -1327,7 +1312,7 @@ JSON only:
     }
     
     try {
-        const response = await fetch('/api/anthropic', {
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
