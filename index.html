@@ -4,243 +4,1300 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Valtori AI - Sales Practice Simulator</title>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        *{margin:0;padding:0;box-sizing:border-box}
-        :root{--bg:#0a0e1a;--bg2:#060811;--card:#141824;--cyan:#00f5ff;--green:#00ff88;--yellow:#ffd500;--orange:#ff8800;--red:#ff3366;--text:#e8ecf8;--dim:#8b93b0;--dimmer:#5a6279;--border:rgba(0,245,255,0.1)}
-        body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
-        .container{max-width:1400px;margin:0 auto;padding:2rem}
-        .toast-box{position:fixed;top:1.5rem;left:50%;transform:translateX(-50%);z-index:5000;display:flex;flex-direction:column;gap:0.5rem}
-        .toast{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1rem 1.5rem;display:flex;align-items:center;gap:0.75rem;box-shadow:0 4px 24px rgba(0,0,0,0.3);animation:toastIn 0.3s}
-        .toast.success{border-color:var(--green)}.toast.error{border-color:var(--red)}.toast.warning{border-color:var(--yellow)}
-        @keyframes toastIn{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
-        .badges{position:fixed;top:1.5rem;right:1.5rem;display:flex;gap:0.75rem;z-index:1000}
-        .badge{background:rgba(0,245,255,0.1);border:1px solid var(--cyan);padding:0.5rem 1rem;border-radius:20px;font-size:0.75rem;font-weight:700;color:var(--cyan);cursor:pointer;transition:all 0.3s;display:flex;align-items:center;gap:0.5rem}
-        .badge:hover{background:rgba(0,245,255,0.2);transform:scale(1.05)}
-        .dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
-        .dot.off{background:var(--red);animation:none}
-        @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
-        .screen{display:none;animation:fadeIn 0.4s}.screen.active{display:block}
-        @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-        .hero{text-align:center;padding:5rem 0}
-        h1{font-size:clamp(2.5rem,8vw,4.5rem);font-weight:700;line-height:1.1;margin-bottom:1.5rem}
-        .grad{background:linear-gradient(135deg,var(--cyan),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-        .sub{font-size:1.25rem;color:var(--dim);margin-bottom:3rem;max-width:600px;margin-left:auto;margin-right:auto}
-        .btn{padding:1rem 2.5rem;border:none;border-radius:8px;font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;transition:all 0.3s;text-transform:uppercase}
-        .btn:disabled{opacity:0.5;cursor:not-allowed}
-        .btn-p{background:var(--cyan);color:var(--bg);box-shadow:0 0 30px rgba(0,245,255,0.3)}
-        .btn-p:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 5px 40px rgba(0,245,255,0.5)}
-        .btn-s{background:var(--card);color:var(--text);border:1px solid var(--cyan)}
-        .btn-s:hover:not(:disabled){background:rgba(0,245,255,0.1)}
-        .btn-d{background:var(--red);color:#fff}
-        .features{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:2rem;margin-top:4rem}
-        .feature{background:var(--card);padding:2rem;border-radius:16px;border:1px solid var(--border);transition:all 0.3s}
-        .feature:hover{border-color:var(--cyan);transform:translateY(-5px)}
-        .feature-icon{font-size:2.5rem;margin-bottom:1rem}
-        .feature-title{font-size:1.2rem;font-weight:600;margin-bottom:0.5rem}
-        .feature-desc{color:var(--dim);font-size:0.95rem}
-        .sel-screen{max-width:800px;margin:3rem auto;text-align:center}
-        .sel-screen h2{font-size:2.5rem;margin-bottom:1rem}
-        .sel-screen>p{color:var(--dim);margin-bottom:2rem}
-        select{width:100%;max-width:450px;padding:1rem 1.5rem;font-size:1.1rem;background:var(--card);border:2px solid var(--cyan);border-radius:8px;color:var(--text);cursor:pointer;margin-bottom:2rem;font-family:'Space Grotesk',sans-serif}
-        select option{background:var(--card);color:var(--text)}
-        .prod-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2rem;margin:2rem auto;max-width:500px;opacity:0;transform:translateY(20px);transition:all 0.5s}
-        .prod-card.show{opacity:1;transform:translateY(0)}
-        .prod-label{font-size:0.8rem;color:var(--dimmer);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.5rem}
-        .prod-value{font-size:1.75rem;font-weight:600;color:var(--cyan);margin-bottom:1.5rem;font-family:'JetBrains Mono',monospace}
-        .comm-box{background:rgba(0,255,136,0.1);padding:1.25rem 1.5rem;border-radius:8px;border:1px solid var(--green);display:flex;justify-content:space-between;align-items:center}
-        .comm-value{font-size:1.5rem;font-weight:700;color:var(--green);font-family:'JetBrains Mono',monospace}
-        .diff-sel{display:flex;justify-content:center;gap:1rem;margin:2rem 0}
-        .diff-btn{padding:0.75rem 1.5rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--dim);cursor:pointer;transition:all 0.3s;font-family:'Space Grotesk',sans-serif}
-        .diff-btn:hover{border-color:var(--cyan)}
-        .diff-btn.active{background:rgba(0,245,255,0.1);border-color:var(--cyan);color:var(--cyan)}
-        .diff-btn.easy.active{background:rgba(0,255,136,0.1);border-color:var(--green);color:var(--green)}
-        .diff-btn.hard.active{background:rgba(255,51,102,0.1);border-color:var(--red);color:var(--red)}
-        .call-screen{max-width:900px;margin:0 auto}
-        .call-header{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;display:flex;justify-content:space-between;align-items:center}
-        .call-status{font-size:1rem;color:var(--green);font-weight:600;display:flex;align-items:center;gap:0.5rem}
-        .call-status .pulse{width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 1.5s infinite}
-        .timer{font-size:2.25rem;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--cyan)}
-        .avatar-box{text-align:center;margin:1.5rem 0}
-        .avatar{width:100px;height:100px;margin:0 auto 1rem;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--green));display:flex;align-items:center;justify-content:center;font-size:3rem;animation:avPulse 2s ease-in-out infinite}
-        @keyframes avPulse{0%,100%{box-shadow:0 0 0 0 rgba(0,245,255,0.4)}50%{box-shadow:0 0 0 20px rgba(0,245,255,0)}}
-        .avatar.speaking{animation:avSpeak 0.4s ease-in-out infinite}
-        .avatar.thinking{animation:avThink 1.5s ease-in-out infinite}
-        @keyframes avSpeak{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
-        @keyframes avThink{0%,100%{opacity:1}50%{opacity:0.5}}
-        .avatar-status{color:var(--dim);font-size:0.9rem}
-        .warning-box{background:rgba(255,213,0,0.15);border:1px solid var(--yellow);color:var(--yellow);padding:0.875rem 1rem;border-radius:8px;text-align:center;margin:1rem 0;animation:fadeIn 0.3s}
-        .prompt-box{background:linear-gradient(135deg,rgba(0,245,255,0.1),rgba(0,255,136,0.1));border:1px solid var(--cyan);border-radius:8px;padding:1.25rem;animation:fadeIn 0.3s;margin:1rem 0}
-        .prompt-label{font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--cyan);margin-bottom:0.5rem;font-weight:600}
-        .transcript{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem;max-height:350px;overflow-y:auto;margin:1rem 0;min-height:180px}
-        .message{margin-bottom:1rem;padding:1rem;border-radius:8px;animation:slideIn 0.3s}
-        @keyframes slideIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
-        .message.user{background:rgba(0,245,255,0.08);border-left:3px solid var(--cyan)}
-        .message.ai{background:rgba(0,255,136,0.08);border-left:3px solid var(--green)}
-        .message.system{background:rgba(255,213,0,0.08);border-left:3px solid var(--yellow);font-style:italic}
-        .speaker{font-weight:600;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.4rem}
-        .message.user .speaker{color:var(--cyan)}
-        .message.ai .speaker{color:var(--green)}
-        .message.system .speaker{color:var(--yellow)}
-        .controls{display:flex;flex-direction:column;align-items:center;gap:1.25rem;margin:1.5rem 0;padding-bottom:5rem}
-        .mic-btn{width:90px;height:90px;border-radius:50%;border:none;background:var(--red);color:#fff;font-size:2.25rem;cursor:pointer;transition:all 0.3s;box-shadow:0 5px 30px rgba(255,51,102,0.4);position:relative}
-        .mic-btn:hover:not(:disabled){transform:scale(1.05)}
-        .mic-btn:disabled{opacity:0.5;cursor:not-allowed}
-        .mic-btn.recording{background:var(--cyan);animation:recPulse 1.5s ease-in-out infinite}
-        @keyframes recPulse{0%,100%{box-shadow:0 0 0 0 rgba(0,245,255,0.6)}50%{box-shadow:0 0 0 20px rgba(0,245,255,0)}}
-        .mic-label{position:absolute;bottom:-28px;left:50%;transform:translateX(-50%);font-size:0.8rem;color:var(--dim);white-space:nowrap}
-        .input-row{display:flex;gap:0.5rem;width:100%;max-width:600px}
-        .text-input{flex:1;padding:0.875rem 1rem;font-size:1rem;border-radius:8px;border:2px solid var(--border);background:var(--card);color:var(--text);font-family:'Space Grotesk',sans-serif;transition:all 0.3s}
-        .text-input:focus{outline:none;border-color:var(--cyan)}
-        .text-input:disabled{opacity:0.5}
-        .or-div{color:var(--dimmer);font-size:0.85rem}
-        .results{max-width:1200px;margin:0 auto}
-        .results-header{text-align:center;margin-bottom:2.5rem}
-        .results-header h2{font-size:2.5rem;margin-bottom:0.5rem}
-        .session-sum{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2rem;margin-bottom:2rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1.5rem}
-        .sum-item{text-align:center}
-        .sum-label{font-size:0.8rem;color:var(--dimmer);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.5rem}
-        .sum-value{font-size:2.25rem;font-weight:700;font-family:'JetBrains Mono',monospace}
-        .sum-value.cyan{color:var(--cyan)}.sum-value.green{color:var(--green)}.sum-value.yellow{color:var(--yellow)}.sum-value.red{color:var(--red)}
-        .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.25rem;margin-bottom:2rem}
-        .kpi-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem}
-        .kpi-title{font-size:0.85rem;color:var(--dim);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.75rem}
-        .kpi-value{font-size:2.5rem;font-weight:700;font-family:'JetBrains Mono',monospace;margin-bottom:0.25rem}
-        .kpi-sub{font-size:0.8rem;color:var(--dimmer)}
-        .kpi-bar{height:6px;background:var(--bg2);border-radius:3px;margin-top:1rem;overflow:hidden}
-        .kpi-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--green));transition:width 1.5s;width:0}
-        .break-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:1.5rem;margin-bottom:2rem}
-        .break-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem}
-        .break-card h3{margin-bottom:1.25rem;font-size:1.2rem}
-        .break-item{padding:0.875rem 1rem;background:var(--bg2);border-radius:8px;margin-bottom:0.75rem;border-left:3px solid transparent}
-        .break-item.pos{border-left-color:var(--green)}
-        .break-item.neg{border-left-color:var(--orange)}
-        .insights{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:2rem}
-        .insights h3{margin-bottom:1.25rem;font-size:1.2rem}
-        .insight-item{display:flex;gap:1rem;margin-bottom:1rem;padding:1rem;background:var(--bg2);border-radius:8px;border-left:3px solid transparent}
-        .insight-item.strength{border-left-color:var(--green);background:rgba(0,255,136,0.05)}
-        .insight-item.weakness{border-left-color:var(--orange);background:rgba(255,136,0,0.05)}
-        .insight-item.opportunity{border-left-color:var(--cyan);background:rgba(0,245,255,0.05)}
-        .insight-icon{font-size:1.5rem}
-        .insight-content{flex:1}
-        .insight-title{font-weight:600;margin-bottom:0.25rem}
-        .insight-desc{color:var(--dim);font-size:0.9rem}
-        .action-btns{display:flex;gap:1rem;justify-content:center;margin-top:2.5rem;flex-wrap:wrap}
-        .dashboard{max-width:1200px;margin:0 auto}
-        .dash-header{text-align:center;margin-bottom:2.5rem}
-        .dash-header h2{font-size:2.5rem;margin-bottom:0.5rem}
-        .perf-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.25rem;margin-bottom:2.5rem}
-        .perf-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;transition:all 0.3s}
-        .perf-card:hover{border-color:var(--cyan);transform:translateY(-3px)}
-        .perf-label{font-size:0.8rem;color:var(--dimmer);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.75rem}
-        .perf-value{font-size:2.5rem;font-weight:700;font-family:'JetBrains Mono',monospace;background:linear-gradient(135deg,var(--cyan),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-        .perf-sub{font-size:0.9rem;color:var(--dim);margin-top:0.5rem}
-        .history{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:2rem}
-        .history h3{margin-bottom:1.25rem;font-size:1.2rem}
-        .hist-item{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:1rem;align-items:center;padding:1rem;background:var(--bg2);border-radius:8px;border:1px solid var(--border);margin-bottom:0.75rem;transition:all 0.3s}
-        .hist-item:hover{border-color:var(--cyan)}
-        .hist-date{font-size:0.8rem;color:var(--dimmer);margin-bottom:0.25rem}
-        .hist-details{color:var(--dim);font-size:0.9rem}
-        .hist-score{font-size:1.5rem;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--cyan);text-align:center}
-        .hist-outcome{font-size:1.25rem;text-align:center}
-        .hist-earnings{text-align:right;font-size:1.1rem;font-weight:600;font-family:'JetBrains Mono',monospace}
-        .hist-earnings.pos{color:var(--green)}.hist-earnings.neg{color:var(--dimmer)}
-        .empty{text-align:center;padding:3rem 2rem;color:var(--dimmer)}
-        .empty-icon{font-size:3.5rem;margin-bottom:1rem;opacity:0.5}
-        .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(6,8,17,0.95);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:3000;padding:1rem}
-        .modal-overlay.active{display:flex}
-        .modal{background:var(--card);border:1px solid var(--cyan);border-radius:16px;padding:2.5rem;max-width:550px;width:100%;box-shadow:0 20px 60px rgba(0,245,255,0.2);max-height:90vh;overflow-y:auto}
-        .modal h2{font-size:1.75rem;margin-bottom:1rem;background:linear-gradient(135deg,var(--cyan),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-        .modal p{color:var(--dim);margin-bottom:1rem;line-height:1.6}
-        .modal ul{color:var(--dim);margin-left:1.25rem;margin-bottom:1rem}
-        .modal ul li{margin-bottom:0.5rem}
-        .modal-actions{display:flex;gap:1rem;margin-top:2rem;flex-wrap:wrap}
-        .modal-input{width:100%;padding:0.875rem 1rem;font-size:1rem;border-radius:8px;border:2px solid var(--border);background:var(--bg2);color:var(--text);font-family:'JetBrains Mono',monospace;margin-bottom:0.75rem}
-        .modal-input:focus{outline:none;border-color:var(--cyan)}
-        .modal-note{font-size:0.85rem;color:var(--dimmer)}
-        .modal-note a{color:var(--cyan)}
-        .modal-status{padding:0.75rem 1rem;border-radius:8px;margin-bottom:1rem;font-size:0.9rem}
-        .modal-status.success{background:rgba(0,255,136,0.1);border:1px solid var(--green);color:var(--green)}
-        .modal-status.error{background:rgba(255,51,102,0.1);border:1px solid var(--red);color:var(--red)}
-        .sale-banner{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(135deg,var(--green),var(--cyan));padding:2rem 4rem;border-radius:16px;font-size:2.25rem;font-weight:700;color:var(--bg);z-index:4000;box-shadow:0 20px 60px rgba(0,255,136,0.5);display:none;text-align:center}
-        .sale-banner.active{display:block;animation:saleIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275)}
-        @keyframes saleIn{0%{transform:translate(-50%,-50%) scale(0)}50%{transform:translate(-50%,-50%) scale(1.1)}100%{transform:translate(-50%,-50%) scale(1)}}
-        .bottom-bar{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);padding:0.875rem 1rem;display:none;justify-content:center;align-items:center;gap:1.5rem;z-index:100}
-        .toggle-group{display:flex;align-items:center;gap:0.75rem;font-size:0.9rem;color:var(--dim)}
-        .toggle{width:52px;height:26px;background:var(--bg2);border-radius:13px;cursor:pointer;border:1px solid var(--border);position:relative;transition:all 0.3s}
-        .toggle.active{background:var(--cyan);border-color:var(--cyan)}
-        .toggle-slider{position:absolute;top:2px;left:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:all 0.3s}
-        .toggle.active .toggle-slider{transform:translateX(26px)}
-        @media(max-width:768px){.container{padding:1rem}h1{font-size:2.5rem}.kpi-value{font-size:2rem}.timer{font-size:1.75rem}.mic-btn{width:80px;height:80px;font-size:2rem}.break-grid{grid-template-columns:1fr}.hist-item{grid-template-columns:1fr;text-align:center;gap:0.5rem}.hist-earnings{text-align:center}.modal{padding:1.5rem}.badges{top:1rem;right:1rem}.badge{padding:0.4rem 0.75rem;font-size:0.7rem}}
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-dark: #0a0e1a; --bg-darker: #060811; --bg-card: #141824;
+            --cyan: #00f5ff; --green: #00ff88; --yellow: #ffd500;
+            --orange: #ff8800; --red: #ff3366;
+            --text: #e8ecf8; --text-dim: #8b93b0; --text-dimmer: #5a6279;
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text); line-height: 1.6; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+        .top-bar { position: fixed; top: 0; left: 0; right: 0; background: rgba(10, 14, 26, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0, 245, 255, 0.1); padding: 0.75rem 1.5rem; display: flex; justify-content: space-between; align-items: center; z-index: 1000; }
+        .top-bar-left { display: flex; align-items: center; gap: 1rem; }
+        .logo { font-size: 1.2rem; font-weight: 800; background: linear-gradient(135deg, var(--cyan), var(--green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .top-bar-right { display: flex; align-items: center; gap: 0.75rem; }
+        .user-badge { background: rgba(0, 255, 136, 0.1); border: 1px solid var(--green); padding: 0.4rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; color: var(--green); display: flex; align-items: center; gap: 0.5rem; }
+        .user-badge .dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; }
+        .top-btn { background: rgba(0, 245, 255, 0.1); border: 1px solid var(--cyan); padding: 0.4rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700; color: var(--cyan); cursor: pointer; transition: all 0.3s; }
+        .top-btn:hover { background: rgba(0, 245, 255, 0.2); }
+        .screen { display: none; animation: fadeIn 0.4s ease; padding-top: 4rem; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .hero { text-align: center; padding: 6rem 0; }
+        h1 { font-size: 4rem; font-weight: 900; line-height: 1.1; margin-bottom: 1.5rem; }
+        .gradient { background: linear-gradient(135deg, var(--cyan), var(--green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .subtitle { font-size: 1.3rem; color: var(--text-dim); margin-bottom: 3rem; }
+        .btn { padding: 1rem 2.5rem; border: none; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.3s; text-transform: uppercase; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-primary { background: var(--cyan); color: var(--bg-dark); box-shadow: 0 0 30px rgba(0, 245, 255, 0.3); }
+        .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 40px rgba(0, 245, 255, 0.5); }
+        .btn-secondary { background: var(--bg-card); color: var(--text); border: 1px solid var(--cyan); }
+        .btn-secondary:hover:not(:disabled) { background: rgba(0, 245, 255, 0.1); }
+        .btn-danger { background: var(--red); color: white; }
+        .btn-small { padding: 0.5rem 1rem; font-size: 0.85rem; }
+        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-top: 4rem; }
+        .feature { background: var(--bg-card); padding: 2rem; border-radius: 12px; border: 1px solid rgba(0, 245, 255, 0.1); transition: all 0.3s; }
+        .feature:hover { border-color: var(--cyan); transform: translateY(-5px); }
+        .feature-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+        .feature-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .feature-desc { color: var(--text-dim); font-size: 0.95rem; }
+        .selection-screen { max-width: 700px; margin: 4rem auto; text-align: center; }
+        .selection-screen h2 { font-size: 2.5rem; margin-bottom: 1rem; }
+        .selection-screen p { color: var(--text-dim); margin-bottom: 3rem; font-size: 1.1rem; }
+        select { width: 100%; max-width: 400px; padding: 1rem 1.5rem; font-size: 1.1rem; background: var(--bg-card); border: 2px solid var(--cyan); border-radius: 8px; color: var(--text); cursor: pointer; margin-bottom: 2rem; }
+        select option { background: var(--bg-card); color: var(--text); }
+        .product-card { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 2rem; margin: 2rem auto; max-width: 500px; opacity: 0; transform: translateY(20px); transition: all 0.5s; }
+        .product-card.show { opacity: 1; transform: translateY(0); }
+        .product-label { font-size: 0.85rem; color: var(--text-dimmer); text-transform: uppercase; margin-bottom: 0.5rem; }
+        .product-value { font-size: 1.8rem; font-weight: 700; color: var(--cyan); margin-bottom: 1.5rem; font-family: 'JetBrains Mono', monospace; }
+        .commission-box { background: rgba(0, 255, 136, 0.1); padding: 1rem 1.5rem; border-radius: 8px; border: 1px solid var(--green); display: flex; justify-content: space-between; align-items: center; }
+        .commission-value { font-size: 1.5rem; font-weight: 700; color: var(--green); font-family: 'JetBrains Mono', monospace; }
+        .call-screen { max-width: 900px; margin: 0 auto; }
+        .call-header { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .timer { font-size: 2.5rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--cyan); }
+        .status { font-size: 1.1rem; color: var(--green); font-weight: 600; }
+        .avatar { width: 120px; height: 120px; margin: 2rem auto; border-radius: 50%; background: linear-gradient(135deg, var(--cyan), var(--green)); display: flex; align-items: center; justify-content: center; font-size: 3.5rem; animation: pulse 2s ease-in-out infinite; }
+        @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(0, 245, 255, 0.4); } 50% { box-shadow: 0 0 0 30px rgba(0, 245, 255, 0); } }
+        .avatar.speaking { animation: speaking 0.4s ease-in-out infinite; }
+        .avatar.thinking { animation: thinking 1.5s ease-in-out infinite; }
+        @keyframes speaking { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+        @keyframes thinking { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .transcript { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 1.5rem; max-height: 400px; overflow-y: auto; margin: 2rem 0; min-height: 150px; }
+        .message { margin-bottom: 1rem; padding: 1rem; border-radius: 8px; animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+        .message.user { background: rgba(0, 245, 255, 0.08); border-left: 3px solid var(--cyan); }
+        .message.ai { background: rgba(0, 255, 136, 0.08); border-left: 3px solid var(--green); }
+        .message.system { background: rgba(255, 213, 0, 0.08); border-left: 3px solid var(--yellow); font-style: italic; }
+        .speaker { font-weight: 700; font-size: 0.85rem; margin-bottom: 0.4rem; text-transform: uppercase; }
+        .message.user .speaker { color: var(--cyan); }
+        .message.ai .speaker { color: var(--green); }
+        .message.system .speaker { color: var(--yellow); }
+        .prompt-box { background: linear-gradient(135deg, rgba(0, 245, 255, 0.15), rgba(0, 255, 136, 0.15)); border: 2px solid var(--cyan); border-radius: 8px; padding: 1.5rem; margin: 1rem 0; animation: fadeIn 0.3s ease; }
+        .prompt-label { font-size: 0.8rem; text-transform: uppercase; color: var(--cyan); margin-bottom: 0.5rem; font-weight: 700; }
+        .controls { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; margin: 2rem 0; padding-bottom: 2rem; }
+        .mic-btn { width: 100px; height: 100px; border-radius: 50%; border: none; background: var(--red); color: white; font-size: 2.5rem; cursor: pointer; transition: all 0.3s; box-shadow: 0 5px 30px rgba(255, 51, 102, 0.4); position: relative; }
+        .mic-btn:hover:not(:disabled) { transform: scale(1.05); }
+        .mic-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .mic-btn.recording { background: var(--cyan); animation: recordPulse 1.5s ease-in-out infinite; }
+        @keyframes recordPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(0, 245, 255, 0.6); } 50% { box-shadow: 0 0 0 25px rgba(0, 245, 255, 0); } }
+        .mic-label { position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%); font-size: 0.85rem; color: var(--text-dim); white-space: nowrap; font-family: 'Inter', sans-serif; }
+        .input-row { display: flex; gap: 0.5rem; width: 100%; max-width: 600px; }
+        .text-input { flex: 1; padding: 1rem; font-size: 1rem; border-radius: 8px; border: 2px solid var(--cyan); background: var(--bg-card); color: var(--text); font-family: 'Inter', sans-serif; }
+        .text-input:focus { outline: none; border-color: var(--green); }
+        .text-input:disabled { opacity: 0.5; }
+        .or-divider { color: var(--text-dimmer); font-size: 0.9rem; }
+        .warning { background: rgba(255, 213, 0, 0.15); border: 1px solid var(--yellow); color: var(--yellow); padding: 1rem; border-radius: 8px; text-align: center; margin: 1rem 0; animation: fadeIn 0.3s ease; }
+        .results { max-width: 1400px; margin: 0 auto; }
+        .results-header { text-align: center; margin-bottom: 3rem; }
+        .results-header h2 { font-size: 3rem; margin-bottom: 0.5rem; }
+        .session-summary { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 16px; padding: 2rem; margin-bottom: 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; }
+        .summary-item { text-align: center; }
+        .summary-label { font-size: 0.85rem; color: var(--text-dimmer); text-transform: uppercase; margin-bottom: 0.5rem; }
+        .summary-value { font-size: 2.5rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+        .summary-value.cyan { color: var(--cyan); }
+        .summary-value.green { color: var(--green); }
+        .summary-value.yellow { color: var(--yellow); }
+        .summary-value.red { color: var(--red); }
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .kpi-card { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 2rem; }
+        .kpi-title { font-size: 1rem; color: var(--text-dim); margin-bottom: 1rem; }
+        .kpi-value { font-size: 3rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; margin-bottom: 0.5rem; }
+        .kpi-subtitle { font-size: 0.9rem; color: var(--text-dimmer); }
+        .kpi-bar { height: 8px; background: var(--bg-darker); border-radius: 4px; margin-top: 1rem; overflow: hidden; }
+        .kpi-bar-fill { height: 100%; background: linear-gradient(90deg, var(--cyan), var(--green)); transition: width 1.5s ease; width: 0%; }
+        .breakdown-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem; margin-bottom: 2rem; }
+        .breakdown-card { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 2rem; }
+        .breakdown-card h3 { margin-bottom: 1.5rem; font-size: 1.3rem; }
+        .breakdown-item { padding: 1rem; background: var(--bg-darker); border-radius: 8px; margin-bottom: 1rem; border-left: 3px solid transparent; }
+        .breakdown-item.positive { border-left-color: var(--green); }
+        .breakdown-item.negative { border-left-color: var(--orange); }
+        .breakdown-label { font-size: 0.95rem; }
+        .insights { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 2rem; margin-bottom: 2rem; }
+        .insights h3 { margin-bottom: 1.5rem; font-size: 1.3rem; }
+        .insight-item { display: flex; gap: 1rem; margin-bottom: 1rem; padding: 1rem; background: var(--bg-darker); border-radius: 8px; }
+        .insight-item.strength { border-left: 3px solid var(--green); }
+        .insight-item.weakness { border-left: 3px solid var(--orange); }
+        .insight-item.opportunity { border-left: 3px solid var(--cyan); }
+        .insight-icon { font-size: 1.5rem; }
+        .insight-content { flex: 1; }
+        .insight-title { font-weight: 700; margin-bottom: 0.3rem; }
+        .insight-desc { font-size: 0.9rem; color: var(--text-dim); }
+        .action-buttons { display: flex; gap: 1rem; justify-content: center; margin-top: 2rem; flex-wrap: wrap; }
+        .dashboard { max-width: 1400px; margin: 0 auto; }
+        .dashboard h2 { text-align: center; font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .dashboard-subtitle { text-align: center; color: var(--text-dim); margin-bottom: 3rem; }
+        .performance-overview { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
+        .perf-card { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 2rem; transition: all 0.3s; }
+        .perf-card:hover { border-color: var(--cyan); transform: translateY(-5px); }
+        .perf-label { font-size: 0.85rem; color: var(--text-dimmer); text-transform: uppercase; margin-bottom: 0.8rem; }
+        .perf-value { font-size: 3rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; background: linear-gradient(135deg, var(--cyan), var(--green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .perf-sub { font-size: 1rem; color: var(--text-dim); margin-top: 0.5rem; }
+        .history { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 2rem; }
+        .history h3 { margin-bottom: 1.5rem; font-size: 1.4rem; }
+        .history-item { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 1rem; align-items: center; padding: 1rem; background: var(--bg-darker); border-radius: 8px; border: 1px solid rgba(0, 245, 255, 0.1); margin-bottom: 1rem; transition: all 0.3s; }
+        .history-item:hover { border-color: var(--cyan); transform: translateX(5px); }
+        .history-date { font-size: 0.85rem; color: var(--text-dimmer); margin-bottom: 0.3rem; }
+        .history-details { color: var(--text-dim); font-size: 0.95rem; }
+        .history-score { font-size: 1.8rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--cyan); text-align: center; }
+        .history-outcome { font-size: 1.5rem; text-align: center; }
+        .history-earnings { text-align: right; font-size: 1.2rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+        .history-earnings.positive { color: var(--green); }
+        .history-earnings.negative { color: var(--red); }
+        .empty { text-align: center; padding: 4rem 2rem; color: var(--text-dimmer); }
+        .empty-icon { font-size: 4rem; margin-bottom: 1rem; opacity: 0.5; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(6, 8, 17, 0.95); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 2000; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: var(--bg-card); border: 1px solid var(--cyan); border-radius: 16px; padding: 3rem; max-width: 500px; width: 90%; box-shadow: 0 20px 60px rgba(0, 245, 255, 0.3); max-height: 90vh; overflow-y: auto; }
+        .modal h2 { font-size: 2rem; margin-bottom: 1rem; background: linear-gradient(135deg, var(--cyan), var(--green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .modal p { color: var(--text-dim); margin-bottom: 1rem; font-size: 1.05rem; }
+        .modal ul { color: var(--text-dim); margin-left: 1.5rem; margin-bottom: 1rem; }
+        .modal ul li { margin-bottom: 0.5rem; }
+        .modal-actions { display: flex; gap: 1rem; margin-top: 2rem; flex-wrap: wrap; }
+        .modal-input { width: 100%; padding: 1rem; font-size: 1rem; border-radius: 8px; border: 2px solid rgba(0, 245, 255, 0.3); background: var(--bg-darker); color: var(--text); font-family: 'Inter', sans-serif; margin-bottom: 1rem; }
+        .modal-input:focus { outline: none; border-color: var(--cyan); }
+        .modal-note { font-size: 0.85rem; color: var(--text-dimmer); margin-top: 0.5rem; }
+        .modal-note a { color: var(--cyan); }
+        .modal-status { padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem; }
+        .modal-status.success { background: rgba(0, 255, 136, 0.1); border: 1px solid var(--green); color: var(--green); }
+        .modal-status.error { background: rgba(255, 51, 102, 0.1); border: 1px solid var(--red); color: var(--red); }
+        .modal-status.info { background: rgba(0, 245, 255, 0.1); border: 1px solid var(--cyan); color: var(--cyan); }
+        .auth-tabs { display: flex; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(0, 245, 255, 0.2); }
+        .auth-tab { flex: 1; padding: 1rem; text-align: center; cursor: pointer; color: var(--text-dim); font-weight: 600; transition: all 0.3s; border-bottom: 2px solid transparent; }
+        .auth-tab:hover { color: var(--text); }
+        .auth-tab.active { color: var(--cyan); border-bottom-color: var(--cyan); }
+        .auth-form { display: none; }
+        .auth-form.active { display: block; }
+        .auth-divider { text-align: center; color: var(--text-dimmer); margin: 1.5rem 0; position: relative; }
+        .auth-divider::before, .auth-divider::after { content: ''; position: absolute; top: 50%; width: 40%; height: 1px; background: rgba(0, 245, 255, 0.2); }
+        .auth-divider::before { left: 0; }
+        .auth-divider::after { right: 0; }
+        .sale-banner { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: linear-gradient(135deg, var(--green), var(--cyan)); padding: 2rem 4rem; border-radius: 16px; font-size: 2.5rem; font-weight: 700; color: var(--bg-dark); z-index: 4000; box-shadow: 0 20px 60px rgba(0, 255, 136, 0.6); animation: salePopIn 0.5s ease; display: none; }
+        .sale-banner.active { display: block; }
+        @keyframes salePopIn { 0% { transform: translate(-50%, -50%) scale(0); } 50% { transform: translate(-50%, -50%) scale(1.1); } 100% { transform: translate(-50%, -50%) scale(1); } }
+        .prompt-toggle { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-card); border-top: 1px solid rgba(0, 245, 255, 0.1); padding: 1rem; display: none; justify-content: center; align-items: center; gap: 1rem; z-index: 100; }
+        .toggle { width: 60px; height: 30px; background: var(--bg-darker); border-radius: 15px; cursor: pointer; border: 1px solid rgba(0, 245, 255, 0.1); position: relative; transition: all 0.3s; }
+        .toggle.active { background: var(--cyan); }
+        .toggle-slider { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; background: white; border-radius: 50%; transition: all 0.3s; }
+        .toggle.active .toggle-slider { transform: translateX(30px); }
+        .loading-spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid rgba(0, 245, 255, 0.3); border-radius: 50%; border-top-color: var(--cyan); animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .subtitle { font-size: 1.1rem; }
+            .kpi-value { font-size: 2rem; }
+            .timer { font-size: 2rem; }
+            .mic-btn { width: 80px; height: 80px; font-size: 2rem; }
+            .breakdown-grid { grid-template-columns: 1fr; }
+            .history-item { grid-template-columns: 1fr; text-align: center; }
+            .modal { padding: 2rem; }
+            .container { padding: 1rem; }
+            .top-bar { padding: 0.5rem 1rem; }
+            .user-badge span { display: none; }
+        }
     </style>
 </head>
 <body>
-    <div class="toast-box" id="toastBox"></div>
-    <div class="badges"><div class="badge" onclick="showAPIModal()">🔑 API</div><div class="badge" id="statusBadge"><span class="dot" id="statusDot"></span><span id="statusText">Online</span></div></div>
-    <div class="container">
-        <div class="screen active" id="landing"><div class="hero"><h1>Master Sales.<br><span class="grad">Without The Risk.</span></h1><p class="sub">Practice with AI customers. Get detailed analytics. Track your improvement.</p><button class="btn btn-p" onclick="goToIndustry()">Get Started</button><div class="features"><div class="feature"><div class="feature-icon">🎤</div><div class="feature-title">Voice & Text</div><div class="feature-desc">Speak naturally or type - practice your pitch your way</div></div><div class="feature"><div class="feature-icon">📊</div><div class="feature-title">Analytics</div><div class="feature-desc">Track close rate, earnings, scores and trends</div></div><div class="feature"><div class="feature-icon">🎯</div><div class="feature-title">Adaptive AI</div><div class="feature-desc">AI adjusts difficulty based on your skill level</div></div></div></div></div>
-        <div class="screen" id="industry"><div class="sel-screen"><h2>Setup Practice</h2><p>Choose an industry or enter your own product</p><select id="industrySelect" onchange="showProduct()"><option value="">-- Select Industry --</option><option value="saas">SaaS / Software</option><option value="realestate">Real Estate</option><option value="financial">Financial Services</option><option value="consulting">Consulting</option><option value="insurance">Insurance</option><option value="healthcare">Healthcare</option><option value="manufacturing">Manufacturing</option><option value="ecommerce">E-commerce</option><option value="marketing">Marketing Services</option><option value="business">Business Services</option></select><div class="prod-card" id="productCard"><div class="prod-label">Product</div><div class="prod-value" id="productName">--</div><div class="prod-label">Price</div><div class="prod-value" id="productPrice">--</div><div class="comm-box"><span>Commission</span><div class="comm-value" id="commissionValue">--</div></div></div><div class="diff-sel"><button class="diff-btn easy" onclick="setDiff('easy')">😊 Easy</button><button class="diff-btn active" onclick="setDiff('auto')">🎯 Auto</button><button class="diff-btn hard" onclick="setDiff('hard')">😤 Hard</button></div><button class="btn btn-p" id="startBtn" onclick="showTutorial()" disabled>Begin Call</button></div></div>
-        <div class="screen" id="call"><div class="call-screen"><div class="call-header"><div><div class="call-status" id="callStatus"><span class="pulse"></span>In Progress</div><div style="font-size:0.85rem;color:var(--dimmer);margin-top:0.25rem">Cold Call</div></div><div class="timer" id="timer">00:00</div></div><div id="warningBox"></div><div class="avatar-box"><div class="avatar" id="avatar">🤖</div><div class="avatar-status" id="avatarStatus">AI Customer</div></div><div id="promptBox"></div><div class="transcript" id="transcript"></div><div class="controls"><div style="position:relative"><button class="mic-btn" id="micBtn" onclick="toggleMic()">🎤<div class="mic-label" id="micLabel">Click to Speak</div></button></div><div class="or-div">— or type —</div><div class="input-row"><input type="text" id="textInput" class="text-input" placeholder="Type response..." maxlength="500" onkeypress="if(event.key==='Enter')sendText()"><button class="btn btn-p" id="sendBtn" onclick="sendText()">Send</button></div><button class="btn btn-s" onclick="endCall()">End Call</button></div></div></div>
-        <div class="screen" id="results"><div class="results"><div class="results-header"><h2>Session Analysis</h2><p style="color:var(--dim)">Performance breakdown</p></div><div class="session-sum"><div class="sum-item"><div class="sum-label">Score</div><div class="sum-value cyan" id="overallScore">--</div></div><div class="sum-item"><div class="sum-label">Outcome</div><div class="sum-value" id="outcomeIcon">--</div></div><div class="sum-item"><div class="sum-label">Duration</div><div class="sum-value yellow" id="callDuration">--</div></div><div class="sum-item"><div class="sum-label">Commission</div><div class="sum-value green" id="commissionEarned">--</div></div></div><div class="kpi-grid"><div class="kpi-card"><div class="kpi-title">📞 Closing</div><div class="kpi-value" style="color:var(--cyan)" id="kpiClosing">--</div><div class="kpi-sub">Asked for the sale</div><div class="kpi-bar"><div class="kpi-fill" id="barClosing"></div></div></div><div class="kpi-card"><div class="kpi-title">🛡️ Objections</div><div class="kpi-value" style="color:var(--green)" id="kpiObjection">--</div><div class="kpi-sub">Handled pushback</div><div class="kpi-bar"><div class="kpi-fill" id="barObjection"></div></div></div><div class="kpi-card"><div class="kpi-title">⚡ Confidence</div><div class="kpi-value" style="color:var(--yellow)" id="kpiConfidence">--</div><div class="kpi-sub">Tone & conviction</div><div class="kpi-bar"><div class="kpi-fill" id="barConfidence"></div></div></div><div class="kpi-card"><div class="kpi-title">🤝 Rapport</div><div class="kpi-value" style="color:var(--orange)" id="kpiRapport">--</div><div class="kpi-sub">Connection</div><div class="kpi-bar"><div class="kpi-fill" id="barRapport"></div></div></div></div><div class="break-grid"><div class="break-card"><h3>💪 Strengths</h3><div id="strengthsList"></div></div><div class="break-card"><h3>🎯 Improve</h3><div id="improvementsList"></div></div></div><div class="insights"><h3>🧠 Insights</h3><div id="insightsList"></div></div><div class="action-btns"><button class="btn btn-p" onclick="practiceAgain()">Practice Again</button><button class="btn btn-s" onclick="goToDashboard()">Dashboard</button></div></div></div>
-        <div class="screen" id="dashboard"><div class="dashboard"><div class="dash-header"><h2>Dashboard</h2><p style="color:var(--dim)">Track progress</p></div><div class="perf-grid"><div class="perf-card"><div class="perf-label">Close Rate</div><div class="perf-value" id="dCloseRate">0%</div><div class="perf-sub" id="dCloseSub">0/0 calls</div></div><div class="perf-card"><div class="perf-label">Earnings</div><div class="perf-value" id="dEarnings">$0</div><div class="perf-sub" id="dEarningSub">0 sales</div></div><div class="perf-card"><div class="perf-label">Avg Score</div><div class="perf-value" id="dAvgScore">--</div><div class="perf-sub" id="dScoreTrend">--</div></div><div class="perf-card"><div class="perf-label">Time</div><div class="perf-value" id="dTime">0m</div><div class="perf-sub" id="dCallCount">0 calls</div></div><div class="perf-card"><div class="perf-label">Per Call</div><div class="perf-value" id="dExpectancy">$0</div><div class="perf-sub">Average</div></div><div class="perf-card"><div class="perf-label">Best Streak</div><div class="perf-value" id="dWinStreak">0</div><div class="perf-sub" id="dStreakSub">Current: 0</div></div></div><div class="history"><h3>History</h3><div id="historyList"><div class="empty"><div class="empty-icon">📊</div><p>No calls yet</p><button class="btn btn-p" onclick="practiceAgain()" style="margin-top:1rem">Start</button></div></div></div><div class="action-btns"><button class="btn btn-p" onclick="practiceAgain()">New Call</button><button class="btn btn-s" onclick="switchScreen('landing')">Home</button></div></div></div>
+    <!-- TOP BAR -->
+    <div class="top-bar">
+        <div class="top-bar-left">
+            <div class="logo">Valtori AI</div>
+        </div>
+        <div class="top-bar-right">
+            <div class="user-badge" id="userBadge" style="display: none;">
+                <span class="dot"></span>
+                <span id="userEmail">user@email.com</span>
+            </div>
+            <button class="top-btn" id="authBtn" onclick="showAuthModal()">Sign In</button>
+            <button class="top-btn" onclick="showAPIKeyModal()">🔑 API</button>
+        </div>
     </div>
-    <div class="modal-overlay" id="tutorialModal"><div class="modal"><h2>Welcome!</h2><p>Practice a sales call with AI.</p><ul><li>🎤 Click mic or type</li><li>🤖 AI responds with voice</li><li>💡 Watch for prompts</li><li>📊 Get feedback after</li></ul><div class="modal-actions"><button class="btn btn-p" onclick="startCall()">Start</button><button class="btn btn-s" onclick="skipTutorial()">Skip</button></div></div></div>
-    <div class="modal-overlay" id="apiModal"><div class="modal"><h2>🔑 API Keys</h2><div id="openaiStatus"></div><input type="password" id="openaiKeyInput" class="modal-input" placeholder="sk-..."><p class="modal-note">OpenAI key for voice. Get at <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com</a></p><div style="display:flex;gap:0.5rem;margin:1rem 0"><button class="btn btn-p" style="padding:0.5rem 1rem" onclick="saveKey()">Save</button><button class="btn btn-d" style="padding:0.5rem 1rem" onclick="clearKey()">Clear</button></div><p style="margin-top:1rem;color:var(--dimmer);font-size:0.85rem"><strong>Mode:</strong></p><label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;margin:0.5rem 0"><input type="radio" name="aiMode" value="online" checked onchange="setMode('online')"><span>Online (Claude API)</span></label><label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer"><input type="radio" name="aiMode" value="offline" onchange="setMode('offline')"><span>Offline (scripted)</span></label><div class="modal-actions"><button class="btn btn-s" onclick="closeAPIModal()">Close</button></div></div></div>
+
+    <div class="container">
+        <!-- LANDING SCREEN -->
+        <div class="screen active" id="landing">
+            <div class="hero">
+                <h1>Master Sales.<br><span class="gradient">Without The Risk.</span></h1>
+                <p class="subtitle">Practice with AI customers. Get FXReplay-style analytics. Improve with data.</p>
+                <button class="btn btn-primary" onclick="handleGetStarted()">Get Started</button>
+                <div class="features">
+                    <div class="feature"><div class="feature-icon">🎤</div><div class="feature-title">Real Voice Calls</div><div class="feature-desc">Speak naturally with AI customers who respond, object, and challenge</div></div>
+                    <div class="feature"><div class="feature-icon">📊</div><div class="feature-title">FXReplay-Style Analytics</div><div class="feature-desc">Win rate, expectancy, drawdowns, performance curves - everything traders use</div></div>
+                    <div class="feature"><div class="feature-icon">🎯</div><div class="feature-title">Adaptive Difficulty</div><div class="feature-desc">AI gets harder as you improve, pushing you to master every scenario</div></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- INDUSTRY SELECTION -->
+        <div class="screen" id="industry">
+            <div class="selection-screen">
+                <h2>Choose Your Industry</h2>
+                <p>Select the industry you're selling in</p>
+                <select id="industrySelect" onchange="showProduct()">
+                    <option value="">-- Select Industry --</option>
+                    <option value="saas">SaaS / Software</option>
+                    <option value="realestate">Real Estate</option>
+                    <option value="financial">Financial Services</option>
+                    <option value="consulting">Consulting</option>
+                    <option value="insurance">Insurance</option>
+                    <option value="healthcare">Healthcare</option>
+                    <option value="manufacturing">Manufacturing</option>
+                    <option value="ecommerce">E-commerce</option>
+                    <option value="marketing">Marketing Services</option>
+                    <option value="business">Business Services</option>
+                </select>
+                <div class="product-card" id="productCard">
+                    <div class="product-label">Your Product</div>
+                    <div class="product-value" id="productName">--</div>
+                    <div class="product-label">Price</div>
+                    <div class="product-value" id="productPrice">--</div>
+                    <div class="commission-box">
+                        <div class="commission-label">Your Commission Per Sale</div>
+                        <div class="commission-value" id="commissionValue">--</div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" id="startBtn" onclick="showTutorial()" disabled>Begin Practice Call</button>
+            </div>
+        </div>
+        
+        <!-- CALL SCREEN -->
+        <div class="screen" id="call">
+            <div class="call-screen">
+                <div class="call-header">
+                    <div><div class="status" id="callStatus">Call in Progress</div><div style="font-size: 0.9rem; color: var(--text-dimmer); margin-top: 0.3rem;">Cold Call</div></div>
+                    <div class="timer" id="timer">00:00</div>
+                </div>
+                <div id="warning"></div>
+                <div style="text-align: center;">
+                    <div class="avatar" id="avatar">🤖</div>
+                    <div id="avatarStatus" style="color: var(--text-dim); margin-top: 1rem;">AI Customer</div>
+                </div>
+                <div id="prompt"></div>
+                <div class="transcript" id="transcript"></div>
+                <div class="controls">
+                    <button class="mic-btn" id="micBtn" onclick="toggleMic()">🎤<div class="mic-label">Click to Speak</div></button>
+                    <div class="or-divider">— or type —</div>
+                    <div class="input-row">
+                        <input type="text" id="textInput" class="text-input" placeholder="Type your response..." maxlength="500" onkeypress="if(event.key==='Enter') sendTextInput()"/>
+                        <button class="btn btn-primary" id="sendBtn" onclick="sendTextInput()">Send</button>
+                    </div>
+                    <button class="btn btn-secondary" onclick="endCall()">End Call</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- RESULTS SCREEN -->
+        <div class="screen" id="results">
+            <div class="results">
+                <div class="results-header">
+                    <h2>Session Analysis</h2>
+                    <p style="color: var(--text-dim); font-size: 1.1rem;">FXReplay-Style Performance Breakdown</p>
+                </div>
+                <div class="session-summary">
+                    <div class="summary-item"><div class="summary-label">Overall Score</div><div class="summary-value cyan" id="overallScore">--</div></div>
+                    <div class="summary-item"><div class="summary-label">Outcome</div><div class="summary-value" id="outcomeIcon">--</div></div>
+                    <div class="summary-item"><div class="summary-label">Duration</div><div class="summary-value yellow" id="callDuration">--</div></div>
+                    <div class="summary-item"><div class="summary-label">Commission</div><div class="summary-value green" id="commissionEarned">--</div></div>
+                </div>
+                <div class="kpi-grid">
+                    <div class="kpi-card"><div class="kpi-title">📞 Closing Ability</div><div class="kpi-value" style="color: var(--cyan);" id="kpiClosing">--</div><div class="kpi-subtitle">How well you asked for the sale</div><div class="kpi-bar"><div class="kpi-bar-fill" id="barClosing"></div></div></div>
+                    <div class="kpi-card"><div class="kpi-title">🛡️ Objection Handling</div><div class="kpi-value" style="color: var(--green);" id="kpiObjection">--</div><div class="kpi-subtitle">Response to pushback</div><div class="kpi-bar"><div class="kpi-bar-fill" id="barObjection"></div></div></div>
+                    <div class="kpi-card"><div class="kpi-title">⚡ Confidence & Energy</div><div class="kpi-value" style="color: var(--yellow);" id="kpiConfidence">--</div><div class="kpi-subtitle">Tone and conviction</div><div class="kpi-bar"><div class="kpi-bar-fill" id="barConfidence"></div></div></div>
+                    <div class="kpi-card"><div class="kpi-title">🤝 Rapport Building</div><div class="kpi-value" style="color: var(--orange);" id="kpiRapport">--</div><div class="kpi-subtitle">Connection with prospect</div><div class="kpi-bar"><div class="kpi-bar-fill" id="barRapport"></div></div></div>
+                </div>
+                <div class="breakdown-grid">
+                    <div class="breakdown-card"><h3>💪 What Worked</h3><div id="strengthsList"></div></div>
+                    <div class="breakdown-card"><h3>🎯 Areas to Improve</h3><div id="improvementsList"></div></div>
+                </div>
+                <div class="insights"><h3>🧠 AI-Powered Insights</h3><div id="insightsList"></div></div>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="practiceAgain()">Practice Again</button>
+                    <button class="btn btn-secondary" onclick="goToDashboard()">View Full Dashboard</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- DASHBOARD SCREEN -->
+        <div class="screen" id="dashboard">
+            <div class="dashboard">
+                <h2>Performance Dashboard</h2>
+                <p class="dashboard-subtitle">Track your progress with FXReplay-style analytics</p>
+                <div class="performance-overview">
+                    <div class="perf-card"><div class="perf-label">Close Rate</div><div class="perf-value" id="dCloseRate">0%</div><div class="perf-sub" id="dCloseSub">0 / 0 calls</div></div>
+                    <div class="perf-card"><div class="perf-label">Total Earnings</div><div class="perf-value" id="dEarnings">$0</div><div class="perf-sub" id="dEarningSub">0 sales closed</div></div>
+                    <div class="perf-card"><div class="perf-label">Average Score</div><div class="perf-value" id="dAvgScore">--</div><div class="perf-sub" id="dScoreTrend">--</div></div>
+                    <div class="perf-card"><div class="perf-label">Practice Time</div><div class="perf-value" id="dTime">0m</div><div class="perf-sub" id="dCallCount">0 calls</div></div>
+                    <div class="perf-card"><div class="perf-label">Avg Per Call</div><div class="perf-value" id="dExpectancy">$0</div><div class="perf-sub">Expected earnings</div></div>
+                    <div class="perf-card"><div class="perf-label">Best Streak</div><div class="perf-value" id="dWinStreak">0</div><div class="perf-sub" id="dStreakSub">Current: 0</div></div>
+                </div>
+                <div class="history"><h3>Call History</h3><div id="historyList"><div class="empty"><div class="empty-icon">📊</div><p>No practice sessions yet</p><button class="btn btn-primary" onclick="practiceAgain()" style="margin-top: 1rem;">Start Practicing</button></div></div></div>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="practiceAgain()">New Practice Call</button>
+                    <button class="btn btn-secondary" onclick="switchScreen('landing')">Back to Home</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- AUTH MODAL -->
+    <div class="modal-overlay" id="authModal">
+        <div class="modal">
+            <h2>Welcome to Valtori</h2>
+            <div class="auth-tabs">
+                <div class="auth-tab active" onclick="switchAuthTab('login')">Sign In</div>
+                <div class="auth-tab" onclick="switchAuthTab('signup')">Sign Up</div>
+            </div>
+            <div id="authStatus"></div>
+            
+            <!-- Login Form -->
+            <div class="auth-form active" id="loginForm">
+                <input type="email" id="loginEmail" class="modal-input" placeholder="Email" />
+                <input type="password" id="loginPassword" class="modal-input" placeholder="Password" />
+                <button class="btn btn-primary" style="width: 100%;" onclick="handleLogin()" id="loginBtn">Sign In</button>
+            </div>
+            
+            <!-- Signup Form -->
+            <div class="auth-form" id="signupForm">
+                <input type="email" id="signupEmail" class="modal-input" placeholder="Email" />
+                <input type="password" id="signupPassword" class="modal-input" placeholder="Password (min 6 characters)" />
+                <button class="btn btn-primary" style="width: 100%;" onclick="handleSignup()" id="signupBtn">Create Account</button>
+            </div>
+            
+            <div class="auth-divider">or</div>
+            <button class="btn btn-secondary" style="width: 100%;" onclick="continueAsGuest()">Continue as Guest</button>
+            <p class="modal-note" style="margin-top: 1rem; text-align: center;">Guest data is stored locally and won't sync across devices.</p>
+        </div>
+    </div>
+    
+    <!-- TUTORIAL MODAL -->
+    <div class="modal-overlay" id="tutorialModal">
+        <div class="modal">
+            <h2>Welcome to Valtori AI</h2>
+            <p>You're about to practice a real sales call with an AI customer.</p>
+            <p><strong>How it works:</strong></p>
+            <ul>
+                <li>Click the mic to speak OR type your response</li>
+                <li>AI responds with voice and may throw objections</li>
+                <li>Watch for helpful coaching prompts</li>
+                <li>Get detailed analytics after each call</li>
+            </ul>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="startCall()">Let's Go!</button>
+                <button class="btn btn-secondary" onclick="skipTutorial()">Skip Tutorial</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- API KEY MODAL -->
+    <div class="modal-overlay" id="apiKeyModal">
+        <div class="modal">
+            <h2>🔑 API Key Settings</h2>
+            <p>Configure your OpenAI API key for voice transcription.</p>
+            <div id="apiKeyStatus"></div>
+            <label style="display: block; color: var(--text-dim); margin-bottom: 0.5rem; font-size: 0.9rem;">OpenAI API Key</label>
+            <input type="password" id="apiKeyInput" class="modal-input" placeholder="sk-..." />
+            <p class="modal-note">Get your key at <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com/api-keys</a><br>Your key is stored locally only.</p>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="saveAPIKey()">Save Key</button>
+                <button class="btn btn-danger" onclick="clearAPIKey()">Clear Key</button>
+                <button class="btn btn-secondary" onclick="closeAPIKeyModal()">Close</button>
+            </div>
+            <p style="margin-top: 1.5rem; color: var(--text-dimmer); font-size: 0.85rem;"><strong>Note:</strong> Voice input requires an OpenAI key. You can still use text input without it.</p>
+        </div>
+    </div>
+    
     <div class="sale-banner" id="saleBanner">🎉 SALE CLOSED! 🎉</div>
-    <div class="bottom-bar" id="bottomBar"><div class="toggle-group"><span>💡 Prompts</span><div class="toggle active" id="promptToggle" onclick="togglePrompts()"><div class="toggle-slider"></div></div></div><div class="toggle-group"><span>🔊 Voice</span><div class="toggle active" id="voiceToggle" onclick="toggleVoice()"><div class="toggle-slider"></div></div></div></div>
-<script>
-const IND={saas:{p:'Enterprise CRM',pr:8500,c:.15},realestate:{p:'Property Listing',pr:450000,c:.03},financial:{p:'Wealth Package',pr:25000,c:.08},consulting:{p:'Strategy Engagement',pr:15000,c:.2},insurance:{p:'Insurance Policy',pr:12000,c:.1},healthcare:{p:'Medical System',pr:35000,c:.12},manufacturing:{p:'Automation Solution',pr:75000,c:.08},ecommerce:{p:'E-commerce Package',pr:18000,c:.15},marketing:{p:'Marketing Retainer',pr:48000,c:.18},business:{p:'Services Contract',pr:24000,c:.15}};
-const STAGES={opening:['Introduce yourself','State company','Ask if good time'],permission:['Respect time','Ask for 2-3 min','Create curiosity'],value:['Pain point','Success story','Quantify benefit'],discovery:['Current situation','Listen more','Follow up'],objection:['Acknowledge','Clarify','Provide proof'],close:['Next step','Clear CTA','Be direct']};
-const SALE_P=["let's do it","yes, i'm interested","i'll buy","sounds good","sign me up","let's proceed","i'll take it","deal","count me in","i'm in","send contract","you convinced me"];
-const HANG_P=["goodbye","have to go now","not interested","don't call again","hanging up","stop calling","leave me alone"];
-const OFFLINE={greet:["Hello?","Yes speaking.","Who's calling?","How can I help?"],curious:["Tell me more.","How does that work?","What's different?","Give an example?"],obj:["Sounds expensive.","Not sure we need this.","Working with someone.","Need to think.","Send info?"],pos:["Interesting.","Hadn't thought of that.","What's next?"],sale:["Sounds good, let's do it.","I'm interested.","Let's proceed."],end:["Not interested, bye.","Not for us.","Have to go."]};
-let S={screen:'landing',ind:null,first:true,prompts:true,voice:true,diff:'auto',stage:'opening',active:false,timer:null,dur:0,warned:false,conv:[],sess:null,proc:false,mode:'online',synth:window.speechSynthesis,voices:[],key:'',rec:null,chunks:[],recording:false,stats:{calls:0,sales:0,earn:0,time:0,scores:[],hist:[],streak:0,maxStreak:0}};
-function toast(m,t='info',d=3000){const c=document.getElementById('toastBox'),e=document.createElement('div');e.className='toast '+t;e.innerHTML='<span>'+{success:'✓',error:'✕',warning:'⚠',info:'ℹ'}[t]+'</span><span>'+m+'</span>';c.appendChild(e);setTimeout(()=>e.remove(),d)}
-function init(){loadStats();loadPrefs();S.key=localStorage.getItem('openaiKey')||'';updateDash();updateStatus();if(S.synth){S.voices=S.synth.getVoices();S.synth.onvoiceschanged=()=>S.voices=S.synth.getVoices()}document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-overlay.active').forEach(m=>m.classList.remove('active'));if(e.key===' '&&S.screen==='call'&&document.activeElement.tagName!=='INPUT'){e.preventDefault();toggleMic()}})}
-function loadStats(){try{const s=localStorage.getItem('vStats');if(s)S.stats={...S.stats,...JSON.parse(s)}}catch(e){localStorage.removeItem('vStats')}}
-function saveStats(){try{localStorage.setItem('vStats',JSON.stringify(S.stats))}catch(e){}}
-function loadPrefs(){try{const p=localStorage.getItem('vPrefs');if(p){const d=JSON.parse(p);S.first=d.first??true;S.prompts=d.prompts??true;S.voice=d.voice??true;S.diff=d.diff??'auto';S.mode=d.mode??'online';document.getElementById('promptToggle')?.classList.toggle('active',S.prompts);document.getElementById('voiceToggle')?.classList.toggle('active',S.voice)}}catch(e){}}
-function savePrefs(){try{localStorage.setItem('vPrefs',JSON.stringify({first:S.first,prompts:S.prompts,voice:S.voice,diff:S.diff,mode:S.mode}))}catch(e){}}
-function updateStatus(){const d=document.getElementById('statusDot'),t=document.getElementById('statusText');if(S.mode==='offline'){d.classList.add('off');t.textContent='Offline'}else{d.classList.remove('off');t.textContent='Online'}}
-function showAPIModal(){const s=document.getElementById('openaiStatus'),i=document.getElementById('openaiKeyInput');if(S.key){s.innerHTML='<div class="modal-status success">✓ Key set</div>';i.value=S.key.slice(0,7)+'...'+S.key.slice(-4)}else{s.innerHTML='<div class="modal-status error">⚠ No key</div>';i.value=''}document.getElementById('apiModal').classList.add('active')}
-function closeAPIModal(){document.getElementById('apiModal').classList.remove('active')}
-function saveKey(){const k=document.getElementById('openaiKeyInput').value.trim();if(!k||!k.startsWith('sk-')){toast('Invalid key','error');return}S.key=k;localStorage.setItem('openaiKey',k);document.getElementById('openaiStatus').innerHTML='<div class="modal-status success">✓ Saved</div>';toast('Key saved','success')}
-function clearKey(){S.key='';localStorage.removeItem('openaiKey');document.getElementById('openaiStatus').innerHTML='<div class="modal-status error">⚠ Cleared</div>';document.getElementById('openaiKeyInput').value='';toast('Key cleared','info')}
-function setMode(m){S.mode=m;savePrefs();updateStatus();toast(m==='offline'?'Offline mode':'Online mode','info')}
-function speak(t,cb){if(!S.voice||!S.synth){if(cb)setTimeout(cb,300);return}S.synth.cancel();const u=new SpeechSynthesisUtterance(t);if(!S.voices.length)S.voices=S.synth.getVoices();const en=S.voices.filter(v=>v.lang.startsWith('en'));if(en.length)u.voice=en[0];u.rate=0.95;const av=document.getElementById('avatar'),st=document.getElementById('avatarStatus');u.onstart=()=>{av?.classList.remove('thinking');av?.classList.add('speaking');if(st)st.textContent='Speaking...'};u.onend=()=>{av?.classList.remove('speaking');if(st)st.textContent='AI Customer';if(cb)cb()};u.onerror=()=>{av?.classList.remove('speaking');if(st)st.textContent='AI Customer';if(cb)cb()};S.synth.speak(u)}
-function switchScreen(s){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));document.getElementById(s)?.classList.add('active');S.screen=s;document.getElementById('bottomBar').style.display=s==='call'?'flex':'none'}
-function goToIndustry(){switchScreen('industry')}
-function goToDashboard(){updateDash();switchScreen('dashboard')}
-function showProduct(){const i=document.getElementById('industrySelect').value;if(!i||!IND[i]){document.getElementById('productCard').classList.remove('show');document.getElementById('startBtn').disabled=true;return}S.ind=i;const c=IND[i];document.getElementById('productName').textContent=c.p;document.getElementById('productPrice').textContent='$'+c.pr.toLocaleString();document.getElementById('commissionValue').textContent='$'+(c.pr*c.c).toLocaleString();document.getElementById('productCard').classList.add('show');document.getElementById('startBtn').disabled=false}
-function setDiff(d){S.diff=d;document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('active'));event.target.classList.add('active');savePrefs()}
-function showTutorial(){if(S.first)document.getElementById('tutorialModal').classList.add('active');else startCall()}
-function skipTutorial(){document.getElementById('tutorialModal').classList.remove('active');S.first=false;savePrefs();startCall()}
-function startCall(){document.getElementById('tutorialModal').classList.remove('active');switchScreen('call');if(!S.ind||!IND[S.ind]){toast('Select industry','error');switchScreen('industry');return}const c=IND[S.ind];S.active=true;S.dur=0;S.warned=false;S.conv=[];S.stage='opening';S.proc=false;S.sess={ts:new Date().toISOString(),ind:S.ind,prod:c.p,price:c.pr,comm:c.pr*c.c,conv:[],closed:false};document.getElementById('transcript').innerHTML='';document.getElementById('warningBox').innerHTML='';document.getElementById('promptBox').innerHTML='';document.getElementById('timer').textContent='00:00';document.getElementById('callStatus').innerHTML='<span class="pulse"></span>In Progress';setInputs(true);startTimer();setTimeout(()=>{const g=OFFLINE.greet[Math.floor(Math.random()*OFFLINE.greet.length)];addMsg('ai',g);speak(g,()=>updatePrompt())},1000)}
-function startTimer(){if(S.timer)clearInterval(S.timer);S.timer=setInterval(()=>{S.dur++;const m=Math.floor(S.dur/60),s=S.dur%60;document.getElementById('timer').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');if(S.dur===60&&!S.warned){S.warned=true;document.getElementById('warningBox').innerHTML='<div class="warning-box">⚠️ 60s - Consider closing</div>'}},1000)}
-function stopTimer(){if(S.timer){clearInterval(S.timer);S.timer=null}}
-function setInputs(e){const m=document.getElementById('micBtn'),t=document.getElementById('textInput'),s=document.getElementById('sendBtn');if(m)m.disabled=!e;if(t)t.disabled=!e;if(s)s.disabled=!e}
-function endCall(){if(!S.active)return;stopTimer();S.active=false;setInputs(false);document.getElementById('callStatus').innerHTML='Ended';endScore()}
-async function toggleMic(){if(!S.key){toast('Set OpenAI key','warning');showAPIModal();return}if(!S.active||S.proc)return;const btn=document.getElementById('micBtn'),lbl=document.getElementById('micLabel');if(S.recording){S.recording=false;btn.classList.remove('recording');lbl.textContent='Processing...';if(S.rec?.state==='recording')S.rec.stop()}else{try{const stream=await navigator.mediaDevices.getUserMedia({audio:true});S.rec=new MediaRecorder(stream);S.chunks=[];S.rec.ondataavailable=e=>S.chunks.push(e.data);S.rec.onstop=async()=>{const blob=new Blob(S.chunks,{type:'audio/webm'});stream.getTracks().forEach(t=>t.stop());await transcribe(blob);lbl.textContent='Click to Speak'};S.rec.onerror=()=>{stream.getTracks().forEach(t=>t.stop());lbl.textContent='Click to Speak';toast('Mic error','error')};S.rec.start();S.recording=true;btn.classList.add('recording');lbl.textContent='Click to Stop';setTimeout(()=>{if(S.recording)toggleMic()},60000)}catch(e){toast('Mic access denied','error')}}}
-async function transcribe(blob){try{const fd=new FormData();fd.append('file',blob,'audio.webm');fd.append('model','whisper-1');const ctrl=new AbortController();setTimeout(()=>ctrl.abort(),30000);const r=await fetch('https://api.openai.com/v1/audio/transcriptions',{method:'POST',headers:{Authorization:'Bearer '+S.key},body:fd,signal:ctrl.signal});if(!r.ok){if(r.status===401){toast('Invalid key','error');showAPIModal()}else if(r.status===429)toast('Rate limited','warning');else toast('Transcribe failed','error');return}const d=await r.json();if(d.text?.trim())handleInput(d.text.trim());else toast('No speech detected','warning')}catch(e){toast('Transcribe error','error')}}
-function sendText(){const i=document.getElementById('textInput'),t=i.value.trim();if(!t||!S.active||S.proc)return;i.value='';handleInput(t)}
-function handleInput(t){if(!S.active||S.proc)return;addMsg('user',t);updateStage(t);S.proc=true;setInputs(false);const av=document.getElementById('avatar'),st=document.getElementById('avatarStatus');av?.classList.add('thinking');if(st)st.textContent='Thinking...';setTimeout(()=>getAI(t),500)}
-function addMsg(who,txt){const tr=document.getElementById('transcript');if(!tr)return;const m=document.createElement('div');m.className='message '+who;const lab=who==='user'?'You':who==='ai'?'Customer':'System';m.innerHTML='<div class="speaker">'+lab+'</div><div>'+txt.replace(/</g,'&lt;')+'</div>';tr.appendChild(m);tr.scrollTop=tr.scrollHeight;S.conv.push({who,txt,time:S.dur})}
-function updateStage(t){const l=t.toLowerCase();if(S.stage==='opening'&&(l.includes('my name')||l.includes('calling from')||l.includes('this is')))S.stage='permission';else if(S.stage==='permission'&&(l.includes('help')||l.includes('benefit')||l.includes('save')))S.stage='value';else if(S.stage==='value'&&(l.includes('?')||l.includes('tell me')))S.stage='discovery';else if(S.stage==='discovery'&&(l.includes('understand')||l.includes('i hear')||l.includes('but')))S.stage='objection';if(l.includes('buy')||l.includes('purchase')||l.includes('sign up')||l.includes('next step'))S.stage='close';updatePrompt()}
-function updatePrompt(){if(!S.prompts)return;const ps=STAGES[S.stage];if(!ps)return;const p=ps[Math.floor(Math.random()*ps.length)];document.getElementById('promptBox').innerHTML='<div class="prompt-box"><div class="prompt-label">💡 '+S.stage.toUpperCase()+'</div><div>'+p+'</div></div>';setTimeout(()=>{if(document.getElementById('promptBox'))document.getElementById('promptBox').innerHTML=''},8000)}
-function togglePrompts(){S.prompts=!S.prompts;document.getElementById('promptToggle').classList.toggle('active',S.prompts);if(!S.prompts)document.getElementById('promptBox').innerHTML='';savePrefs()}
-function toggleVoice(){S.voice=!S.voice;document.getElementById('voiceToggle').classList.toggle('active',S.voice);savePrefs()}
-async function getAI(txt){const avgScore=S.stats.scores.length?S.stats.scores.reduce((a,b)=>a+b,0)/S.stats.scores.length:50;let diff=S.diff==='auto'?(avgScore>75?'hard':avgScore<50?'easy':'medium'):S.diff;const c=IND[S.ind];if(S.mode==='offline'){offlineAI(diff);return}const prompt=`You are a ${diff} sales prospect. Industry: ${S.ind}. Product: ${c.p} $${c.pr.toLocaleString()}. ${diff==='easy'?'Friendly, open.':diff==='hard'?'Busy, skeptical, may hang up.':'Professional, needs convincing.'} Conversation:\n${S.conv.map(x=>x.who.toUpperCase()+': '+x.txt).join('\n')}\nRespond 1-2 sentences. May ask questions, object, show interest, or end call.${Math.random()>0.7?' Give an objection.':''}`;try{const ctrl=new AbortController();setTimeout(()=>ctrl.abort(),30000);const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:150,messages:[{role:'user',content:prompt}]}),signal:ctrl.signal});const d=await r.json();if(d.error)throw new Error(d.error.message);if(!d.content?.[0]?.text)throw new Error('Bad response');const ai=d.content[0].text.trim();processAI(ai)}catch(e){console.error('AI error:',e);offlineAI(diff)}}
-function offlineAI(diff){let pool;const last=S.conv.filter(x=>x.who==='user').slice(-1)[0]?.txt.toLowerCase()||'';if(SALE_P.some(p=>last.includes(p))){pool=OFFLINE.sale}else if(last.includes('?')){pool=OFFLINE.curious}else if(S.conv.length>6&&Math.random()>0.6){pool=diff==='hard'?OFFLINE.end:OFFLINE.pos}else if(Math.random()>0.5){pool=OFFLINE.obj}else{pool=OFFLINE.curious}const ai=pool[Math.floor(Math.random()*pool.length)];processAI(ai)}
-function processAI(ai){addMsg('ai',ai);const low=ai.toLowerCase();if(SALE_P.some(p=>low.includes(p))){handleSale();return}if(HANG_P.some(p=>low.includes(p))){speak(ai,()=>setTimeout(handleHangup,1500));return}speak(ai,()=>{S.proc=false;if(S.active)setInputs(true)})}
-function handleSale(){S.sess.closed=true;try{new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuAy/DajTwJEmiy6OyNPwwSVa7n77BLDQw7k9fzx3UjBSt8x+3akD0IEGCv5+WcUAwMUKXh8bJQDgsxhcXtypRBAw==').play().catch(()=>{})}catch(e){}const b=document.getElementById('saleBanner');b.classList.add('active');setTimeout(()=>b.classList.remove('active'),2000);S.stats.sales++;S.stats.earn+=S.sess.comm;S.stats.streak++;if(S.stats.streak>S.stats.maxStreak)S.stats.maxStreak=S.stats.streak;saveStats();const msgs=["Great! I'll send details.","Perfect!","Excellent choice!"];addMsg('ai',msgs[Math.floor(Math.random()*msgs.length)]);speak(msgs[0],()=>setTimeout(()=>{stopTimer();S.active=false;endScore()},2000))}
-function handleHangup(){stopTimer();S.active=false;S.stats.streak=0;saveStats();document.getElementById('callStatus').innerHTML='Ended';setTimeout(endScore,1000)}
-async function endScore(){addMsg('system','Analyzing...');let score;try{score=await calcScore()}catch(e){score=defaultScore()}S.sess.score=score;S.sess.dur=S.dur;S.sess.conv=[...S.conv];S.stats.calls++;S.stats.time+=S.dur;S.stats.scores.push(score.overall);S.stats.hist.unshift(S.sess);if(S.stats.hist.length>100)S.stats.hist=S.stats.hist.slice(0,100);saveStats();if(S.first){S.first=false;savePrefs()}showResults(score);switchScreen('results')}
-async function calcScore(){const tr=S.conv.map(c=>c.who.toUpperCase()+': '+c.txt).join('\n');if(tr.length<20)return defaultScore();if(S.mode==='offline')return defaultScore();const prompt=`Analyze sales call. Score 0-100 each:\nTRANSCRIPT:\n${tr}\nCONTEXT: Product ${S.sess.prod}, $${S.sess.price}, ${S.dur}s, ${S.sess.closed?'CLOSED':'No sale'}\nScore: closing, objection, confidence, rapport\n2 strengths, 2 improvements, 3 insights\nJSON only: {"closing":N,"objection":N,"confidence":N,"rapport":N,"strengths":["...","..."],"improvements":["...","..."],"insights":[{"type":"strength|weakness|opportunity","title":"...","desc":"..."}]}`;try{const ctrl=new AbortController();setTimeout(()=>ctrl.abort(),30000);const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,messages:[{role:'user',content:prompt}]}),signal:ctrl.signal});const d=await r.json();if(d.error||!d.content?.[0]?.text)throw new Error();const txt=d.content[0].text,st=txt.indexOf('{'),en=txt.lastIndexOf('}');if(st===-1||en===-1)throw new Error();const a=JSON.parse(txt.substring(st,en+1));const clamp=v=>Math.max(0,Math.min(100,Number(v)||50));const cl=clamp(a.closing),ob=clamp(a.objection),co=clamp(a.confidence),ra=clamp(a.rapport);return{overall:Math.round((cl+ob+co+ra)/4),metrics:{closing:cl,objection:ob,confidence:co,rapport:ra},feedback:{strengths:a.strengths||['Completed call','Showed effort'],improvements:a.improvements||['Ask more questions','Handle objections'],insights:a.insights||[{type:'opportunity',title:'Keep practicing',desc:'Consistency builds skill'}]}}}catch(e){return defaultScore()}}
-function defaultScore(){const b=S.sess.closed?75:55;return{overall:b,metrics:{closing:S.sess.closed?85:45,objection:60,confidence:65,rapport:60},feedback:{strengths:['Completed the call','Took initiative'],improvements:['Ask discovery questions','Handle objections better'],insights:[{type:'opportunity',title:'Keep Practicing',desc:'Consistency is key'}]}}}
-function showResults(sc){document.getElementById('overallScore').textContent=sc.overall;document.getElementById('outcomeIcon').textContent=S.sess.closed?'✅ CLOSED':'❌ NO SALE';const m=Math.floor(S.dur/60),s=S.dur%60;document.getElementById('callDuration').textContent=m+':'+String(s).padStart(2,'0');document.getElementById('commissionEarned').textContent=S.sess.closed?'+$'+S.sess.comm.toLocaleString():'$0';['closing','objection','confidence','rapport'].forEach(k=>{const v=sc.metrics[k],cap=k.charAt(0).toUpperCase()+k.slice(1);document.getElementById('kpi'+cap).textContent=v;setTimeout(()=>document.getElementById('bar'+cap).style.width=v+'%',100)});const sl=document.getElementById('strengthsList');sl.innerHTML='';sc.feedback.strengths.forEach(x=>sl.innerHTML+='<div class="break-item pos">✅ '+x+'</div>');const il=document.getElementById('improvementsList');il.innerHTML='';sc.feedback.improvements.forEach(x=>il.innerHTML+='<div class="break-item neg">💡 '+x+'</div>');const inl=document.getElementById('insightsList');inl.innerHTML='';const icons={strength:'💪',weakness:'⚠️',opportunity:'🎯'};sc.feedback.insights.forEach(x=>inl.innerHTML+='<div class="insight-item '+x.type+'"><div class="insight-icon">'+(icons[x.type]||'💡')+'</div><div class="insight-content"><div class="insight-title">'+x.title+'</div><div class="insight-desc">'+x.desc+'</div></div></div>')}
-function updateDash(){const cr=S.stats.calls>0?Math.round(S.stats.sales/S.stats.calls*100):0;document.getElementById('dCloseRate').textContent=cr+'%';document.getElementById('dCloseSub').textContent=S.stats.sales+'/'+S.stats.calls;document.getElementById('dEarnings').textContent='$'+S.stats.earn.toLocaleString();document.getElementById('dEarningSub').textContent=S.stats.sales+' sales';if(S.stats.scores.length){const avg=Math.round(S.stats.scores.reduce((a,b)=>a+b,0)/S.stats.scores.length);document.getElementById('dAvgScore').textContent=avg;if(S.stats.scores.length>=2){const rec=S.stats.scores.slice(-3),recAvg=rec.reduce((a,b)=>a+b,0)/rec.length,allAvg=S.stats.scores.reduce((a,b)=>a+b,0)/S.stats.scores.length;document.getElementById('dScoreTrend').textContent=recAvg>allAvg?'📈 Up':recAvg<allAvg?'📉 Down':'➡️ Stable'}else document.getElementById('dScoreTrend').textContent='Starting'}else{document.getElementById('dAvgScore').textContent='--';document.getElementById('dScoreTrend').textContent='No data'}const h=Math.floor(S.stats.time/3600),m=Math.floor((S.stats.time%3600)/60);document.getElementById('dTime').textContent=h>0?h+'h '+m+'m':m+'m';document.getElementById('dCallCount').textContent=S.stats.calls+' calls';const exp=S.stats.calls>0?Math.round(S.stats.earn/S.stats.calls):0;document.getElementById('dExpectancy').textContent=exp>0?'+$'+exp:'$0';document.getElementById('dWinStreak').textContent=S.stats.maxStreak;document.getElementById('dStreakSub').textContent='Current: '+S.stats.streak;const hl=document.getElementById('historyList');if(!S.stats.hist.length){hl.innerHTML='<div class="empty"><div class="empty-icon">📊</div><p>No calls yet</p><button class="btn btn-p" onclick="practiceAgain()" style="margin-top:1rem">Start</button></div>'}else{hl.innerHTML='';S.stats.hist.slice(0,20).forEach(x=>{const d=new Date(x.ts),ec=x.closed?'pos':'neg',et=x.closed?'+$'+x.comm.toLocaleString():'$0';hl.innerHTML+='<div class="hist-item"><div><div class="hist-date">'+d.toLocaleDateString()+' '+d.toLocaleTimeString()+'</div><div class="hist-details">'+x.prod+' • '+Math.floor(x.dur/60)+':'+String(x.dur%60).padStart(2,'0')+'</div></div><div class="hist-score">'+(x.score?.overall||'--')+'</div><div class="hist-outcome">'+(x.closed?'✅':'❌')+'</div><div class="hist-earnings '+ec+'">'+et+'</div></div>'})}}
-function practiceAgain(){document.getElementById('transcript').innerHTML='';document.getElementById('warningBox').innerHTML='';document.getElementById('promptBox').innerHTML='';if(S.ind)startCall();else switchScreen('industry')}
-window.addEventListener('load',init);
-</script>
+    <div class="prompt-toggle" id="promptToggle"><span>💡 Prompts:</span><div class="toggle active" id="toggle" onclick="togglePrompts()"><div class="toggle-slider"></div></div></div>
+
+    <script>
+    // ============================================
+    // SUPABASE CONFIG
+    // ============================================
+    const SUPABASE_URL = 'https://aqzjxlxdjhegypnhsdcp.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxemp4bHhkamhlZ3lwbmhzZGNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxMzk2OTYsImV4cCI6MjA4MDcxNTY5Nn0.oNwuIyrqwNAA4PfT4Nxgm869d6nKMZseFLJQAkJxbNM';
+    
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    // ============================================
+    // CONFIGURATION
+    // ============================================
+    const INDUSTRIES = {
+        saas: { product: 'Enterprise CRM Software', price: 8500, commission: 0.15 },
+        realestate: { product: 'Premium Property Listing', price: 450000, commission: 0.03 },
+        financial: { product: 'Wealth Management Package', price: 25000, commission: 0.08 },
+        consulting: { product: 'Business Strategy Engagement', price: 15000, commission: 0.20 },
+        insurance: { product: 'Commercial Insurance Policy', price: 12000, commission: 0.10 },
+        healthcare: { product: 'Medical Equipment System', price: 35000, commission: 0.12 },
+        manufacturing: { product: 'Industrial Automation Solution', price: 75000, commission: 0.08 },
+        ecommerce: { product: 'E-commerce Platform Package', price: 18000, commission: 0.15 },
+        marketing: { product: 'Annual Marketing Retainer', price: 48000, commission: 0.18 },
+        business: { product: 'Managed Services Contract', price: 24000, commission: 0.15 }
+    };
+
+    const STAGES = {
+        opening: ['Introduce yourself professionally', 'State your company clearly', 'Ask if now is a good time'],
+        permission: ['Respect their time', 'Ask for 2-3 minutes', 'Create curiosity'],
+        value: ['Mention a pain point', 'Share a result', 'Make them curious'],
+        discovery: ['Ask about their situation', 'Listen more than talk', 'Dig deeper'],
+        objection: ['Acknowledge concern', 'Ask clarifying questions', 'Provide proof'],
+        close: ['Ask for next step', 'Suggest specific time', 'Be confident']
+    };
+
+    const SALE_PATTERNS = ["let's do it", "yes, i'm interested", "i'll buy", "sounds good", "sign me up", "let's proceed", "i'll take it", "we have a deal", "count me in", "let's move forward", "i'm in", "send me the contract", "yes, let's go"];
+    const HANGUP_PATTERNS = ["goodbye", "have to go", "not interested right now", "can't talk right now", "too busy for this", "don't call again", "remove me from your list", "i'm hanging up"];
+
+    // ============================================
+    // STATE
+    // ============================================
+    let currentUser = null;
+    let isGuest = false;
+    let currentScreen = 'landing';
+    let selectedIndustry = null;
+    let isFirstCall = true;
+    let promptsOn = true;
+    let stage = 'opening';
+    let callActive = false;
+    let timerInterval = null;
+    let duration = 0;
+    let warningShown = false;
+    let promptTimeout = null;
+    let synthesis = window.speechSynthesis;
+    let voices = [];
+    let conversation = [];
+    let session = null;
+    let isProcessing = false;
+    let stats = { totalCalls: 0, totalSales: 0, totalEarnings: 0, totalTime: 0, scores: [], history: [], currentStreak: 0, maxWinStreak: 0 };
+    let openaiKey = '';
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let isRecording = false;
+
+    // ============================================
+    // AUTH FUNCTIONS
+    // ============================================
+    function showAuthModal() {
+        document.getElementById('authModal').classList.add('active');
+        document.getElementById('authStatus').innerHTML = '';
+    }
+    
+    function closeAuthModal() {
+        document.getElementById('authModal').classList.remove('active');
+    }
+    
+    function switchAuthTab(tab) {
+        document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+        document.querySelector(`.auth-tab:nth-child(${tab === 'login' ? 1 : 2})`).classList.add('active');
+        document.getElementById(tab === 'login' ? 'loginForm' : 'signupForm').classList.add('active');
+        document.getElementById('authStatus').innerHTML = '';
+    }
+    
+    async function handleLogin() {
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        
+        if (!email || !password) {
+            document.getElementById('authStatus').innerHTML = '<div class="modal-status error">Please enter email and password</div>';
+            return;
+        }
+        
+        const btn = document.getElementById('loginBtn');
+        btn.innerHTML = '<div class="loading-spinner"></div>';
+        btn.disabled = true;
+        
+        try {
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            
+            if (error) throw error;
+            
+            currentUser = data.user;
+            isGuest = false;
+            await loadUserStats();
+            updateAuthUI();
+            closeAuthModal();
+            
+        } catch (error) {
+            document.getElementById('authStatus').innerHTML = `<div class="modal-status error">${error.message}</div>`;
+        } finally {
+            btn.innerHTML = 'Sign In';
+            btn.disabled = false;
+        }
+    }
+    
+    async function handleSignup() {
+        const email = document.getElementById('signupEmail').value.trim();
+        const password = document.getElementById('signupPassword').value;
+        
+        if (!email || !password) {
+            document.getElementById('authStatus').innerHTML = '<div class="modal-status error">Please enter email and password</div>';
+            return;
+        }
+        
+        if (password.length < 6) {
+            document.getElementById('authStatus').innerHTML = '<div class="modal-status error">Password must be at least 6 characters</div>';
+            return;
+        }
+        
+        const btn = document.getElementById('signupBtn');
+        btn.innerHTML = '<div class="loading-spinner"></div>';
+        btn.disabled = true;
+        
+        try {
+            const { data, error } = await supabase.auth.signUp({ email, password });
+            
+            if (error) throw error;
+            
+            if (data.user && !data.user.confirmed_at) {
+                document.getElementById('authStatus').innerHTML = '<div class="modal-status success">✅ Check your email to confirm your account!</div>';
+            } else {
+                currentUser = data.user;
+                isGuest = false;
+                await initUserStats();
+                updateAuthUI();
+                closeAuthModal();
+            }
+            
+        } catch (error) {
+            document.getElementById('authStatus').innerHTML = `<div class="modal-status error">${error.message}</div>`;
+        } finally {
+            btn.innerHTML = 'Create Account';
+            btn.disabled = false;
+        }
+    }
+    
+    function continueAsGuest() {
+        isGuest = true;
+        currentUser = null;
+        loadLocalStats();
+        updateAuthUI();
+        closeAuthModal();
+    }
+    
+    async function handleLogout() {
+        if (currentUser) {
+            await supabase.auth.signOut();
+        }
+        currentUser = null;
+        isGuest = false;
+        stats = { totalCalls: 0, totalSales: 0, totalEarnings: 0, totalTime: 0, scores: [], history: [], currentStreak: 0, maxWinStreak: 0 };
+        updateAuthUI();
+        switchScreen('landing');
+    }
+    
+    function updateAuthUI() {
+        const badge = document.getElementById('userBadge');
+        const btn = document.getElementById('authBtn');
+        
+        if (currentUser) {
+            badge.style.display = 'flex';
+            document.getElementById('userEmail').textContent = currentUser.email;
+            btn.textContent = 'Sign Out';
+            btn.onclick = handleLogout;
+        } else if (isGuest) {
+            badge.style.display = 'flex';
+            document.getElementById('userEmail').textContent = 'Guest';
+            btn.textContent = 'Sign In';
+            btn.onclick = showAuthModal;
+        } else {
+            badge.style.display = 'none';
+            btn.textContent = 'Sign In';
+            btn.onclick = showAuthModal;
+        }
+    }
+    
+    // ============================================
+    // STATS SYNC (SUPABASE)
+    // ============================================
+    async function loadUserStats() {
+        if (!currentUser) return;
+        
+        try {
+            const { data, error } = await supabase
+                .from('user_stats')
+                .select('stats')
+                .eq('user_id', currentUser.id)
+                .single();
+            
+            if (error && error.code !== 'PGRST116') throw error;
+            
+            if (data && data.stats) {
+                stats = { ...stats, ...data.stats };
+            }
+        } catch (error) {
+            console.error('Error loading stats:', error);
+        }
+    }
+    
+    async function initUserStats() {
+        if (!currentUser) return;
+        
+        try {
+            const { error } = await supabase
+                .from('user_stats')
+                .insert({ user_id: currentUser.id, stats: stats });
+            
+            if (error && error.code !== '23505') throw error;
+        } catch (error) {
+            console.error('Error initializing stats:', error);
+        }
+    }
+    
+    async function saveStats() {
+        if (currentUser) {
+            try {
+                const { error } = await supabase
+                    .from('user_stats')
+                    .upsert({ 
+                        user_id: currentUser.id, 
+                        stats: stats,
+                        updated_at: new Date().toISOString()
+                    }, { onConflict: 'user_id' });
+                
+                if (error) throw error;
+            } catch (error) {
+                console.error('Error saving stats:', error);
+            }
+        } else {
+            // Guest mode - save to localStorage
+            try { localStorage.setItem('valtoriStats', JSON.stringify(stats)); } catch (e) {}
+        }
+    }
+    
+    function loadLocalStats() {
+        try {
+            const saved = localStorage.getItem('valtoriStats');
+            if (saved) stats = { ...stats, ...JSON.parse(saved) };
+        } catch (e) {
+            console.error('Stats load error:', e);
+        }
+    }
+
+    // ============================================
+    // INITIALIZATION
+    // ============================================
+    async function init() {
+        console.log('🚀 Valtori AI initializing...');
+        
+        // Check for existing session
+        const { data: { session: existingSession } } = await supabase.auth.getSession();
+        
+        if (existingSession) {
+            currentUser = existingSession.user;
+            await loadUserStats();
+        } else {
+            loadLocalStats();
+        }
+        
+        loadPreferences();
+        
+        const savedKey = localStorage.getItem('openaiKey');
+        if (savedKey) openaiKey = savedKey;
+        
+        updateAuthUI();
+        updateDashboard();
+        
+        // Listen for auth changes
+        supabase.auth.onAuthStateChange(async (event, session) => {
+            if (event === 'SIGNED_IN' && session) {
+                currentUser = session.user;
+                isGuest = false;
+                await loadUserStats();
+                updateAuthUI();
+            } else if (event === 'SIGNED_OUT') {
+                currentUser = null;
+                updateAuthUI();
+            }
+        });
+        
+        console.log('✅ Initialization complete');
+    }
+
+    function loadPreferences() {
+        try {
+            const sp = localStorage.getItem('valtoriPromptsOn');
+            if (sp !== null) { promptsOn = sp === 'true'; document.getElementById('toggle')?.classList.toggle('active', promptsOn); }
+            const sf = localStorage.getItem('valtoriFirstCall');
+            if (sf !== null) isFirstCall = sf === 'true';
+        } catch (e) {}
+    }
+
+    function savePreferences() {
+        try { localStorage.setItem('valtoriPromptsOn', String(promptsOn)); localStorage.setItem('valtoriFirstCall', String(isFirstCall)); } catch (e) {}
+    }
+    
+    function handleGetStarted() {
+        if (!currentUser && !isGuest) {
+            showAuthModal();
+        } else {
+            goToIndustry();
+        }
+    }
+
+    // ============================================
+    // API KEY MANAGEMENT
+    // ============================================
+    function showAPIKeyModal() {
+        const status = document.getElementById('apiKeyStatus');
+        const input = document.getElementById('apiKeyInput');
+        if (openaiKey) {
+            status.innerHTML = '<div class="modal-status success">✅ API key configured</div>';
+            input.value = openaiKey.substring(0, 7) + '...' + openaiKey.slice(-4);
+        } else {
+            status.innerHTML = '<div class="modal-status error">⚠️ No API key - voice input disabled</div>';
+            input.value = '';
+        }
+        document.getElementById('apiKeyModal').classList.add('active');
+    }
+
+    function closeAPIKeyModal() { document.getElementById('apiKeyModal').classList.remove('active'); }
+
+    function saveAPIKey() {
+        const key = document.getElementById('apiKeyInput').value.trim();
+        if (!key || !key.startsWith('sk-')) { alert('Invalid key format. Should start with sk-'); return; }
+        openaiKey = key;
+        localStorage.setItem('openaiKey', key);
+        document.getElementById('apiKeyStatus').innerHTML = '<div class="modal-status success">✅ Key saved!</div>';
+        document.getElementById('apiKeyInput').value = key.substring(0, 7) + '...' + key.slice(-4);
+    }
+
+    function clearAPIKey() {
+        if (!confirm('Clear API key? Voice input will be disabled.')) return;
+        openaiKey = '';
+        localStorage.removeItem('openaiKey');
+        document.getElementById('apiKeyStatus').innerHTML = '<div class="modal-status error">⚠️ Key cleared</div>';
+        document.getElementById('apiKeyInput').value = '';
+    }
+
+    // ============================================
+    // SPEECH SYNTHESIS
+    // ============================================
+    function loadVoices() { voices = synthesis.getVoices(); }
+
+    function speak(text, callback) {
+        if (!synthesis) { if (callback) callback(); return; }
+        synthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        if (voices.length === 0) voices = synthesis.getVoices();
+        const eng = voices.filter(v => v.lang.startsWith('en'));
+        if (eng.length > 0) utterance.voice = eng[0];
+        utterance.rate = 0.95;
+        utterance.pitch = 1;
+        const avatar = document.getElementById('avatar');
+        const avatarStatus = document.getElementById('avatarStatus');
+        utterance.onstart = () => { avatar?.classList.remove('thinking'); avatar?.classList.add('speaking'); if (avatarStatus) avatarStatus.textContent = 'Speaking...'; };
+        utterance.onend = () => { avatar?.classList.remove('speaking'); if (avatarStatus) avatarStatus.textContent = 'AI Customer'; if (callback) callback(); };
+        utterance.onerror = () => { avatar?.classList.remove('speaking'); if (avatarStatus) avatarStatus.textContent = 'AI Customer'; if (callback) callback(); };
+        synthesis.speak(utterance);
+    }
+
+    // ============================================
+    // SCREEN MANAGEMENT
+    // ============================================
+    function switchScreen(screen) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screen)?.classList.add('active');
+        currentScreen = screen;
+        const pt = document.getElementById('promptToggle');
+        if (pt) pt.style.display = screen === 'call' ? 'flex' : 'none';
+    }
+
+    function goToIndustry() { switchScreen('industry'); }
+    function goToDashboard() { updateDashboard(); switchScreen('dashboard'); }
+
+    // ============================================
+    // INDUSTRY SELECTION
+    // ============================================
+    function showProduct() {
+        const industry = document.getElementById('industrySelect').value;
+        if (!industry || !INDUSTRIES[industry]) {
+            document.getElementById('productCard').classList.remove('show');
+            document.getElementById('startBtn').disabled = true;
+            return;
+        }
+        selectedIndustry = industry;
+        const c = INDUSTRIES[industry];
+        document.getElementById('productName').textContent = c.product;
+        document.getElementById('productPrice').textContent = '$' + c.price.toLocaleString();
+        document.getElementById('commissionValue').textContent = '$' + (c.price * c.commission).toLocaleString();
+        document.getElementById('productCard').classList.add('show');
+        document.getElementById('startBtn').disabled = false;
+    }
+
+    // ============================================
+    // TUTORIAL
+    // ============================================
+    function showTutorial() { if (isFirstCall) document.getElementById('tutorialModal').classList.add('active'); else startCall(); }
+    function skipTutorial() { document.getElementById('tutorialModal').classList.remove('active'); isFirstCall = false; savePreferences(); startCall(); }
+
+    // ============================================
+    // CALL MANAGEMENT
+    // ============================================
+    function startCall() {
+        console.log('📞 Starting call...');
+        document.getElementById('tutorialModal').classList.remove('active');
+        switchScreen('call');
+        callActive = true;
+        duration = 0;
+        warningShown = false;
+        conversation = [];
+        stage = 'opening';
+        isProcessing = false;
+        const c = INDUSTRIES[selectedIndustry];
+        session = { timestamp: new Date().toISOString(), industry: selectedIndustry, product: c.product, price: c.price, commission: c.price * c.commission, conversation: [], closed: false, saleAmount: 0 };
+        document.getElementById('transcript').innerHTML = '';
+        document.getElementById('warning').innerHTML = '';
+        document.getElementById('prompt').innerHTML = '';
+        document.getElementById('timer').textContent = '00:00';
+        document.getElementById('callStatus').textContent = 'Call in Progress';
+        setInputsEnabled(true);
+        startTimer();
+        setTimeout(() => {
+            const greetings = ["Hello?", "Yes, this is speaking.", "Hi, who's calling?", "Hello, how can I help you?"];
+            const g = greetings[Math.floor(Math.random() * greetings.length)];
+            addMessage('ai', g);
+            speak(g, () => updatePrompt());
+        }, 1000);
+    }
+
+    function startTimer() {
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            duration++;
+            const m = Math.floor(duration / 60), s = duration % 60;
+            const t = document.getElementById('timer');
+            if (t) t.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            if (duration === 60 && !warningShown) {
+                warningShown = true;
+                const w = document.getElementById('warning');
+                if (w) w.innerHTML = '<div class="warning">⚠️ 60 seconds - Consider closing soon</div>';
+            }
+        }, 1000);
+    }
+
+    function stopTimer() { if (timerInterval) { clearInterval(timerInterval); timerInterval = null; } }
+
+    function setInputsEnabled(enabled) {
+        const m = document.getElementById('micBtn'), t = document.getElementById('textInput'), s = document.getElementById('sendBtn');
+        if (m) m.disabled = !enabled;
+        if (t) t.disabled = !enabled;
+        if (s) s.disabled = !enabled;
+    }
+
+    function endCall() {
+        if (!callActive) return;
+        console.log('📴 Ending call...');
+        stopTimer();
+        callActive = false;
+        setInputsEnabled(false);
+        document.getElementById('callStatus').textContent = 'Call Ended';
+        endCallScore();
+    }
+
+    // ============================================
+    // VOICE INPUT (WHISPER)
+    // ============================================
+    async function toggleMic() {
+        if (!openaiKey) { showAPIKeyModal(); return; }
+        if (!callActive || isProcessing) return;
+        const btn = document.getElementById('micBtn');
+        if (isRecording) {
+            isRecording = false;
+            btn.classList.remove('recording');
+            btn.innerHTML = '🎤<div class="mic-label">Processing...</div>';
+            if (mediaRecorder?.state === 'recording') mediaRecorder.stop();
+        } else {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                mediaRecorder.onstop = async () => {
+                    const blob = new Blob(audioChunks, { type: 'audio/webm' });
+                    stream.getTracks().forEach(t => t.stop());
+                    await transcribeAudio(blob);
+                    btn.innerHTML = '🎤<div class="mic-label">Click to Speak</div>';
+                };
+                mediaRecorder.onerror = () => {
+                    stream.getTracks().forEach(t => t.stop());
+                    btn.innerHTML = '🎤<div class="mic-label">Click to Speak</div>';
+                    alert('Recording error. Try text input.');
+                };
+                mediaRecorder.start();
+                isRecording = true;
+                btn.classList.add('recording');
+                btn.innerHTML = '🎤<div class="mic-label">Recording... Click to Stop</div>';
+            } catch (e) {
+                console.error('Mic error:', e);
+                alert('Could not access microphone. Use text input.');
+            }
+        }
+    }
+
+    async function transcribeAudio(blob) {
+        try {
+            const fd = new FormData();
+            fd.append('file', blob, 'audio.webm');
+            fd.append('model', 'whisper-1');
+            const r = await fetch('https://api.openai.com/v1/audio/transcriptions', { method: 'POST', headers: { 'Authorization': `Bearer ${openaiKey}` }, body: fd });
+            if (!r.ok) {
+                if (r.status === 401) { alert('Invalid API key.'); showAPIKeyModal(); }
+                else if (r.status === 429) alert('Rate limited. Wait and retry.');
+                else alert('Transcription failed.');
+                return;
+            }
+            const d = await r.json();
+            if (d.text?.trim()) handleUserSpeech(d.text.trim());
+            else alert('Could not understand audio. Try again.');
+        } catch (e) {
+            console.error('Whisper error:', e);
+            alert('Transcription failed. Check connection.');
+        }
+    }
+
+    // ============================================
+    // TEXT INPUT
+    // ============================================
+    function sendTextInput() {
+        const input = document.getElementById('textInput');
+        const text = input.value.trim();
+        if (!text || !callActive || isProcessing) return;
+        input.value = '';
+        handleUserSpeech(text);
+    }
+
+    // ============================================
+    // CONVERSATION HANDLING
+    // ============================================
+    function handleUserSpeech(text) {
+        if (!callActive || isProcessing) return;
+        addMessage('user', text);
+        updateStage(text);
+        isProcessing = true;
+        setInputsEnabled(false);
+        const avatar = document.getElementById('avatar'), avatarStatus = document.getElementById('avatarStatus');
+        if (avatar) avatar.classList.add('thinking');
+        if (avatarStatus) avatarStatus.textContent = 'Thinking...';
+        setTimeout(() => getAIResponse(text), 500);
+    }
+
+    function addMessage(speaker, text) {
+        const transcript = document.getElementById('transcript');
+        if (!transcript) return;
+        const msg = document.createElement('div');
+        msg.className = `message ${speaker}`;
+        const label = speaker === 'user' ? 'You' : speaker === 'ai' ? 'Customer' : 'System';
+        const sp = document.createElement('div');
+        sp.className = 'speaker';
+        sp.textContent = label;
+        const tx = document.createElement('div');
+        tx.textContent = text;
+        msg.appendChild(sp);
+        msg.appendChild(tx);
+        transcript.appendChild(msg);
+        transcript.scrollTop = transcript.scrollHeight;
+        conversation.push({ speaker, text, timestamp: duration });
+    }
+
+    // ============================================
+    // STAGE PROGRESSION
+    // ============================================
+    function updateStage(text) {
+        const l = text.toLowerCase();
+        if (stage === 'opening' && (l.includes('my name is') || l.includes('calling from') || l.includes('this is'))) stage = 'permission';
+        else if (stage === 'permission' && (l.includes('help') || l.includes('benefit') || l.includes('save'))) stage = 'value';
+        else if (stage === 'value' && (l.includes('?') || l.includes('tell me'))) stage = 'discovery';
+        else if (stage === 'discovery' && (l.includes('understand') || l.includes('i hear'))) stage = 'objection';
+        if (l.includes('buy') || l.includes('purchase') || l.includes('sign up') || l.includes('get started')) stage = 'close';
+        updatePrompt();
+    }
+
+    function updatePrompt() {
+        if (!promptsOn) return;
+        const prompts = STAGES[stage];
+        if (!prompts) return;
+        if (promptTimeout) clearTimeout(promptTimeout);
+        const p = prompts[Math.floor(Math.random() * prompts.length)];
+        const el = document.getElementById('prompt');
+        if (el) {
+            el.innerHTML = `<div class="prompt-box"><div class="prompt-label">💡 ${stage.toUpperCase()}</div><div>${p}</div></div>`;
+            promptTimeout = setTimeout(() => { el.innerHTML = ''; }, 8000);
+        }
+    }
+
+    function togglePrompts() {
+        promptsOn = !promptsOn;
+        const toggle = document.getElementById('toggle'), prompt = document.getElementById('prompt');
+        if (toggle) toggle.classList.toggle('active', promptsOn);
+        if (promptsOn) updatePrompt();
+        else if (prompt) prompt.innerHTML = '';
+        savePreferences();
+    }
+
+    // ============================================
+    // AI RESPONSE (CLAUDE API)
+    // ============================================
+    async function getAIResponse(userText) {
+        const avgScore = stats.scores.length > 0 ? stats.scores.reduce((a, b) => a + b, 0) / stats.scores.length : 50;
+        let difficulty = 'medium';
+        if (avgScore > 75) difficulty = 'hard';
+        else if (avgScore < 50) difficulty = 'easy';
+        const c = INDUSTRIES[selectedIndustry];
+        const systemPrompt = `You are a ${difficulty} sales prospect in a cold call simulation.
+
+CONTEXT:
+- Industry: ${selectedIndustry}
+- Product: ${c.product}
+- Price: $${c.price.toLocaleString()}
+
+PERSONALITY (${difficulty}):
+${difficulty === 'easy' ? '- Receptive and friendly, open to hearing more' : difficulty === 'medium' ? '- Skeptical but professional, needs convincing' : '- Very busy, impatient, may hang up'}
+
+CONVERSATION:
+${conversation.map(x => `${x.speaker.toUpperCase()}: ${x.text}`).join('\n')}
+
+Respond in 1-2 sentences as the prospect. You may ask questions, give objections, show interest, or end the call if it's going poorly.${Math.random() > 0.7 ? ' Consider giving an objection.' : ''}`;
+
+        try {
+            const r = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'anthropic-version': '2023-06-01' },
+                body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 150, messages: [{ role: 'user', content: systemPrompt }] })
+            });
+            const d = await r.json();
+            if (d.error) throw new Error(d.error.message);
+            if (!d.content?.[0]?.text) throw new Error('Invalid response');
+            const aiText = d.content[0].text.trim();
+            addMessage('ai', aiText);
+            const lower = aiText.toLowerCase();
+            if (SALE_PATTERNS.some(p => lower.includes(p))) { handleSale(); return; }
+            if (HANGUP_PATTERNS.some(p => lower.includes(p))) { speak(aiText, () => setTimeout(handleHangUp, 1500)); return; }
+            speak(aiText, () => { isProcessing = false; if (callActive) setInputsEnabled(true); });
+        } catch (e) {
+            console.error('AI error:', e);
+            document.getElementById('avatar')?.classList.remove('thinking');
+            const fallback = "I'm sorry, could you repeat that?";
+            addMessage('ai', fallback);
+            speak(fallback, () => { isProcessing = false; if (callActive) setInputsEnabled(true); });
+        }
+    }
+
+    // ============================================
+    // SALE HANDLING
+    // ============================================
+    function handleSale() {
+        console.log('🎉 SALE CLOSED!');
+        session.closed = true;
+        session.saleAmount = INDUSTRIES[selectedIndustry].price;
+        try { new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuAy/DajTwJEmiy6OyNPwwSVa7n77BLDQw7k9fzx3UjBSt8x+3akD0IEGCv5+WcUAwMUKXh8bJQDgsxhcXtypRBAw==').play().catch(() => {}); } catch (e) {}
+        const banner = document.getElementById('saleBanner');
+        if (banner) { banner.classList.add('active'); setTimeout(() => banner.classList.remove('active'), 2000); }
+        stats.totalSales++;
+        stats.totalEarnings += session.commission;
+        stats.currentStreak++;
+        if (stats.currentStreak > stats.maxWinStreak) stats.maxWinStreak = stats.currentStreak;
+        saveStats();
+        const msgs = ["Great! I'll send the details.", "Perfect! Let me set that up.", "Excellent choice!"];
+        const msg = msgs[Math.floor(Math.random() * msgs.length)];
+        addMessage('ai', msg);
+        speak(msg, () => setTimeout(() => { stopTimer(); callActive = false; endCallScore(); }, 2000));
+    }
+
+    function handleHangUp() {
+        console.log('📵 Hung up');
+        stopTimer();
+        callActive = false;
+        stats.currentStreak = 0;
+        saveStats();
+        document.getElementById('callStatus').textContent = 'Call Ended';
+        setTimeout(endCallScore, 1000);
+    }
+
+    // ============================================
+    // SCORING
+    // ============================================
+    async function endCallScore() {
+        console.log('📊 Calculating score...');
+        addMessage('system', 'Analyzing performance...');
+        let score;
+        try { score = await calculateScore(); } catch (e) { console.error('Score error:', e); score = getDefaultScore(); }
+        session.score = score;
+        session.duration = duration;
+        session.conversation = [...conversation];
+        stats.totalCalls++;
+        stats.totalTime += duration;
+        stats.scores.push(score.overall);
+        stats.history.unshift(session);
+        if (stats.history.length > 100) stats.history = stats.history.slice(0, 100);
+        saveStats();
+        if (isFirstCall) { isFirstCall = false; savePreferences(); }
+        displayResults(score);
+        switchScreen('results');
+    }
+
+    async function calculateScore() {
+        const transcript = conversation.map(c => `${c.speaker.toUpperCase()}: ${c.text}`).join('\n');
+        if (transcript.length < 20) return getDefaultScore();
+        const prompt = `Analyze this sales call and score 0-100 on each metric.
+
+TRANSCRIPT:
+${transcript}
+
+CONTEXT:
+- Product: ${session.product}
+- Price: $${session.price.toLocaleString()}
+- Duration: ${duration}s
+- Outcome: ${session.closed ? 'CLOSED' : 'No sale'}
+
+Score: closing, objection, confidence, rapport (0-100 each)
+Provide: 2 strengths, 2 improvements, 3 insights
+
+Respond with ONLY JSON:
+{"closing":N,"objection":N,"confidence":N,"rapport":N,"strengths":["...","..."],"improvements":["...","..."],"insights":[{"type":"strength|weakness|opportunity","title":"...","desc":"..."},{"type":"...","title":"...","desc":"..."},{"type":"...","title":"...","desc":"..."}]}`;
+
+        try {
+            const r = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'anthropic-version': '2023-06-01' },
+                body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 800, messages: [{ role: 'user', content: prompt }] })
+            });
+            const d = await r.json();
+            if (d.error || !d.content?.[0]?.text) throw new Error('API error');
+            const text = d.content[0].text;
+            const start = text.indexOf('{'), end = text.lastIndexOf('}');
+            if (start === -1 || end === -1) throw new Error('No JSON');
+            const analysis = JSON.parse(text.substring(start, end + 1));
+            return processAnalysis(analysis);
+        } catch (e) {
+            console.error('Score calc error:', e);
+            return getDefaultScore();
+        }
+    }
+
+    function processAnalysis(a) {
+        const clamp = (v) => Math.max(0, Math.min(100, Number(v) || 50));
+        const closing = clamp(a.closing), objection = clamp(a.objection), confidence = clamp(a.confidence), rapport = clamp(a.rapport);
+        return {
+            overall: Math.round((closing + objection + confidence + rapport) / 4),
+            metrics: { closing, objection, confidence, rapport },
+            feedback: {
+                strengths: a.strengths || ['Completed the call', 'Showed initiative'],
+                improvements: a.improvements || ['Ask more questions', 'Handle objections better'],
+                insights: a.insights || [{ type: 'opportunity', title: 'Keep Practicing', desc: 'Consistency is key' }]
+            }
+        };
+    }
+
+    function getDefaultScore() {
+        const base = session.closed ? 75 : 55;
+        return {
+            overall: base,
+            metrics: { closing: session.closed ? 85 : 45, objection: 60, confidence: 65, rapport: 60 },
+            feedback: {
+                strengths: ['Completed the call', 'Showed initiative'],
+                improvements: ['Ask more discovery questions', 'Handle objections with proof'],
+                insights: [
+                    { type: session.closed ? 'strength' : 'opportunity', title: session.closed ? 'Great Close!' : 'Keep Trying', desc: session.closed ? 'You successfully navigated to a close' : 'Practice makes perfect' },
+                    { type: 'opportunity', title: 'Track Progress', desc: 'Review your dashboard to spot patterns' },
+                    { type: 'weakness', title: 'Time Management', desc: 'Aim for efficient calls under 3 minutes' }
+                ]
+            }
+        };
+    }
+
+    // ============================================
+    // DISPLAY RESULTS
+    // ============================================
+    function displayResults(score) {
+        document.getElementById('overallScore').textContent = score.overall;
+        document.getElementById('outcomeIcon').textContent = session.closed ? '✅ CLOSED' : '❌ NO SALE';
+        const m = Math.floor(duration / 60), s = duration % 60;
+        document.getElementById('callDuration').textContent = `${m}:${String(s).padStart(2, '0')}`;
+        document.getElementById('commissionEarned').textContent = session.closed ? '+$' + session.commission.toLocaleString() : '$0';
+        ['closing', 'objection', 'confidence', 'rapport'].forEach(metric => {
+            const val = score.metrics[metric];
+            const cap = metric.charAt(0).toUpperCase() + metric.slice(1);
+            document.getElementById('kpi' + cap).textContent = val;
+            setTimeout(() => { document.getElementById('bar' + cap).style.width = val + '%'; }, 100);
+        });
+        const sl = document.getElementById('strengthsList');
+        sl.innerHTML = '';
+        score.feedback.strengths.forEach(s => { sl.innerHTML += `<div class="breakdown-item positive"><div class="breakdown-label">✅ ${s}</div></div>`; });
+        const il = document.getElementById('improvementsList');
+        il.innerHTML = '';
+        score.feedback.improvements.forEach(i => { il.innerHTML += `<div class="breakdown-item negative"><div class="breakdown-label">💡 ${i}</div></div>`; });
+        const inl = document.getElementById('insightsList');
+        inl.innerHTML = '';
+        const icons = { strength: '💪', weakness: '⚠️', opportunity: '🎯' };
+        score.feedback.insights.forEach(ins => {
+            inl.innerHTML += `<div class="insight-item ${ins.type}"><div class="insight-icon">${icons[ins.type] || '💡'}</div><div class="insight-content"><div class="insight-title">${ins.title}</div><div class="insight-desc">${ins.desc}</div></div></div>`;
+        });
+    }
+
+    // ============================================
+    // DASHBOARD
+    // ============================================
+    function updateDashboard() {
+        const cr = stats.totalCalls > 0 ? Math.round((stats.totalSales / stats.totalCalls) * 100) : 0;
+        document.getElementById('dCloseRate').textContent = cr + '%';
+        document.getElementById('dCloseSub').textContent = `${stats.totalSales} / ${stats.totalCalls} calls`;
+        document.getElementById('dEarnings').textContent = '$' + stats.totalEarnings.toLocaleString();
+        document.getElementById('dEarningSub').textContent = `${stats.totalSales} closed`;
+        if (stats.scores.length > 0) {
+            const avg = Math.round(stats.scores.reduce((a, b) => a + b, 0) / stats.scores.length);
+            document.getElementById('dAvgScore').textContent = avg;
+            if (stats.scores.length >= 2) {
+                const recentScores = stats.scores.slice(-3);
+                const recent = recentScores.reduce((a, b) => a + b, 0) / recentScores.length;
+                const overall = stats.scores.reduce((a, b) => a + b, 0) / stats.scores.length;
+                document.getElementById('dScoreTrend').textContent = recent > overall ? '📈 Improving' : recent < overall ? '📉 Declining' : '➡️ Stable';
+            } else document.getElementById('dScoreTrend').textContent = 'Getting started';
+        } else {
+            document.getElementById('dAvgScore').textContent = '--';
+            document.getElementById('dScoreTrend').textContent = 'No data';
+        }
+        const h = Math.floor(stats.totalTime / 3600), min = Math.floor((stats.totalTime % 3600) / 60);
+        document.getElementById('dTime').textContent = h > 0 ? `${h}h ${min}m` : `${min}m`;
+        document.getElementById('dCallCount').textContent = `${stats.totalCalls} calls`;
+        const exp = stats.totalCalls > 0 ? Math.round(stats.totalEarnings / stats.totalCalls) : 0;
+        document.getElementById('dExpectancy').textContent = exp > 0 ? '+$' + exp.toLocaleString() : '$0';
+        document.getElementById('dWinStreak').textContent = stats.maxWinStreak;
+        document.getElementById('dStreakSub').textContent = `Current: ${stats.currentStreak}`;
+        const hl = document.getElementById('historyList');
+        if (stats.history.length === 0) {
+            hl.innerHTML = '<div class="empty"><div class="empty-icon">📊</div><p>No calls yet</p><button class="btn btn-primary" onclick="practiceAgain()" style="margin-top:1rem">Start Practicing</button></div>';
+        } else {
+            hl.innerHTML = '';
+            stats.history.slice(0, 20).forEach(s => {
+                const d = new Date(s.timestamp);
+                const ec = s.closed ? 'positive' : 'negative';
+                const et = s.closed ? '+$' + s.commission.toLocaleString() : '$0';
+                hl.innerHTML += `<div class="history-item"><div><div class="history-date">${d.toLocaleDateString()} ${d.toLocaleTimeString()}</div><div class="history-details">${s.product} • ${Math.floor(s.duration / 60)}:${String(s.duration % 60).padStart(2, '0')}</div></div><div class="history-score">${s.score?.overall || '--'}</div><div class="history-outcome">${s.closed ? '✅' : '❌'}</div><div class="history-earnings ${ec}">${et}</div></div>`;
+            });
+        }
+    }
+
+    function practiceAgain() {
+        document.getElementById('transcript').innerHTML = '';
+        document.getElementById('warning').innerHTML = '';
+        document.getElementById('prompt').innerHTML = '';
+        if (selectedIndustry) startCall();
+        else switchScreen('industry');
+    }
+
+    // ============================================
+    // INITIALIZATION
+    // ============================================
+    window.addEventListener('load', () => {
+        init();
+        if (synthesis) {
+            synthesis.getVoices();
+            synthesis.onvoiceschanged = loadVoices;
+        }
+    });
+    </script>
 </body>
 </html>
