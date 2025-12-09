@@ -15,22 +15,18 @@
         }
         body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text); line-height: 1.6; }
         .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
-        .beta-badge { position: fixed; top: 1.5rem; right: 1.5rem; background: rgba(0, 245, 255, 0.1); border: 1px solid var(--cyan); padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; color: var(--cyan); z-index: 1000; cursor: pointer; transition: all 0.3s; }
-        .beta-badge:hover { background: rgba(0, 245, 255, 0.2); transform: scale(1.05); }
+        .beta-badge { position: fixed; top: 1.5rem; right: 1.5rem; background: rgba(0, 245, 255, 0.1); border: 1px solid var(--cyan); padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; color: var(--cyan); z-index: 1000; cursor: pointer; }
         .screen { display: none; animation: fadeIn 0.4s ease; }
         .screen.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .hero { text-align: center; padding: 6rem 0; }
         h1 { font-size: 4rem; font-weight: 900; line-height: 1.1; margin-bottom: 1.5rem; }
-        .gradient { background: linear-gradient(135deg, var(--cyan), var(--green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .gradient { background: linear-gradient(135deg, var(--cyan), var(--green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .subtitle { font-size: 1.3rem; color: var(--text-dim); margin-bottom: 3rem; }
         .btn { padding: 1rem 2.5rem; border: none; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.3s; text-transform: uppercase; }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-primary { background: var(--cyan); color: var(--bg-dark); box-shadow: 0 0 30px rgba(0, 245, 255, 0.3); }
-        .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 40px rgba(0, 245, 255, 0.5); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 40px rgba(0, 245, 255, 0.5); }
         .btn-secondary { background: var(--bg-card); color: var(--text); border: 1px solid var(--cyan); }
-        .btn-secondary:hover:not(:disabled) { background: rgba(0, 245, 255, 0.1); }
-        .btn-danger { background: var(--red); color: white; }
         .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-top: 4rem; }
         .feature { background: var(--bg-card); padding: 2rem; border-radius: 12px; border: 1px solid rgba(0, 245, 255, 0.1); transition: all 0.3s; }
         .feature:hover { border-color: var(--cyan); transform: translateY(-5px); }
@@ -41,7 +37,6 @@
         .selection-screen h2 { font-size: 2.5rem; margin-bottom: 1rem; }
         .selection-screen p { color: var(--text-dim); margin-bottom: 3rem; font-size: 1.1rem; }
         select { width: 100%; max-width: 400px; padding: 1rem 1.5rem; font-size: 1.1rem; background: var(--bg-card); border: 2px solid var(--cyan); border-radius: 8px; color: var(--text); cursor: pointer; margin-bottom: 2rem; }
-        select option { background: var(--bg-card); color: var(--text); }
         .product-card { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 2rem; margin: 2rem auto; max-width: 500px; opacity: 0; transform: translateY(20px); transition: all 0.5s; }
         .product-card.show { opacity: 1; transform: translateY(0); }
         .product-label { font-size: 0.85rem; color: var(--text-dimmer); text-transform: uppercase; margin-bottom: 0.5rem; }
@@ -55,34 +50,29 @@
         .avatar { width: 120px; height: 120px; margin: 2rem auto; border-radius: 50%; background: linear-gradient(135deg, var(--cyan), var(--green)); display: flex; align-items: center; justify-content: center; font-size: 3.5rem; animation: pulse 2s ease-in-out infinite; }
         @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(0, 245, 255, 0.4); } 50% { box-shadow: 0 0 0 30px rgba(0, 245, 255, 0); } }
         .avatar.speaking { animation: speaking 0.4s ease-in-out infinite; }
-        .avatar.thinking { animation: thinking 1.5s ease-in-out infinite; }
         @keyframes speaking { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
-        @keyframes thinking { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .transcript { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 1.5rem; max-height: 400px; overflow-y: auto; margin: 2rem 0; min-height: 150px; }
+        .transcript { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 1.5rem; max-height: 400px; overflow-y: auto; margin: 2rem 0; }
         .message { margin-bottom: 1rem; padding: 1rem; border-radius: 8px; animation: slideIn 0.3s ease; }
         @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
         .message.user { background: rgba(0, 245, 255, 0.08); border-left: 3px solid var(--cyan); }
         .message.ai { background: rgba(0, 255, 136, 0.08); border-left: 3px solid var(--green); }
-        .message.system { background: rgba(255, 213, 0, 0.08); border-left: 3px solid var(--yellow); font-style: italic; }
         .speaker { font-weight: 700; font-size: 0.85rem; margin-bottom: 0.4rem; text-transform: uppercase; }
         .message.user .speaker { color: var(--cyan); }
         .message.ai .speaker { color: var(--green); }
-        .message.system .speaker { color: var(--yellow); }
-        .prompt-box { background: linear-gradient(135deg, rgba(0, 245, 255, 0.15), rgba(0, 255, 136, 0.15)); border: 2px solid var(--cyan); border-radius: 8px; padding: 1.5rem; margin: 1rem 0; animation: fadeIn 0.3s ease; }
+        .prompt-box { background: linear-gradient(135deg, rgba(0, 245, 255, 0.15), rgba(0, 255, 136, 0.15)); border: 2px solid var(--cyan); border-radius: 8px; padding: 1.5rem; margin: 1rem 0; }
         .prompt-label { font-size: 0.8rem; text-transform: uppercase; color: var(--cyan); margin-bottom: 0.5rem; font-weight: 700; }
         .controls { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; margin: 2rem 0; padding-bottom: 2rem; }
         .mic-btn { width: 100px; height: 100px; border-radius: 50%; border: none; background: var(--red); color: white; font-size: 2.5rem; cursor: pointer; transition: all 0.3s; box-shadow: 0 5px 30px rgba(255, 51, 102, 0.4); position: relative; }
-        .mic-btn:hover:not(:disabled) { transform: scale(1.05); }
-        .mic-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .mic-btn:hover { transform: scale(1.05); }
         .mic-btn.recording { background: var(--cyan); animation: recordPulse 1.5s ease-in-out infinite; }
         @keyframes recordPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(0, 245, 255, 0.6); } 50% { box-shadow: 0 0 0 25px rgba(0, 245, 255, 0); } }
         .mic-label { position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%); font-size: 0.85rem; color: var(--text-dim); white-space: nowrap; }
         .input-row { display: flex; gap: 0.5rem; width: 100%; max-width: 600px; }
-        .text-input { flex: 1; padding: 1rem; font-size: 1rem; border-radius: 8px; border: 2px solid var(--cyan); background: var(--bg-card); color: var(--text); font-family: 'Inter', sans-serif; }
-        .text-input:focus { outline: none; border-color: var(--green); }
-        .text-input:disabled { opacity: 0.5; }
+        .text-input { flex: 1; padding: 1rem; font-size: 1rem; border-radius: 8px; border: 2px solid var(--cyan); background: var(--bg-card); color: var(--text); }
         .or-divider { color: var(--text-dimmer); font-size: 0.9rem; }
-        .warning { background: rgba(255, 213, 0, 0.15); border: 1px solid var(--yellow); color: var(--yellow); padding: 1rem; border-radius: 8px; text-align: center; margin: 1rem 0; animation: fadeIn 0.3s ease; }
+        .warning { background: rgba(255, 213, 0, 0.15); border: 1px solid var(--yellow); color: var(--yellow); padding: 1rem; border-radius: 8px; text-align: center; margin: 1rem 0; }
+        
+        /* RESULTS - FXReplay Style */
         .results { max-width: 1400px; margin: 0 auto; }
         .results-header { text-align: center; margin-bottom: 3rem; }
         .results-header h2 { font-size: 3rem; margin-bottom: 0.5rem; }
@@ -94,6 +84,7 @@
         .summary-value.green { color: var(--green); }
         .summary-value.yellow { color: var(--yellow); }
         .summary-value.red { color: var(--red); }
+        
         .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
         .kpi-card { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 1.5rem; }
         .kpi-title { font-size: 0.9rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
@@ -101,13 +92,15 @@
         .kpi-subtitle { font-size: 0.85rem; color: var(--text-dimmer); }
         .kpi-bar { height: 8px; background: var(--bg-darker); border-radius: 4px; margin-top: 1rem; overflow: hidden; }
         .kpi-bar-fill { height: 100%; background: linear-gradient(90deg, var(--cyan), var(--green)); transition: width 1.5s ease; width: 0; }
-        .breakdown-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem; margin-bottom: 2rem; }
+        
+        .breakdown-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 2rem; margin-bottom: 2rem; }
         .breakdown-card { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 2rem; }
         .breakdown-card h3 { margin-bottom: 1.5rem; font-size: 1.3rem; }
         .breakdown-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--bg-darker); border-radius: 8px; margin-bottom: 0.8rem; border-left: 3px solid transparent; }
         .breakdown-item.positive { border-left-color: var(--green); }
         .breakdown-item.negative { border-left-color: var(--red); }
         .breakdown-label { font-size: 1rem; }
+        
         .insights { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 2rem; margin-bottom: 2rem; }
         .insights h3 { margin-bottom: 1.5rem; font-size: 1.4rem; }
         .insight-item { display: flex; gap: 1rem; margin-bottom: 1rem; padding: 1.2rem; background: var(--bg-darker); border-radius: 8px; border-left: 4px solid transparent; }
@@ -118,7 +111,10 @@
         .insight-content { flex: 1; }
         .insight-title { font-weight: 700; margin-bottom: 0.3rem; font-size: 1.1rem; }
         .insight-desc { color: var(--text-dim); font-size: 0.95rem; }
-        .action-buttons { display: flex; gap: 1rem; justify-content: center; margin-top: 3rem; flex-wrap: wrap; }
+        
+        .action-buttons { display: flex; gap: 1rem; justify-content: center; margin-top: 3rem; }
+        
+        /* DASHBOARD - Enhanced */
         .dashboard { max-width: 1400px; margin: 0 auto; }
         .dashboard h2 { text-align: center; font-size: 2.5rem; margin-bottom: 0.5rem; }
         .dashboard-subtitle { text-align: center; color: var(--text-dim); margin-bottom: 3rem; }
@@ -126,8 +122,9 @@
         .perf-card { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 2rem; transition: all 0.3s; }
         .perf-card:hover { border-color: var(--cyan); transform: translateY(-5px); }
         .perf-label { font-size: 0.85rem; color: var(--text-dimmer); text-transform: uppercase; margin-bottom: 0.8rem; }
-        .perf-value { font-size: 3rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; background: linear-gradient(135deg, var(--cyan), var(--green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .perf-value { font-size: 3rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; background: linear-gradient(135deg, var(--cyan), var(--green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .perf-sub { font-size: 1rem; color: var(--text-dim); margin-top: 0.5rem; }
+        
         .history { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 2rem; }
         .history h3 { margin-bottom: 1.5rem; font-size: 1.4rem; }
         .history-item { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 1rem; align-items: center; padding: 1rem; background: var(--bg-darker); border-radius: 8px; border: 1px solid rgba(0, 245, 255, 0.1); margin-bottom: 1rem; transition: all 0.3s; }
@@ -139,31 +136,28 @@
         .history-earnings { text-align: right; font-size: 1.2rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
         .history-earnings.positive { color: var(--green); }
         .history-earnings.negative { color: var(--red); }
+        
         .empty { text-align: center; padding: 4rem 2rem; color: var(--text-dimmer); }
         .empty-icon { font-size: 4rem; margin-bottom: 1rem; opacity: 0.5; }
+        
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(6, 8, 17, 0.95); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 2000; }
         .modal-overlay.active { display: flex; }
-        .modal { background: var(--bg-card); border: 1px solid var(--cyan); border-radius: 16px; padding: 3rem; max-width: 600px; width: 90%; box-shadow: 0 20px 60px rgba(0, 245, 255, 0.3); max-height: 90vh; overflow-y: auto; }
-        .modal h2 { font-size: 2rem; margin-bottom: 1rem; background: linear-gradient(135deg, var(--cyan), var(--green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .modal { background: var(--bg-card); border: 1px solid var(--cyan); border-radius: 16px; padding: 3rem; max-width: 600px; width: 90%; box-shadow: 0 20px 60px rgba(0, 245, 255, 0.3); }
+        .modal h2 { font-size: 2rem; margin-bottom: 1rem; background: linear-gradient(135deg, var(--cyan), var(--green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .modal p { color: var(--text-dim); margin-bottom: 1rem; font-size: 1.05rem; }
         .modal ul { color: var(--text-dim); margin-left: 1.5rem; margin-bottom: 1rem; }
-        .modal ul li { margin-bottom: 0.5rem; }
-        .modal-actions { display: flex; gap: 1rem; margin-top: 2rem; flex-wrap: wrap; }
-        .modal-input { width: 100%; padding: 1rem; font-size: 1rem; border-radius: 8px; border: 2px solid var(--cyan); background: var(--bg-darker); color: var(--text); font-family: 'JetBrains Mono', monospace; margin-bottom: 1rem; }
-        .modal-input:focus { outline: none; border-color: var(--green); }
-        .modal-note { font-size: 0.85rem; color: var(--text-dimmer); margin-top: 0.5rem; }
-        .modal-note a { color: var(--cyan); }
-        .modal-status { padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem; }
-        .modal-status.success { background: rgba(0, 255, 136, 0.1); border: 1px solid var(--green); color: var(--green); }
-        .modal-status.error { background: rgba(255, 51, 102, 0.1); border: 1px solid var(--red); color: var(--red); }
+        .modal-actions { display: flex; gap: 1rem; margin-top: 2rem; }
+        
         .sale-banner { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: linear-gradient(135deg, var(--green), var(--cyan)); padding: 2rem 4rem; border-radius: 16px; font-size: 2.5rem; font-weight: 700; color: var(--bg-dark); z-index: 4000; box-shadow: 0 20px 60px rgba(0, 255, 136, 0.6); animation: salePopIn 0.5s ease; display: none; }
         .sale-banner.active { display: block; }
         @keyframes salePopIn { 0% { transform: translate(-50%, -50%) scale(0); } 50% { transform: translate(-50%, -50%) scale(1.1); } 100% { transform: translate(-50%, -50%) scale(1); } }
+        
         .prompt-toggle { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-card); border-top: 1px solid rgba(0, 245, 255, 0.1); padding: 1rem; display: none; justify-content: center; align-items: center; gap: 1rem; z-index: 100; }
         .toggle { width: 60px; height: 30px; background: var(--bg-darker); border-radius: 15px; cursor: pointer; border: 1px solid rgba(0, 245, 255, 0.1); position: relative; transition: all 0.3s; }
         .toggle.active { background: var(--cyan); }
         .toggle-slider { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; background: white; border-radius: 50%; transition: all 0.3s; }
         .toggle.active .toggle-slider { transform: translateX(30px); }
+        
         @media (max-width: 768px) {
             h1 { font-size: 2.5rem; }
             .subtitle { font-size: 1.1rem; }
@@ -172,13 +166,11 @@
             .mic-btn { width: 80px; height: 80px; font-size: 2rem; }
             .breakdown-grid { grid-template-columns: 1fr; }
             .history-item { grid-template-columns: 1fr; text-align: center; }
-            .modal { padding: 2rem; }
-            .container { padding: 1rem; }
         }
     </style>
 </head>
 <body>
-    <div class="beta-badge" onclick="showAPIKeyModal()">🔑 API</div>
+    <div class="beta-badge" onclick="setupAPIKey()">🔑 API Keys</div>
     <div class="container">
         <!-- LANDING SCREEN -->
         <div class="screen active" id="landing">
@@ -187,14 +179,26 @@
                 <p class="subtitle">Practice with AI customers. Get FXReplay-style analytics. Improve with data.</p>
                 <button class="btn btn-primary" onclick="goToIndustry()">Get Started</button>
                 <div class="features">
-                    <div class="feature"><div class="feature-icon">🎤</div><div class="feature-title">Real Voice Calls</div><div class="feature-desc">Speak naturally with AI customers who respond, object, and challenge</div></div>
-                    <div class="feature"><div class="feature-icon">📊</div><div class="feature-title">FXReplay-Style Analytics</div><div class="feature-desc">Win rate, expectancy, drawdowns, performance curves - everything traders use</div></div>
-                    <div class="feature"><div class="feature-icon">🎯</div><div class="feature-title">Adaptive Difficulty</div><div class="feature-desc">AI gets harder as you improve, pushing you to master every scenario</div></div>
+                    <div class="feature">
+                        <div class="feature-icon">🎤</div>
+                        <div class="feature-title">Real Voice Calls</div>
+                        <div class="feature-desc">Speak naturally with AI customers who respond, object, and challenge</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">📊</div>
+                        <div class="feature-title">FXReplay-Style Analytics</div>
+                        <div class="feature-desc">Win rate, expectancy, drawdowns, performance curves - everything traders use</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🎯</div>
+                        <div class="feature-title">Adaptive Difficulty</div>
+                        <div class="feature-desc">AI gets harder as you improve, pushing you to master every scenario</div>
+                    </div>
                 </div>
             </div>
         </div>
         
-        <!-- INDUSTRY SELECTION -->
+        <!-- INDUSTRY SELECTION SCREEN -->
         <div class="screen" id="industry">
             <div class="selection-screen">
                 <h2>Choose Your Industry</h2>
@@ -230,13 +234,16 @@
         <div class="screen" id="call">
             <div class="call-screen">
                 <div class="call-header">
-                    <div><div class="status" id="callStatus">Call in Progress</div><div style="font-size: 0.9rem; color: var(--text-dimmer); margin-top: 0.3rem;">Cold Call</div></div>
+                    <div>
+                        <div class="status">Call in Progress</div>
+                        <div style="font-size: 0.9rem; color: var(--text-dimmer); margin-top: 0.3rem;">Cold Call</div>
+                    </div>
                     <div class="timer" id="timer">00:00</div>
                 </div>
                 <div id="warning"></div>
                 <div style="text-align: center;">
                     <div class="avatar" id="avatar">🤖</div>
-                    <div id="avatarStatus" style="color: var(--text-dim); margin-top: 1rem;">AI Customer</div>
+                    <div style="color: var(--text-dim); margin-top: 1rem;">AI Customer</div>
                 </div>
                 <div id="prompt"></div>
                 <div class="transcript" id="transcript"></div>
@@ -244,8 +251,8 @@
                     <button class="mic-btn" id="micBtn" onclick="toggleMic()">🎤<div class="mic-label">Click to Speak</div></button>
                     <div class="or-divider">— or type —</div>
                     <div class="input-row">
-                        <input type="text" id="textInput" class="text-input" placeholder="Type your response..." maxlength="500" onkeypress="if(event.key==='Enter') sendTextInput()"/>
-                        <button class="btn btn-primary" id="sendBtn" onclick="sendTextInput()">Send</button>
+                        <input type="text" id="textInput" class="text-input" placeholder="Type your response..." onkeypress="if(event.key==='Enter') sendTextInput()"/>
+                        <button class="btn btn-primary" onclick="sendTextInput()">Send</button>
                     </div>
                     <button class="btn btn-secondary" onclick="endCall()">End Call</button>
                 </div>
@@ -259,23 +266,69 @@
                     <h2>Session Analysis</h2>
                     <p style="color: var(--text-dim); font-size: 1.1rem;">FXReplay-Style Performance Breakdown</p>
                 </div>
+                
                 <div class="session-summary">
-                    <div class="summary-item"><div class="summary-label">Overall Score</div><div class="summary-value cyan" id="overallScore">--</div></div>
-                    <div class="summary-item"><div class="summary-label">Outcome</div><div class="summary-value" id="outcomeIcon">--</div></div>
-                    <div class="summary-item"><div class="summary-label">Duration</div><div class="summary-value yellow" id="callDuration">--</div></div>
-                    <div class="summary-item"><div class="summary-label">Commission</div><div class="summary-value green" id="commissionEarned">--</div></div>
+                    <div class="summary-item">
+                        <div class="summary-label">Overall Score</div>
+                        <div class="summary-value cyan" id="overallScore">--</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Outcome</div>
+                        <div class="summary-value" id="outcomeIcon">--</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Duration</div>
+                        <div class="summary-value yellow" id="callDuration">--</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Commission</div>
+                        <div class="summary-value green" id="commissionEarned">--</div>
+                    </div>
                 </div>
+                
                 <div class="kpi-grid">
-                    <div class="kpi-card"><div class="kpi-title">📞 Closing Ability</div><div class="kpi-value" style="color: var(--cyan);" id="kpiClosing">--</div><div class="kpi-subtitle">How well you asked for the sale</div><div class="kpi-bar"><div class="kpi-bar-fill" id="barClosing"></div></div></div>
-                    <div class="kpi-card"><div class="kpi-title">🛡️ Objection Handling</div><div class="kpi-value" style="color: var(--green);" id="kpiObjection">--</div><div class="kpi-subtitle">Response to pushback</div><div class="kpi-bar"><div class="kpi-bar-fill" id="barObjection"></div></div></div>
-                    <div class="kpi-card"><div class="kpi-title">⚡ Confidence & Energy</div><div class="kpi-value" style="color: var(--yellow);" id="kpiConfidence">--</div><div class="kpi-subtitle">Tone and conviction</div><div class="kpi-bar"><div class="kpi-bar-fill" id="barConfidence"></div></div></div>
-                    <div class="kpi-card"><div class="kpi-title">🤝 Rapport Building</div><div class="kpi-value" style="color: var(--orange);" id="kpiRapport">--</div><div class="kpi-subtitle">Connection with prospect</div><div class="kpi-bar"><div class="kpi-bar-fill" id="barRapport"></div></div></div>
+                    <div class="kpi-card">
+                        <div class="kpi-title">📞 Closing Ability</div>
+                        <div class="kpi-value" style="color: var(--cyan);" id="kpiClosing">--</div>
+                        <div class="kpi-subtitle">How well you asked for the sale</div>
+                        <div class="kpi-bar"><div class="kpi-bar-fill" id="barClosing"></div></div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-title">🛡️ Objection Handling</div>
+                        <div class="kpi-value" style="color: var(--green);" id="kpiObjection">--</div>
+                        <div class="kpi-subtitle">Response to pushback</div>
+                        <div class="kpi-bar"><div class="kpi-bar-fill" id="barObjection"></div></div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-title">⚡ Confidence & Energy</div>
+                        <div class="kpi-value" style="color: var(--yellow);" id="kpiConfidence">--</div>
+                        <div class="kpi-subtitle">Tone and conviction</div>
+                        <div class="kpi-bar"><div class="kpi-bar-fill" id="barConfidence"></div></div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-title">🤝 Rapport Building</div>
+                        <div class="kpi-value" style="color: var(--orange);" id="kpiRapport">--</div>
+                        <div class="kpi-subtitle">Connection with prospect</div>
+                        <div class="kpi-bar"><div class="kpi-bar-fill" id="barRapport"></div></div>
+                    </div>
                 </div>
+                
                 <div class="breakdown-grid">
-                    <div class="breakdown-card"><h3>💪 What Worked</h3><div id="strengthsList"></div></div>
-                    <div class="breakdown-card"><h3>🎯 Areas to Improve</h3><div id="improvementsList"></div></div>
+                    <div class="breakdown-card">
+                        <h3>💪 What Worked</h3>
+                        <div id="strengthsList"></div>
+                    </div>
+                    <div class="breakdown-card">
+                        <h3>🎯 Areas to Improve</h3>
+                        <div id="improvementsList"></div>
+                    </div>
                 </div>
-                <div class="insights"><h3>🧠 AI-Powered Insights</h3><div id="insightsList"></div></div>
+                
+                <div class="insights">
+                    <h3>🧠 AI-Powered Insights</h3>
+                    <div id="insightsList"></div>
+                </div>
+                
                 <div class="action-buttons">
                     <button class="btn btn-primary" onclick="practiceAgain()">Practice Again</button>
                     <button class="btn btn-secondary" onclick="goToDashboard()">View Full Dashboard</button>
@@ -288,18 +341,49 @@
             <div class="dashboard">
                 <h2>Performance Dashboard</h2>
                 <p class="dashboard-subtitle">Track your progress with FXReplay-style analytics</p>
+                
                 <div class="performance-overview">
-                    <div class="perf-card"><div class="perf-label">Close Rate</div><div class="perf-value" id="dCloseRate">0%</div><div class="perf-sub" id="dCloseSub">0 / 0 calls</div></div>
-                    <div class="perf-card"><div class="perf-label">Total Earnings</div><div class="perf-value" id="dEarnings">$0</div><div class="perf-sub" id="dEarningSub">0 sales closed</div></div>
-                    <div class="perf-card"><div class="perf-label">Average Score</div><div class="perf-value" id="dAvgScore">--</div><div class="perf-sub" id="dScoreTrend">--</div></div>
-                    <div class="perf-card"><div class="perf-label">Practice Time</div><div class="perf-value" id="dTime">0m</div><div class="perf-sub" id="dCallCount">0 calls</div></div>
-                    <div class="perf-card"><div class="perf-label">Avg Per Call</div><div class="perf-value" id="dExpectancy">$0</div><div class="perf-sub">Expected earnings</div></div>
-                    <div class="perf-card"><div class="perf-label">Best Streak</div><div class="perf-value" id="dWinStreak">0</div><div class="perf-sub" id="dStreakSub">Current: 0</div></div>
+                    <div class="perf-card">
+                        <div class="perf-label">Close Rate</div>
+                        <div class="perf-value" id="dCloseRate">0%</div>
+                        <div class="perf-sub" id="dCloseSub">0 / 0 calls</div>
+                    </div>
+                    <div class="perf-card">
+                        <div class="perf-label">Total Earnings</div>
+                        <div class="perf-value" id="dEarnings">$0</div>
+                        <div class="perf-sub" id="dEarningSub">0 sales closed</div>
+                    </div>
+                    <div class="perf-card">
+                        <div class="perf-label">Average Score</div>
+                        <div class="perf-value" id="dAvgScore">--</div>
+                        <div class="perf-sub" id="dScoreTrend">--</div>
+                    </div>
+                    <div class="perf-card">
+                        <div class="perf-label">Practice Time</div>
+                        <div class="perf-value" id="dTime">0h</div>
+                        <div class="perf-sub" id="dCallCount">0 calls</div>
+                    </div>
+                    <div class="perf-card">
+                        <div class="perf-label">Expectancy</div>
+                        <div class="perf-value" id="dExpectancy">--</div>
+                        <div class="perf-sub">Average per call</div>
+                    </div>
+                    <div class="perf-card">
+                        <div class="perf-label">Win Streak</div>
+                        <div class="perf-value" id="dWinStreak">0</div>
+                        <div class="perf-sub" id="dStreakSub">Current: 0</div>
+                    </div>
                 </div>
-                <div class="history"><h3>Call History</h3><div id="historyList"><div class="empty"><div class="empty-icon">📊</div><p>No practice sessions yet</p><button class="btn btn-primary" onclick="practiceAgain()" style="margin-top: 1rem;">Start Practicing</button></div></div></div>
-                <div class="action-buttons">
-                    <button class="btn btn-primary" onclick="practiceAgain()">New Practice Call</button>
-                    <button class="btn btn-secondary" onclick="switchScreen('landing')">Back to Home</button>
+                
+                <div class="history">
+                    <h3>Call History</h3>
+                    <div id="historyList">
+                        <div class="empty">
+                            <div class="empty-icon">📊</div>
+                            <p>No practice sessions yet</p>
+                            <button class="btn btn-primary" onclick="practiceAgain()" style="margin-top: 1rem;">Start Practicing</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -312,689 +396,1153 @@
             <p>You're about to practice a real sales call with an AI customer.</p>
             <p><strong>How it works:</strong></p>
             <ul>
-                <li>Click the mic to speak OR type your response</li>
+                <li>Click mic to speak OR type your response</li>
                 <li>AI responds with voice and may throw objections</li>
-                <li>Watch for helpful coaching prompts</li>
-                <li>Get detailed analytics after each call</li>
+                <li>Watch for helpful prompts (toggle on/off)</li>
+                <li>Get detailed analytics like FXReplay traders</li>
             </ul>
+            <p>Ready?</p>
             <div class="modal-actions">
                 <button class="btn btn-primary" onclick="startCall()">Let's Go!</button>
-                <button class="btn btn-secondary" onclick="skipTutorial()">Skip Tutorial</button>
+                <button class="btn btn-secondary" onclick="skipTutorial()">Skip</button>
             </div>
         </div>
     </div>
     
-    <!-- API KEY MODAL -->
-    <div class="modal-overlay" id="apiKeyModal">
-        <div class="modal">
-            <h2>🔑 API Key Settings</h2>
-            <p>Configure your OpenAI API key for voice transcription.</p>
-            <div id="apiKeyStatus"></div>
-            <label style="display: block; color: var(--text-dim); margin-bottom: 0.5rem; font-size: 0.9rem;">OpenAI API Key</label>
-            <input type="password" id="apiKeyInput" class="modal-input" placeholder="sk-..." />
-            <p class="modal-note">Get your key at <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com/api-keys</a><br>Your key is stored locally only.</p>
-            <div class="modal-actions">
-                <button class="btn btn-primary" onclick="saveAPIKey()">Save Key</button>
-                <button class="btn btn-danger" onclick="clearAPIKey()">Clear Key</button>
-                <button class="btn btn-secondary" onclick="closeAPIKeyModal()">Close</button>
-            </div>
-            <p style="margin-top: 1.5rem; color: var(--text-dimmer); font-size: 0.85rem;"><strong>Note:</strong> Voice input requires an OpenAI key. You can still use text input without it.</p>
-        </div>
-    </div>
-    
+    <!-- SALE BANNER -->
     <div class="sale-banner" id="saleBanner">🎉 SALE CLOSED! 🎉</div>
-    <div class="prompt-toggle" id="promptToggle"><span>💡 Prompts:</span><div class="toggle active" id="toggle" onclick="togglePrompts()"><div class="toggle-slider"></div></div></div>
-
+    
+    <!-- PROMPT TOGGLE -->
+    <div class="prompt-toggle" id="promptToggle">
+        <span>💡 Prompts:</span>
+        <div class="toggle active" id="toggle" onclick="togglePrompts()"><div class="toggle-slider"></div></div>
+    </div>
+    
     <script>
-    // ============================================
-    // CONFIGURATION
-    // ============================================
-    const INDUSTRIES = {
-        saas: { product: 'Enterprise CRM Software', price: 8500, commission: 0.15 },
-        realestate: { product: 'Premium Property Listing', price: 450000, commission: 0.03 },
-        financial: { product: 'Wealth Management Package', price: 25000, commission: 0.08 },
-        consulting: { product: 'Business Strategy Engagement', price: 15000, commission: 0.20 },
-        insurance: { product: 'Commercial Insurance Policy', price: 12000, commission: 0.10 },
-        healthcare: { product: 'Medical Equipment System', price: 35000, commission: 0.12 },
-        manufacturing: { product: 'Industrial Automation Solution', price: 75000, commission: 0.08 },
-        ecommerce: { product: 'E-commerce Platform Package', price: 18000, commission: 0.15 },
-        marketing: { product: 'Annual Marketing Retainer', price: 48000, commission: 0.18 },
-        business: { product: 'Managed Services Contract', price: 24000, commission: 0.15 }
-    };
+// =============================================================================
+// CONFIGURATION & STATE
+// =============================================================================
 
-    const STAGES = {
-        opening: ['Introduce yourself professionally', 'State your company clearly', 'Ask if now is a good time'],
-        permission: ['Respect their time', 'Ask for 2-3 minutes', 'Create curiosity'],
-        value: ['Mention a pain point', 'Share a result', 'Make them curious'],
-        discovery: ['Ask about their situation', 'Listen more than talk', 'Dig deeper'],
-        objection: ['Acknowledge concern', 'Ask clarifying questions', 'Provide proof'],
-        close: ['Ask for next step', 'Suggest specific time', 'Be confident']
-    };
+const INDUSTRIES = {
+    saas: { product: 'Enterprise CRM Software', price: 8500, commission: 0.15 },
+    realestate: { product: 'Premium Property Listing', price: 450000, commission: 0.03 },
+    financial: { product: 'Wealth Management Package', price: 25000, commission: 0.08 },
+    consulting: { product: 'Business Strategy Engagement', price: 15000, commission: 0.20 },
+    insurance: { product: 'Commercial Insurance Policy', price: 12000, commission: 0.10 },
+    healthcare: { product: 'Medical Equipment System', price: 35000, commission: 0.12 },
+    manufacturing: { product: 'Industrial Automation Solution', price: 75000, commission: 0.08 },
+    ecommerce: { product: 'E-commerce Platform Package', price: 18000, commission: 0.15 },
+    marketing: { product: 'Annual Marketing Retainer', price: 48000, commission: 0.18 },
+    business: { product: 'Managed Services Contract', price: 24000, commission: 0.15 }
+};
 
-    const SALE_PATTERNS = ["let's do it", "yes, i'm interested", "i'll buy", "sounds good", "sign me up", "let's proceed", "i'll take it", "we have a deal", "count me in", "let's move forward", "i'm in", "send me the contract", "yes, let's go"];
-    const HANGUP_PATTERNS = ["goodbye", "have to go", "not interested right now", "can't talk right now", "too busy for this", "don't call again", "remove me from your list", "i'm hanging up"];
+const STAGES = {
+    opening: ['Introduce yourself professionally', 'State your company clearly', 'Ask if now is a good time'],
+    permission: ['Respect their time', 'Ask for 2-3 minutes', 'Create curiosity'],
+    value: ['Mention a pain point', 'Share a result', 'Make them curious'],
+    discovery: ['Ask about their situation', 'Listen more than talk', 'Dig deeper'],
+    objection: ['Acknowledge concern', 'Ask clarifying questions', 'Provide proof'],
+    close: ['Ask for next step', 'Suggest specific time', 'Be confident']
+};
 
-    // ============================================
-    // STATE
-    // ============================================
-    let currentScreen = 'landing';
-    let selectedIndustry = null;
-    let isFirstCall = true;
-    let promptsOn = true;
-    let stage = 'opening';
-    let callActive = false;
-    let timerInterval = null;
-    let duration = 0;
-    let warningShown = false;
-    let promptTimeout = null;
-    let synthesis = window.speechSynthesis;
-    let voices = [];
-    let conversation = [];
-    let session = null;
-    let isProcessing = false;
-    let stats = { totalCalls: 0, totalSales: 0, totalEarnings: 0, totalTime: 0, scores: [], history: [], currentStreak: 0, maxWinStreak: 0 };
-    let openaiKey = '';
-    let mediaRecorder = null;
-    let audioChunks = [];
-    let isRecording = false;
+// Application state
+let currentScreen = 'landing';
+let selectedIndustry = null;
+let isFirstCall = true;
+let promptsOn = true;
+let stage = 'opening';
+let callActive = false;
+let callStart = null;
+let timer = null;
+let duration = 0;
+let warningShown = false;
 
-    // ============================================
-    // INITIALIZATION
-    // ============================================
-    function init() {
-        console.log('🚀 Valtori AI initializing...');
-        loadStats();
-        loadPreferences();
-        const savedKey = localStorage.getItem('openaiKey');
-        if (savedKey) openaiKey = savedKey;
-        updateDashboard();
-        console.log('✅ Initialization complete');
+// Speech synthesis
+const synthesis = window.speechSynthesis;
+
+// Conversation tracking
+let conversation = [];
+let session = null;
+
+// Stats persistence
+let stats = {
+    totalCalls: 0,
+    totalSales: 0,
+    totalEarnings: 0,
+    totalTime: 0,
+    scores: [],
+    history: [],
+    currentStreak: 0,
+    maxWinStreak: 0
+};
+
+// API Keys
+let openaiKey = '';      // For Whisper voice transcription
+let anthropicKey = '';   // For Claude AI responses
+
+// Recording state
+let mediaRecorder = null;
+let audioChunks = [];
+let isRecording = false;
+
+// Conversation context (tracks what AI knows)
+let conversationContext = {
+    productMentioned: false,
+    priceMentioned: false,
+    companyMentioned: false,
+    benefitsMentioned: false
+};
+
+// =============================================================================
+// INITIALIZATION
+// =============================================================================
+
+function init() {
+    loadStats();
+    updateDashboard();
+    
+    // Load OpenAI key (for voice)
+    const savedOpenAI = localStorage.getItem('openaiKey');
+    if (savedOpenAI) {
+        openaiKey = savedOpenAI;
+        console.log('✅ OpenAI API key loaded');
     }
+    
+    // Load Anthropic key (for AI responses)
+    const savedAnthropic = localStorage.getItem('anthropicKey');
+    if (savedAnthropic) {
+        anthropicKey = savedAnthropic;
+        console.log('✅ Anthropic API key loaded');
+    }
+}
 
-    function loadStats() {
-        try {
-            const saved = localStorage.getItem('valtoriStats');
-            if (saved) stats = { ...stats, ...JSON.parse(saved) };
-        } catch (e) {
-            console.error('Stats load error:', e);
-            localStorage.removeItem('valtoriStats');
+function loadStats() {
+    try {
+        const saved = localStorage.getItem('valtoriStats');
+        if (saved) {
+            stats = JSON.parse(saved);
+        }
+    } catch (error) {
+        console.error('Error loading stats:', error);
+        stats = {
+            totalCalls: 0,
+            totalSales: 0,
+            totalEarnings: 0,
+            totalTime: 0,
+            scores: [],
+            history: [],
+            currentStreak: 0,
+            maxWinStreak: 0
+        };
+    }
+}
+
+function saveStats() {
+    try {
+        localStorage.setItem('valtoriStats', JSON.stringify(stats));
+    } catch (error) {
+        console.error('Error saving stats:', error);
+    }
+}
+
+// =============================================================================
+// API KEY MANAGEMENT
+// =============================================================================
+
+function setupAPIKey() {
+    const currentWhisper = openaiKey 
+        ? `OpenAI (Voice): ${openaiKey.substring(0, 12)}...${openaiKey.substring(openaiKey.length - 4)}` 
+        : 'OpenAI (Voice): ❌ Not set';
+    
+    const currentClaude = anthropicKey
+        ? `Anthropic (AI): ${anthropicKey.substring(0, 12)}...${anthropicKey.substring(anthropicKey.length - 4)}`
+        : 'Anthropic (AI): ❌ Not set';
+    
+    const choice = prompt(
+        `📋 API KEYS STATUS:\n\n` +
+        `${currentWhisper}\n` +
+        `${currentClaude}\n\n` +
+        `Which key to set?\n\n` +
+        `1 = OpenAI (for voice input)\n` +
+        `2 = Anthropic (for AI responses)\n` +
+        `0 = Cancel`
+    );
+    
+    if (choice === '1') {
+        const key = prompt(
+            '🔑 OpenAI API Key\n\n' +
+            'Used for: Voice transcription (Whisper)\n\n' +
+            'Get your key at:\n' +
+            'https://platform.openai.com/api-keys\n\n' +
+            'Enter key (starts with sk-):'
+        );
+        
+        if (key && key.trim()) {
+            if (key.startsWith('sk-')) {
+                openaiKey = key.trim();
+                localStorage.setItem('openaiKey', key.trim());
+                alert('✅ OpenAI Key saved!\n\nYou can now use voice input.');
+            } else {
+                alert('❌ Invalid OpenAI key.\n\nMust start with "sk-"');
+            }
+        }
+    } else if (choice === '2') {
+        const key = prompt(
+            '🔑 Anthropic API Key\n\n' +
+            'Used for: Claude AI responses\n\n' +
+            'Get your key at:\n' +
+            'https://console.anthropic.com/\n\n' +
+            'Enter key (starts with sk-ant-):'
+        );
+        
+        if (key && key.trim()) {
+            if (key.startsWith('sk-ant-')) {
+                anthropicKey = key.trim();
+                localStorage.setItem('anthropicKey', key.trim());
+                alert('✅ Anthropic Key saved!\n\nAI responses will now work.');
+            } else {
+                alert('❌ Invalid Anthropic key.\n\nMust start with "sk-ant-"');
+            }
         }
     }
+}
 
-    function saveStats() {
-        try { localStorage.setItem('valtoriStats', JSON.stringify(stats)); } catch (e) { console.error('Stats save error:', e); }
+// =============================================================================
+// SPEECH SYNTHESIS
+// =============================================================================
+
+function speak(text, callback) {
+    if (!synthesis) {
+        if (callback) callback();
+        return;
     }
-
-    function loadPreferences() {
-        try {
-            const sp = localStorage.getItem('valtoriPromptsOn');
-            if (sp !== null) { promptsOn = sp === 'true'; document.getElementById('toggle')?.classList.toggle('active', promptsOn); }
-            const sf = localStorage.getItem('valtoriFirstCall');
-            if (sf !== null) isFirstCall = sf === 'true';
-        } catch (e) {}
-    }
-
-    function savePreferences() {
-        try { localStorage.setItem('valtoriPromptsOn', String(promptsOn)); localStorage.setItem('valtoriFirstCall', String(isFirstCall)); } catch (e) {}
-    }
-
-    // ============================================
-    // API KEY MANAGEMENT
-    // ============================================
-    function showAPIKeyModal() {
-        const status = document.getElementById('apiKeyStatus');
-        const input = document.getElementById('apiKeyInput');
-        if (openaiKey) {
-            status.innerHTML = '<div class="modal-status success">✅ API key configured</div>';
-            input.value = openaiKey.substring(0, 7) + '...' + openaiKey.slice(-4);
-        } else {
-            status.innerHTML = '<div class="modal-status error">⚠️ No API key - voice input disabled</div>';
-            input.value = '';
+    
+    synthesis.cancel();
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    const voices = synthesis.getVoices();
+    
+    if (voices.length > 0) {
+        const english = voices.filter(v => v.lang.startsWith('en'));
+        if (english.length > 0) {
+            utterance.voice = english[0];
         }
-        document.getElementById('apiKeyModal').classList.add('active');
     }
-
-    function closeAPIKeyModal() { document.getElementById('apiKeyModal').classList.remove('active'); }
-
-    function saveAPIKey() {
-        const key = document.getElementById('apiKeyInput').value.trim();
-        if (!key || !key.startsWith('sk-')) { alert('Invalid key format. Should start with sk-'); return; }
-        openaiKey = key;
-        localStorage.setItem('openaiKey', key);
-        document.getElementById('apiKeyStatus').innerHTML = '<div class="modal-status success">✅ Key saved!</div>';
-        document.getElementById('apiKeyInput').value = key.substring(0, 7) + '...' + key.slice(-4);
-    }
-
-    function clearAPIKey() {
-        if (!confirm('Clear API key? Voice input will be disabled.')) return;
-        openaiKey = '';
-        localStorage.removeItem('openaiKey');
-        document.getElementById('apiKeyStatus').innerHTML = '<div class="modal-status error">⚠️ Key cleared</div>';
-        document.getElementById('apiKeyInput').value = '';
-    }
-
-    // ============================================
-    // SPEECH SYNTHESIS
-    // ============================================
-    function loadVoices() { voices = synthesis.getVoices(); }
-
-    function speak(text, callback) {
-        if (!synthesis) { if (callback) callback(); return; }
-        synthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        if (voices.length === 0) voices = synthesis.getVoices();
-        const eng = voices.filter(v => v.lang.startsWith('en'));
-        if (eng.length > 0) utterance.voice = eng[0];
-        utterance.rate = 0.95;
-        utterance.pitch = 1;
+    
+    utterance.rate = 0.95;
+    utterance.pitch = 1;
+    
+    utterance.onstart = () => {
         const avatar = document.getElementById('avatar');
-        const avatarStatus = document.getElementById('avatarStatus');
-        utterance.onstart = () => { avatar?.classList.remove('thinking'); avatar?.classList.add('speaking'); if (avatarStatus) avatarStatus.textContent = 'Speaking...'; };
-        utterance.onend = () => { avatar?.classList.remove('speaking'); if (avatarStatus) avatarStatus.textContent = 'AI Customer'; if (callback) callback(); };
-        utterance.onerror = () => { avatar?.classList.remove('speaking'); if (avatarStatus) avatarStatus.textContent = 'AI Customer'; if (callback) callback(); };
-        synthesis.speak(utterance);
+        if (avatar) avatar.classList.add('speaking');
+    };
+    
+    utterance.onend = () => {
+        const avatar = document.getElementById('avatar');
+        if (avatar) avatar.classList.remove('speaking');
+        if (callback) callback();
+    };
+    
+    synthesis.speak(utterance);
+}
+
+// =============================================================================
+// NAVIGATION
+// =============================================================================
+
+function switchScreen(screen) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(screen).classList.add('active');
+    currentScreen = screen;
+    
+    const promptToggle = document.getElementById('promptToggle');
+    promptToggle.style.display = screen === 'call' ? 'flex' : 'none';
+}
+
+function goToIndustry() {
+    switchScreen('industry');
+}
+
+function goToDashboard() {
+    updateDashboard();
+    switchScreen('dashboard');
+}
+
+function practiceAgain() {
+    document.getElementById('transcript').innerHTML = '';
+    document.getElementById('warning').innerHTML = '';
+    document.getElementById('prompt').innerHTML = '';
+    
+    if (selectedIndustry) {
+        startCall();
+    } else {
+        switchScreen('industry');
     }
+}
 
-    // ============================================
-    // SCREEN MANAGEMENT
-    // ============================================
-    function switchScreen(screen) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(screen)?.classList.add('active');
-        currentScreen = screen;
-        const pt = document.getElementById('promptToggle');
-        if (pt) pt.style.display = screen === 'call' ? 'flex' : 'none';
+// =============================================================================
+// INDUSTRY SELECTION
+// =============================================================================
+
+function showProduct() {
+    const select = document.getElementById('industrySelect');
+    const industry = select.value;
+    
+    if (!industry) {
+        document.getElementById('productCard').classList.remove('show');
+        document.getElementById('startBtn').disabled = true;
+        return;
     }
+    
+    selectedIndustry = industry;
+    const config = INDUSTRIES[industry];
+    
+    document.getElementById('productName').textContent = config.product;
+    document.getElementById('productPrice').textContent = '$' + config.price.toLocaleString();
+    document.getElementById('commissionValue').textContent = '$' + (config.price * config.commission).toLocaleString();
+    document.getElementById('productCard').classList.add('show');
+    document.getElementById('startBtn').disabled = false;
+}
 
-    function goToIndustry() { switchScreen('industry'); }
-    function goToDashboard() { updateDashboard(); switchScreen('dashboard'); }
+function showTutorial() {
+    if (isFirstCall) {
+        document.getElementById('tutorialModal').classList.add('active');
+    } else {
+        startCall();
+    }
+}
 
-    // ============================================
-    // INDUSTRY SELECTION
-    // ============================================
-    function showProduct() {
-        const industry = document.getElementById('industrySelect').value;
-        if (!industry || !INDUSTRIES[industry]) {
-            document.getElementById('productCard').classList.remove('show');
-            document.getElementById('startBtn').disabled = true;
-            return;
+function skipTutorial() {
+    document.getElementById('tutorialModal').classList.remove('active');
+    isFirstCall = false;
+    startCall();
+}
+
+// =============================================================================
+// CALL MANAGEMENT
+// =============================================================================
+
+function startCall() {
+    console.log('Starting call...');
+    
+    // Check if Anthropic key is set
+    if (!anthropicKey) {
+        alert(
+            '❌ Anthropic API Key Required\n\n' +
+            'You need an Anthropic API key for AI responses.\n\n' +
+            'Click the 🔑 button and select option 2 to set it up.\n\n' +
+            'Get your free key at:\n' +
+            'https://console.anthropic.com/'
+        );
+        return;
+    }
+    
+    document.getElementById('tutorialModal').classList.remove('active');
+    switchScreen('call');
+    
+    callActive = true;
+    callStart = Date.now();
+    duration = 0;
+    warningShown = false;
+    conversation = [];
+    stage = 'opening';
+    
+    // Reset conversation context
+    conversationContext = {
+        productMentioned: false,
+        priceMentioned: false,
+        companyMentioned: false,
+        benefitsMentioned: false
+    };
+    
+    // Initialize session
+    session = {
+        timestamp: new Date(),
+        industry: selectedIndustry,
+        product: INDUSTRIES[selectedIndustry].product,
+        price: INDUSTRIES[selectedIndustry].price,
+        commission: INDUSTRIES[selectedIndustry].price * INDUSTRIES[selectedIndustry].commission,
+        conversation: [],
+        closed: false,
+        saleAmount: 0
+    };
+    
+    startTimer();
+    
+    // AI greeting after 1 second
+    setTimeout(() => {
+        const greetings = ["Hello?", "Yes, this is speaking.", "Hi, who's calling?", "Hello, how can I help you?"];
+        const greeting = greetings[Math.floor(Math.random() * greetings.length)];
+        addMessage('ai', greeting);
+        speak(greeting, () => { updatePrompt(); });
+    }, 1000);
+}
+
+function startTimer() {
+    timer = setInterval(() => {
+        duration++;
+        const mins = Math.floor(duration / 60);
+        const secs = duration % 60;
+        document.getElementById('timer').textContent = 
+            `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        
+        if (duration === 60 && !warningShown) {
+            warningShown = true;
+            document.getElementById('warning').innerHTML = 
+                '<div class="warning">⚠️ 60 seconds elapsed - Consider closing soon</div>';
         }
-        selectedIndustry = industry;
-        const c = INDUSTRIES[industry];
-        document.getElementById('productName').textContent = c.product;
-        document.getElementById('productPrice').textContent = '$' + c.price.toLocaleString();
-        document.getElementById('commissionValue').textContent = '$' + (c.price * c.commission).toLocaleString();
-        document.getElementById('productCard').classList.add('show');
-        document.getElementById('startBtn').disabled = false;
+    }, 1000);
+}
+
+function endCall() {
+    clearInterval(timer);
+    callActive = false;
+    endCallScore();
+}
+
+function handleHangUp() {
+    clearInterval(timer);
+    callActive = false;
+    stats.currentStreak = 0;
+    setTimeout(() => endCallScore(), 2000);
+}
+
+function handleSale() {
+    session.closed = true;
+    session.saleAmount = INDUSTRIES[selectedIndustry].price;
+    
+    // Play success sound
+    const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuAy/DajTwJEmiy6OyNPwwSVa7n77BLDQw7k9fzx3UjBSt8x+3akD0IEGCv5+WcUAwMUKXh8bJQDgsxhcXtypRBAw==');
+    audio.play().catch(e => console.log('Audio error:', e));
+    
+    // Show sale banner
+    const banner = document.getElementById('saleBanner');
+    banner.classList.add('active');
+    setTimeout(() => {
+        banner.classList.remove('active');
+    }, 2000);
+    
+    // Update stats
+    stats.totalSales++;
+    stats.totalEarnings += session.commission;
+    stats.currentStreak++;
+    if (stats.currentStreak > stats.maxWinStreak) {
+        stats.maxWinStreak = stats.currentStreak;
     }
+    
+    // AI closing message
+    const closing = ["Great! I'll send details.", "Perfect! Let me set that up.", "Excellent choice!"];
+    const msg = closing[Math.floor(Math.random() * closing.length)];
+    addMessage('ai', msg);
+    speak(msg, () => {
+        setTimeout(() => endCallScore(), 2000);
+    });
+}
 
-    // ============================================
-    // TUTORIAL
-    // ============================================
-    function showTutorial() { if (isFirstCall) document.getElementById('tutorialModal').classList.add('active'); else startCall(); }
-    function skipTutorial() { document.getElementById('tutorialModal').classList.remove('active'); isFirstCall = false; savePreferences(); startCall(); }
+// =============================================================================
+// VOICE INPUT
+// =============================================================================
 
-    // ============================================
-    // CALL MANAGEMENT
-    // ============================================
-    function startCall() {
-        console.log('📞 Starting call...');
-        document.getElementById('tutorialModal').classList.remove('active');
-        switchScreen('call');
-        callActive = true;
-        duration = 0;
-        warningShown = false;
-        conversation = [];
-        stage = 'opening';
-        isProcessing = false;
-        const c = INDUSTRIES[selectedIndustry];
-        session = { timestamp: new Date().toISOString(), industry: selectedIndustry, product: c.product, price: c.price, commission: c.price * c.commission, conversation: [], closed: false, saleAmount: 0 };
-        document.getElementById('transcript').innerHTML = '';
-        document.getElementById('warning').innerHTML = '';
-        document.getElementById('prompt').innerHTML = '';
-        document.getElementById('timer').textContent = '00:00';
-        document.getElementById('callStatus').textContent = 'Call in Progress';
-        setInputsEnabled(true);
-        startTimer();
-        setTimeout(() => {
-            const greetings = ["Hello?", "Yes, this is speaking.", "Hi, who's calling?", "Hello, how can I help you?"];
-            const g = greetings[Math.floor(Math.random() * greetings.length)];
-            addMessage('ai', g);
-            speak(g, () => updatePrompt());
-        }, 1000);
-    }
-
-    function startTimer() {
-        if (timerInterval) clearInterval(timerInterval);
-        timerInterval = setInterval(() => {
-            duration++;
-            const m = Math.floor(duration / 60), s = duration % 60;
-            const t = document.getElementById('timer');
-            if (t) t.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-            if (duration === 60 && !warningShown) {
-                warningShown = true;
-                const w = document.getElementById('warning');
-                if (w) w.innerHTML = '<div class="warning">⚠️ 60 seconds - Consider closing soon</div>';
-            }
-        }, 1000);
-    }
-
-    function stopTimer() { if (timerInterval) { clearInterval(timerInterval); timerInterval = null; } }
-
-    function setInputsEnabled(enabled) {
-        const m = document.getElementById('micBtn'), t = document.getElementById('textInput'), s = document.getElementById('sendBtn');
-        if (m) m.disabled = !enabled;
-        if (t) t.disabled = !enabled;
-        if (s) s.disabled = !enabled;
-    }
-
-    function endCall() {
-        if (!callActive) return;
-        console.log('📴 Ending call...');
-        stopTimer();
-        callActive = false;
-        setInputsEnabled(false);
-        document.getElementById('callStatus').textContent = 'Call Ended';
-        endCallScore();
-    }
-
-    // ============================================
-    // VOICE INPUT (WHISPER)
-    // ============================================
-    async function toggleMic() {
-        if (!openaiKey) { showAPIKeyModal(); return; }
-        if (!callActive || isProcessing) return;
-        const btn = document.getElementById('micBtn');
-        if (isRecording) {
-            isRecording = false;
-            btn.classList.remove('recording');
-            btn.innerHTML = '🎤<div class="mic-label">Processing...</div>';
-            if (mediaRecorder?.state === 'recording') mediaRecorder.stop();
-        } else {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-                audioChunks = [];
-                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-                mediaRecorder.onstop = async () => {
-                    const blob = new Blob(audioChunks, { type: 'audio/webm' });
-                    stream.getTracks().forEach(t => t.stop());
-                    await transcribeAudio(blob);
-                    btn.innerHTML = '🎤<div class="mic-label">Click to Speak</div>';
-                };
-                mediaRecorder.onerror = () => {
-                    stream.getTracks().forEach(t => t.stop());
-                    btn.innerHTML = '🎤<div class="mic-label">Click to Speak</div>';
-                    alert('Recording error. Try text input.');
-                };
-                mediaRecorder.start();
-                isRecording = true;
-                btn.classList.add('recording');
-                btn.innerHTML = '🎤<div class="mic-label">Recording... Click to Stop</div>';
-            } catch (e) {
-                console.error('Mic error:', e);
-                alert('Could not access microphone. Use text input.');
-            }
+async function toggleMic() {
+    if (!openaiKey) {
+        if (confirm(
+            '🎤 Voice input requires OpenAI API key\n\n' +
+            'Set your OpenAI key now?\n\n' +
+            '(Or use text input instead)'
+        )) {
+            setupAPIKey();
         }
+        return;
     }
-
-    async function transcribeAudio(blob) {
+    
+    const btn = document.getElementById('micBtn');
+    
+    if (isRecording) {
+        // Stop recording
+        isRecording = false;
+        btn.classList.remove('recording');
+        btn.innerHTML = '🎤<div class="mic-label">Processing...</div>';
+        
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+            mediaRecorder.stop();
+        }
+    } else {
+        // Start recording
         try {
-            const fd = new FormData();
-            fd.append('file', blob, 'audio.webm');
-            fd.append('model', 'whisper-1');
-            const r = await fetch('https://api.openai.com/v1/audio/transcriptions', { method: 'POST', headers: { 'Authorization': `Bearer ${openaiKey}` }, body: fd });
-            if (!r.ok) {
-                if (r.status === 401) { alert('Invalid API key.'); showAPIKeyModal(); }
-                else if (r.status === 429) alert('Rate limited. Wait and retry.');
-                else alert('Transcription failed.');
-                return;
-            }
-            const d = await r.json();
-            if (d.text?.trim()) handleUserSpeech(d.text.trim());
-            else alert('Could not understand audio. Try again.');
-        } catch (e) {
-            console.error('Whisper error:', e);
-            alert('Transcription failed. Check connection.');
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+            
+            mediaRecorder.ondataavailable = e => {
+                audioChunks.push(e.data);
+            };
+            
+            mediaRecorder.onstop = async () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                await transcribeAudio(audioBlob);
+                stream.getTracks().forEach(track => track.stop());
+                btn.innerHTML = '🎤<div class="mic-label">Click to Speak</div>';
+            };
+            
+            mediaRecorder.start();
+            isRecording = true;
+            btn.classList.add('recording');
+            btn.innerHTML = '🎤<div class="mic-label">Recording...</div>';
+            console.log('Recording started');
+        } catch (err) {
+            console.error('Mic error:', err);
+            alert('Could not access microphone. Use text input.');
         }
     }
+}
 
-    // ============================================
-    // TEXT INPUT
-    // ============================================
-    function sendTextInput() {
-        const input = document.getElementById('textInput');
-        const text = input.value.trim();
-        if (!text || !callActive || isProcessing) return;
-        input.value = '';
-        handleUserSpeech(text);
+async function transcribeAudio(audioBlob) {
+    try {
+        const formData = new FormData();
+        formData.append('file', audioBlob, 'audio.webm');
+        formData.append('model', 'whisper-1');
+        
+        const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${openaiKey}`
+            },
+            body: formData
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Whisper API error: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.text) {
+            console.log('Transcribed:', data.text);
+            handleUserSpeech(data.text);
+        } else {
+            console.error('Transcription failed:', data);
+            alert('Could not transcribe. Try text input.');
+        }
+    } catch (error) {
+        console.error('Whisper error:', error);
+        alert('Transcription failed. Use text input.');
     }
+}
 
-    // ============================================
-    // CONVERSATION HANDLING
-    // ============================================
-    function handleUserSpeech(text) {
-        if (!callActive || isProcessing) return;
-        addMessage('user', text);
-        updateStage(text);
-        isProcessing = true;
-        setInputsEnabled(false);
-        const avatar = document.getElementById('avatar'), avatarStatus = document.getElementById('avatarStatus');
-        if (avatar) avatar.classList.add('thinking');
-        if (avatarStatus) avatarStatus.textContent = 'Thinking...';
-        setTimeout(() => getAIResponse(text), 500);
+// =============================================================================
+// TEXT INPUT
+// =============================================================================
+
+function sendTextInput() {
+    const input = document.getElementById('textInput');
+    const text = input.value.trim();
+    
+    if (!text) return;
+    
+    if (!callActive) {
+        alert('Start a call first');
+        return;
     }
+    
+    console.log('📝 Text:', text);
+    input.value = '';
+    handleUserSpeech(text);
+}
 
-    function addMessage(speaker, text) {
-        const transcript = document.getElementById('transcript');
-        if (!transcript) return;
-        const msg = document.createElement('div');
-        msg.className = `message ${speaker}`;
-        const label = speaker === 'user' ? 'You' : speaker === 'ai' ? 'Customer' : 'System';
-        const sp = document.createElement('div');
-        sp.className = 'speaker';
-        sp.textContent = label;
-        const tx = document.createElement('div');
-        tx.textContent = text;
-        msg.appendChild(sp);
-        msg.appendChild(tx);
-        transcript.appendChild(msg);
-        transcript.scrollTop = transcript.scrollHeight;
-        conversation.push({ speaker, text, timestamp: duration });
+// =============================================================================
+// CONVERSATION ANALYSIS
+// =============================================================================
+
+function analyzeUserMessage(text) {
+    const lower = text.toLowerCase();
+    
+    // Check if they mentioned company name
+    if (lower.includes('from ') || lower.includes('calling from') || 
+        lower.includes('with ') || lower.includes('representing')) {
+        conversationContext.companyMentioned = true;
     }
+    
+    // Check if they mentioned the product category
+    const productKeywords = {
+        saas: ['software', 'crm', 'platform', 'system', 'tool', 'app', 'technology', 'saas'],
+        realestate: ['property', 'home', 'house', 'real estate', 'listing', 'apartment', 'condo'],
+        financial: ['wealth', 'investment', 'financial', 'portfolio', 'retirement', 'planning'],
+        consulting: ['consulting', 'strategy', 'advisory', 'business', 'operations'],
+        insurance: ['insurance', 'policy', 'coverage', 'protection', 'plan'],
+        healthcare: ['healthcare', 'medical', 'health', 'equipment', 'device', 'system'],
+        manufacturing: ['manufacturing', 'automation', 'industrial', 'equipment', 'machinery'],
+        ecommerce: ['ecommerce', 'online store', 'platform', 'shop', 'marketplace'],
+        marketing: ['marketing', 'advertising', 'campaign', 'brand', 'seo', 'social media', 'digital'],
+        business: ['managed services', 'it services', 'support', 'maintenance', 'contract']
+    };
+    
+    const keywords = productKeywords[selectedIndustry] || [];
+    if (keywords.some(kw => lower.includes(kw))) {
+        conversationContext.productMentioned = true;
+    }
+    
+    // Check if they mentioned price
+    if (lower.match(/\$[\d,]+/) || lower.includes('price') || 
+        lower.includes('cost') || lower.includes('investment') || lower.includes('fee')) {
+        conversationContext.priceMentioned = true;
+    }
+    
+    // Check if they mentioned benefits/value
+    if (lower.includes('save') || lower.includes('increase') || lower.includes('improve') || 
+        lower.includes('reduce') || lower.includes('boost') || lower.includes('grow')) {
+        conversationContext.benefitsMentioned = true;
+    }
+}
 
-    // ============================================
-    // STAGE PROGRESSION
-    // ============================================
-    function updateStage(text) {
-        const l = text.toLowerCase();
-        if (stage === 'opening' && (l.includes('my name is') || l.includes('calling from') || l.includes('this is'))) stage = 'permission';
-        else if (stage === 'permission' && (l.includes('help') || l.includes('benefit') || l.includes('save'))) stage = 'value';
-        else if (stage === 'value' && (l.includes('?') || l.includes('tell me'))) stage = 'discovery';
-        else if (stage === 'discovery' && (l.includes('understand') || l.includes('i hear'))) stage = 'objection';
-        if (l.includes('buy') || l.includes('purchase') || l.includes('sign up') || l.includes('get started')) stage = 'close';
+function handleUserSpeech(text) {
+    if (!callActive) return;
+    
+    // Analyze what they mentioned
+    analyzeUserMessage(text);
+    
+    // Add to transcript
+    addMessage('user', text);
+    session.conversation.push({ speaker: 'user', text, timestamp: duration });
+    
+    // Update stage
+    updateStage(text);
+    
+    // Get AI response after brief pause
+    setTimeout(() => {
+        getAIResponse(text);
+    }, 500);
+}
+
+function updateStage(text) {
+    const lower = text.toLowerCase();
+    
+    if (stage === 'opening' && (lower.includes('my name') || lower.includes('calling from'))) {
+        stage = 'permission';
+    } else if (stage === 'permission' && (lower.includes('help') || lower.includes('benefit'))) {
+        stage = 'value';
+    } else if (stage === 'value' && lower.includes('?')) {
+        stage = 'discovery';
+    } else if (lower.includes('buy') || lower.includes('when can')) {
+        stage = 'close';
+    }
+    
+    updatePrompt();
+}
+
+function updatePrompt() {
+    if (!promptsOn) return;
+    
+    const prompts = STAGES[stage];
+    if (!prompts) return;
+    
+    const randomPrompt = prompts[Math.floor(Math.random() * prompts.length)];
+    document.getElementById('prompt').innerHTML = 
+        `<div class="prompt-box"><div class="prompt-label">💡 ${stage.toUpperCase()}</div><div>${randomPrompt}</div></div>`;
+    
+    setTimeout(() => {
+        document.getElementById('prompt').innerHTML = '';
+    }, 8000);
+}
+
+function togglePrompts() {
+    promptsOn = !promptsOn;
+    const toggle = document.getElementById('toggle');
+    
+    if (promptsOn) {
+        toggle.classList.add('active');
         updatePrompt();
+    } else {
+        toggle.classList.remove('active');
+        document.getElementById('prompt').innerHTML = '';
     }
+}
 
-    function updatePrompt() {
-        if (!promptsOn) return;
-        const prompts = STAGES[stage];
-        if (!prompts) return;
-        if (promptTimeout) clearTimeout(promptTimeout);
-        const p = prompts[Math.floor(Math.random() * prompts.length)];
-        const el = document.getElementById('prompt');
-        if (el) {
-            el.innerHTML = `<div class="prompt-box"><div class="prompt-label">💡 ${stage.toUpperCase()}</div><div>${p}</div></div>`;
-            promptTimeout = setTimeout(() => { el.innerHTML = ''; }, 8000);
-        }
+// =============================================================================
+// AI RESPONSE (3-PHASE REALISTIC SYSTEM WITH PROPER AUTH)
+// =============================================================================
+
+async function getAIResponse(userText) {
+    // Check if Anthropic key is set
+    if (!anthropicKey) {
+        const fallback = "I need an Anthropic API key to respond. Click the 🔑 button to set it.";
+        addMessage('ai', fallback);
+        speak(fallback);
+        return;
     }
+    
+    const avgScore = stats.scores.length > 0 
+        ? stats.scores.reduce((a, b) => a + b, 0) / stats.scores.length 
+        : 50;
+    
+    let difficulty = 'medium';
+    if (avgScore > 75) difficulty = 'hard';
+    if (avgScore < 50) difficulty = 'easy';
+    
+    let systemPrompt = '';
+    const conversationHistory = conversation.map(c => `${c.speaker}: ${c.text}`).join('\n');
+    
+    // PHASE 1: AI doesn't know what you're selling yet
+    if (!conversationContext.productMentioned) {
+        systemPrompt = `You are a busy professional who just answered your phone.
 
-    function togglePrompts() {
-        promptsOn = !promptsOn;
-        const toggle = document.getElementById('toggle'), prompt = document.getElementById('prompt');
-        if (toggle) toggle.classList.toggle('active', promptsOn);
-        if (promptsOn) updatePrompt();
-        else if (prompt) prompt.innerHTML = '';
-        savePreferences();
+You DO NOT KNOW:
+- Who is calling
+- What company they're from
+- What they want to sell
+- Why they're calling
+
+You are:
+${difficulty === 'easy' ? '- Polite but cautious' : ''}
+${difficulty === 'medium' ? '- Professional but skeptical' : ''}
+${difficulty === 'hard' ? '- Very busy and slightly annoyed' : ''}
+
+CONVERSATION SO FAR:
+${conversationHistory}
+
+Respond realistically:
+- "Hello?" or "Yes?"
+- "Who is this?"
+- "What's this about?"
+- "I'm in the middle of something..."
+${difficulty === 'hard' ? '- "How did you get this number?"' : ''}
+
+DO NOT assume what they're selling. You don't know yet.
+1 sentence only.`;
     }
+    
+    // PHASE 2: AI now knows product category but not price
+    else if (conversationContext.productMentioned && !conversationContext.priceMentioned) {
+        systemPrompt = `You are a professional who now knows this call is about: ${INDUSTRIES[selectedIndustry].product}
 
-    // ============================================
-    // AI RESPONSE (CLAUDE API)
-    // ============================================
-    async function getAIResponse(userText) {
-        const avgScore = stats.scores.length > 0 ? stats.scores.reduce((a, b) => a + b, 0) / stats.scores.length : 50;
-        let difficulty = 'medium';
-        if (avgScore > 75) difficulty = 'hard';
-        else if (avgScore < 50) difficulty = 'easy';
-        const c = INDUSTRIES[selectedIndustry];
-        const systemPrompt = `You are a ${difficulty} sales prospect in a cold call simulation.
-
-CONTEXT:
-- Industry: ${selectedIndustry}
-- Product: ${c.product}
-- Price: $${c.price.toLocaleString()}
-
-PERSONALITY (${difficulty}):
-${difficulty === 'easy' ? '- Receptive and friendly, open to hearing more' : difficulty === 'medium' ? '- Skeptical but professional, needs convincing' : '- Very busy, impatient, may hang up'}
+You are:
+${difficulty === 'easy' ? '- Receptive but want to know more' : ''}
+${difficulty === 'medium' ? '- Skeptical - you probably already have a solution' : ''}
+${difficulty === 'hard' ? '- Not interested unless they make it quick' : ''}
 
 CONVERSATION:
-${conversation.map(x => `${x.speaker.toUpperCase()}: ${x.text}`).join('\n')}
+${conversationHistory}
 
-Respond in 1-2 sentences as the prospect. You may ask questions, give objections, show interest, or end the call if it's going poorly.${Math.random() > 0.7 ? ' Consider giving an objection.' : ''}`;
+Give realistic responses:
+- "We already have something for that"
+- "What makes you different from [competitor]?"
+- "How much does this cost?"
+- "We're not looking for that right now"
+- "Send me some information"
+${difficulty === 'hard' ? '- "I really don\'t have time for this"' : ''}
+${Math.random() > 0.7 ? '- Give a specific objection' : ''}
 
-        try {
-            const r = await fetch('https://api.anthropic.com/v1/messages', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'anthropic-version': '2023-06-01' },
-                body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 150, messages: [{ role: 'user', content: systemPrompt }] })
-            });
-            const d = await r.json();
-            if (d.error) throw new Error(d.error.message);
-            if (!d.content?.[0]?.text) throw new Error('Invalid response');
-            const aiText = d.content[0].text.trim();
-            addMessage('ai', aiText);
-            const lower = aiText.toLowerCase();
-            if (SALE_PATTERNS.some(p => lower.includes(p))) { handleSale(); return; }
-            if (HANGUP_PATTERNS.some(p => lower.includes(p))) { speak(aiText, () => setTimeout(handleHangUp, 1500)); return; }
-            speak(aiText, () => { isProcessing = false; if (callActive) setInputsEnabled(true); });
-        } catch (e) {
-            console.error('AI error:', e);
-            document.getElementById('avatar')?.classList.remove('thinking');
-            const fallback = "I'm sorry, could you repeat that?";
-            addMessage('ai', fallback);
-            speak(fallback, () => { isProcessing = false; if (callActive) setInputsEnabled(true); });
+Only reference details THEY mentioned. Don't assume anything else.
+1-2 sentences.`;
+    }
+    
+    // PHASE 3: Full context - evaluating the offer
+    else {
+        systemPrompt = `You are evaluating an offer for: ${INDUSTRIES[selectedIndustry].product}
+${conversationContext.priceMentioned ? `Price discussed: $${INDUSTRIES[selectedIndustry].price.toLocaleString()}` : ''}
+
+You are:
+${difficulty === 'easy' ? '- Open to good offers if value is clear' : ''}
+${difficulty === 'medium' ? '- Need strong ROI proof to say yes' : ''}
+${difficulty === 'hard' ? '- Very skeptical, need exceptional value' : ''}
+
+CONVERSATION:
+${conversationHistory}
+
+React based on their pitch quality:
+${conversationContext.benefitsMentioned ? '- They mentioned benefits (good sign)' : '- They haven\'t shown value yet'}
+${conversationContext.priceMentioned ? '- Price seems ' + (INDUSTRIES[selectedIndustry].price > 20000 ? 'expensive' : 'reasonable') : ''}
+
+Possible responses:
+- "That's expensive. What's the ROI?"
+- "We need to see case studies"
+- "I need to discuss with my team"
+- "Can you guarantee results?"
+- If pitch was strong AND they asked for sale: "Let's do it" or "I'll buy"
+- If pitch was weak: "I'll think about it" or "Not interested"
+
+Only say YES if:
+1. They explained value clearly
+2. They handled objections well
+3. They asked for the sale directly
+4. Price seems worth it
+
+1-2 sentences.`;
+    }
+    
+    try {
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': anthropicKey,
+                'anthropic-version': '2023-06-01'
+            },
+            body: JSON.stringify({
+                model: 'claude-sonnet-4-20250514',
+                max_tokens: 150,
+                messages: [{ role: 'user', content: systemPrompt }]
+            })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(`API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
         }
+        
+        const data = await response.json();
+        const aiText = data.content[0].text;
+        
+        addMessage('ai', aiText);
+        session.conversation.push({ speaker: 'ai', text: aiText, timestamp: duration });
+        
+        // Check for sale
+        if (aiText.toLowerCase().includes("let's do it") ||
+            aiText.toLowerCase().includes("yes, i'm interested") ||
+            aiText.toLowerCase().includes("i'll buy") ||
+            aiText.toLowerCase().includes('sounds good') ||
+            aiText.toLowerCase().includes('sign me up')) {
+            handleSale();
+        }
+        // Check for hang-up
+        else if (aiText.toLowerCase().includes('goodbye') ||
+                 aiText.toLowerCase().includes('have to go') ||
+                 aiText.toLowerCase().includes('not interested') ||
+                 aiText.toLowerCase().includes("can't talk") ||
+                 aiText.toLowerCase().includes('busy')) {
+            speak(aiText, () => {
+                setTimeout(() => handleHangUp(), 1500);
+            });
+        }
+        else {
+            speak(aiText);
+        }
+    } catch (error) {
+        console.error('AI Error:', error);
+        const fallback = "I'm having trouble responding. Please check your Anthropic API key.";
+        addMessage('ai', fallback);
+        speak(fallback);
     }
+}
 
-    // ============================================
-    // SALE HANDLING
-    // ============================================
-    function handleSale() {
-        console.log('🎉 SALE CLOSED!');
-        session.closed = true;
-        session.saleAmount = INDUSTRIES[selectedIndustry].price;
-        try { new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuAy/DajTwJEmiy6OyNPwwSVa7n77BLDQw7k9fzx3UjBSt8x+3akD0IEGCv5+WcUAwMUKXh8bJQDgsxhcXtypRBAw==').play().catch(() => {}); } catch (e) {}
-        const banner = document.getElementById('saleBanner');
-        if (banner) { banner.classList.add('active'); setTimeout(() => banner.classList.remove('active'), 2000); }
-        stats.totalSales++;
-        stats.totalEarnings += session.commission;
-        stats.currentStreak++;
-        if (stats.currentStreak > stats.maxWinStreak) stats.maxWinStreak = stats.currentStreak;
-        saveStats();
-        const msgs = ["Great! I'll send the details.", "Perfect! Let me set that up.", "Excellent choice!"];
-        const msg = msgs[Math.floor(Math.random() * msgs.length)];
-        addMessage('ai', msg);
-        speak(msg, () => setTimeout(() => { stopTimer(); callActive = false; endCallScore(); }, 2000));
-    }
+// =============================================================================
+// SCORING (WITH PROPER AUTH)
+// =============================================================================
 
-    function handleHangUp() {
-        console.log('📵 Hung up');
-        stopTimer();
-        callActive = false;
-        stats.currentStreak = 0;
-        saveStats();
-        document.getElementById('callStatus').textContent = 'Call Ended';
-        setTimeout(endCallScore, 1000);
-    }
+async function endCallScore() {
+    const score = await calculateScore();
+    session.score = score;
+    session.duration = duration;
+    
+    stats.totalCalls++;
+    stats.totalTime += duration;
+    stats.scores.push(score.overall);
+    stats.history.unshift(session);
+    
+    saveStats();
+    
+    if (isFirstCall) isFirstCall = false;
+    
+    displayResults(score);
+    switchScreen('results');
+}
 
-    // ============================================
-    // SCORING
-    // ============================================
-    async function endCallScore() {
-        console.log('📊 Calculating score...');
-        addMessage('system', 'Analyzing performance...');
-        let score;
-        try { score = await calculateScore(); } catch (e) { console.error('Score error:', e); score = getDefaultScore(); }
-        session.score = score;
-        session.duration = duration;
-        session.conversation = [...conversation];
-        stats.totalCalls++;
-        stats.totalTime += duration;
-        stats.scores.push(score.overall);
-        stats.history.unshift(session);
-        if (stats.history.length > 100) stats.history = stats.history.slice(0, 100);
-        saveStats();
-        if (isFirstCall) { isFirstCall = false; savePreferences(); }
-        displayResults(score);
-        switchScreen('results');
-    }
-
-    async function calculateScore() {
-        const transcript = conversation.map(c => `${c.speaker.toUpperCase()}: ${c.text}`).join('\n');
-        if (transcript.length < 20) return getDefaultScore();
-        const prompt = `Analyze this sales call and score 0-100 on each metric.
+async function calculateScore() {
+    const transcript = session.conversation
+        .map(c => `${c.speaker.toUpperCase()}: ${c.text}`)
+        .join('\n');
+    
+    const analysisPrompt = `Analyze this sales call. Score 0-100 on each metric.
 
 TRANSCRIPT:
 ${transcript}
 
 CONTEXT:
 - Product: ${session.product}
-- Price: $${session.price.toLocaleString()}
+- Price: $${session.price}
 - Duration: ${duration}s
 - Outcome: ${session.closed ? 'CLOSED' : 'No sale'}
 
-Score: closing, objection, confidence, rapport (0-100 each)
-Provide: 2 strengths, 2 improvements, 3 insights
+Score 4 metrics (0-100):
+1. Closing Ability - Asked for sale, created urgency
+2. Objection Handling - Handled pushback
+3. Confidence & Energy - Tone and conviction
+4. Rapport Building - Connection with prospect
 
-Respond with ONLY JSON:
-{"closing":N,"objection":N,"confidence":N,"rapport":N,"strengths":["...","..."],"improvements":["...","..."],"insights":[{"type":"strength|weakness|opportunity","title":"...","desc":"..."},{"type":"...","title":"...","desc":"..."},{"type":"...","title":"...","desc":"..."}]}`;
+Also provide:
+- 2 strengths (what worked)
+- 2 improvements (what to fix)
+- 3 insights (patterns, opportunities, warnings)
 
-        try {
-            const r = await fetch('https://api.anthropic.com/v1/messages', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'anthropic-version': '2023-06-01' },
-                body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 800, messages: [{ role: 'user', content: prompt }] })
-            });
-            const d = await r.json();
-            if (d.error || !d.content?.[0]?.text) throw new Error('API error');
-            const text = d.content[0].text;
-            const start = text.indexOf('{'), end = text.lastIndexOf('}');
-            if (start === -1 || end === -1) throw new Error('No JSON');
-            const analysis = JSON.parse(text.substring(start, end + 1));
-            return processAnalysis(analysis);
-        } catch (e) {
-            console.error('Score calc error:', e);
-            return getDefaultScore();
-        }
-    }
-
-    function processAnalysis(a) {
-        const clamp = (v) => Math.max(0, Math.min(100, Number(v) || 50));
-        const closing = clamp(a.closing), objection = clamp(a.objection), confidence = clamp(a.confidence), rapport = clamp(a.rapport);
+JSON only:
+{
+  "closing": number,
+  "objection": number,
+  "confidence": number,
+  "rapport": number,
+  "strengths": ["...","..."],
+  "improvements": ["...","..."],
+  "insights": [
+    {"type":"strength|weakness|opportunity","title":"...","desc":"..."},
+    ...
+  ]
+}`;
+    
+    // Check if Anthropic key is set
+    if (!anthropicKey) {
+        console.error('No Anthropic API key for scoring');
+        // Return fallback scores
         return {
-            overall: Math.round((closing + objection + confidence + rapport) / 4),
-            metrics: { closing, objection, confidence, rapport },
+            overall: 65,
+            metrics: {
+                closing: session.closed ? 85 : 50,
+                objection: 60,
+                confidence: 70,
+                rapport: 65
+            },
             feedback: {
-                strengths: a.strengths || ['Completed the call', 'Showed initiative'],
-                improvements: a.improvements || ['Ask more questions', 'Handle objections better'],
-                insights: a.insights || [{ type: 'opportunity', title: 'Keep Practicing', desc: 'Consistency is key' }]
+                strengths: ['Completed the call', 'Showed up to practice'],
+                improvements: ['Ask more questions', 'Work on objection handling'],
+                insights: [{
+                    type: 'opportunity',
+                    title: 'More Practice Needed',
+                    desc: 'Keep practicing to build consistency'
+                }]
             }
         };
     }
-
-    function getDefaultScore() {
-        const base = session.closed ? 75 : 55;
-        return {
-            overall: base,
-            metrics: { closing: session.closed ? 85 : 45, objection: 60, confidence: 65, rapport: 60 },
-            feedback: {
-                strengths: ['Completed the call', 'Took initiative to practice'],
-                improvements: ['Ask more discovery questions', 'Work on handling objections'],
-                insights: [{ type: 'opportunity', title: 'Keep Practicing', desc: 'Consistency builds skill' }]
-            }
-        };
-    }
-
-    // ============================================
-    // DISPLAY RESULTS
-    // ============================================
-    function displayResults(score) {
-        document.getElementById('overallScore').textContent = score.overall;
-        document.getElementById('outcomeIcon').textContent = session.closed ? '✅ CLOSED' : '❌ NO SALE';
-        const m = Math.floor(duration / 60), s = duration % 60;
-        document.getElementById('callDuration').textContent = `${m}:${String(s).padStart(2, '0')}`;
-        document.getElementById('commissionEarned').textContent = session.closed ? '+$' + session.commission.toLocaleString() : '$0';
-        ['closing', 'objection', 'confidence', 'rapport'].forEach(metric => {
-            const val = score.metrics[metric];
-            const cap = metric.charAt(0).toUpperCase() + metric.slice(1);
-            document.getElementById('kpi' + cap).textContent = val;
-            setTimeout(() => { document.getElementById('bar' + cap).style.width = val + '%'; }, 100);
+    
+    try {
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': anthropicKey,
+                'anthropic-version': '2023-06-01'
+            },
+            body: JSON.stringify({
+                model: 'claude-sonnet-4-20250514',
+                max_tokens: 1500,
+                messages: [{ role: 'user', content: analysisPrompt }]
+            })
         });
-        const sl = document.getElementById('strengthsList');
-        sl.innerHTML = '';
-        score.feedback.strengths.forEach(s => { sl.innerHTML += `<div class="breakdown-item positive"><div class="breakdown-label">✅ ${s}</div></div>`; });
-        const il = document.getElementById('improvementsList');
-        il.innerHTML = '';
-        score.feedback.improvements.forEach(i => { il.innerHTML += `<div class="breakdown-item negative"><div class="breakdown-label">💡 ${i}</div></div>`; });
-        const inl = document.getElementById('insightsList');
-        inl.innerHTML = '';
-        const icons = { strength: '💪', weakness: '⚠️', opportunity: '🎯' };
-        score.feedback.insights.forEach(ins => {
-            inl.innerHTML += `<div class="insight-item ${ins.type}"><div class="insight-icon">${icons[ins.type] || '💡'}</div><div class="insight-content"><div class="insight-title">${ins.title}</div><div class="insight-desc">${ins.desc}</div></div></div>`;
-        });
-    }
-
-    // ============================================
-    // DASHBOARD
-    // ============================================
-    function updateDashboard() {
-        const cr = stats.totalCalls > 0 ? Math.round((stats.totalSales / stats.totalCalls) * 100) : 0;
-        document.getElementById('dCloseRate').textContent = cr + '%';
-        document.getElementById('dCloseSub').textContent = `${stats.totalSales} / ${stats.totalCalls} calls`;
-        document.getElementById('dEarnings').textContent = '$' + stats.totalEarnings.toLocaleString();
-        document.getElementById('dEarningSub').textContent = `${stats.totalSales} closed`;
-        if (stats.scores.length > 0) {
-            const avg = Math.round(stats.scores.reduce((a, b) => a + b, 0) / stats.scores.length);
-            document.getElementById('dAvgScore').textContent = avg;
-            if (stats.scores.length >= 2) {
-                const recentScores = stats.scores.slice(-3);
-                const recent = recentScores.reduce((a, b) => a + b, 0) / recentScores.length;
-                const overall = stats.scores.reduce((a, b) => a + b, 0) / stats.scores.length;
-                document.getElementById('dScoreTrend').textContent = recent > overall ? '📈 Improving' : recent < overall ? '📉 Declining' : '➡️ Stable';
-            } else document.getElementById('dScoreTrend').textContent = 'Getting started';
-        } else {
-            document.getElementById('dAvgScore').textContent = '--';
-            document.getElementById('dScoreTrend').textContent = 'No data';
+        
+        if (!response.ok) {
+            throw new Error(`Scoring API error: ${response.status}`);
         }
-        const h = Math.floor(stats.totalTime / 3600), min = Math.floor((stats.totalTime % 3600) / 60);
-        document.getElementById('dTime').textContent = h > 0 ? `${h}h ${min}m` : `${min}m`;
-        document.getElementById('dCallCount').textContent = `${stats.totalCalls} calls`;
-        const exp = stats.totalCalls > 0 ? Math.round(stats.totalEarnings / stats.totalCalls) : 0;
-        document.getElementById('dExpectancy').textContent = exp > 0 ? '+$' + exp.toLocaleString() : '$0';
-        document.getElementById('dWinStreak').textContent = stats.maxWinStreak;
-        document.getElementById('dStreakSub').textContent = `Current: ${stats.currentStreak}`;
-        const hl = document.getElementById('historyList');
-        if (stats.history.length === 0) {
-            hl.innerHTML = '<div class="empty"><div class="empty-icon">📊</div><p>No calls yet</p><button class="btn btn-primary" onclick="practiceAgain()" style="margin-top:1rem">Start Practicing</button></div>';
-        } else {
-            hl.innerHTML = '';
-            stats.history.slice(0, 20).forEach(s => {
-                const d = new Date(s.timestamp);
-                const ec = s.closed ? 'positive' : 'negative';
-                const et = s.closed ? '+$' + s.commission.toLocaleString() : '$0';
-                hl.innerHTML += `<div class="history-item"><div><div class="history-date">${d.toLocaleDateString()} ${d.toLocaleTimeString()}</div><div class="history-details">${s.product} • ${Math.floor(s.duration / 60)}:${String(s.duration % 60).padStart(2, '0')}</div></div><div class="history-score">${s.score?.overall || '--'}</div><div class="history-outcome">${s.closed ? '✅' : '❌'}</div><div class="history-earnings ${ec}">${et}</div></div>`;
-            });
+        
+        const data = await response.json();
+        const aiAnalysis = data.content[0].text;
+        const jsonMatch = aiAnalysis.match(/\{[\s\S]*\}/);
+        
+        if (jsonMatch) {
+            const analysis = JSON.parse(jsonMatch[0]);
+            const overall = Math.round(
+                (analysis.closing + analysis.objection + analysis.confidence + analysis.rapport) / 4
+            );
+            
+            return {
+                overall,
+                metrics: {
+                    closing: analysis.closing,
+                    objection: analysis.objection,
+                    confidence: analysis.confidence,
+                    rapport: analysis.rapport
+                },
+                feedback: {
+                    strengths: analysis.strengths,
+                    improvements: analysis.improvements,
+                    insights: analysis.insights || []
+                }
+            };
         }
+    } catch (error) {
+        console.error('Scoring error:', error);
     }
-
-    function practiceAgain() {
-        document.getElementById('transcript').innerHTML = '';
-        document.getElementById('warning').innerHTML = '';
-        document.getElementById('prompt').innerHTML = '';
-        if (selectedIndustry) startCall();
-        else switchScreen('industry');
-    }
-
-    // ============================================
-    // INITIALIZATION
-    // ============================================
-    window.addEventListener('load', () => {
-        init();
-        if (synthesis) {
-            synthesis.getVoices();
-            synthesis.onvoiceschanged = loadVoices;
+    
+    // Fallback scores
+    return {
+        overall: 65,
+        metrics: {
+            closing: session.closed ? 85 : 50,
+            objection: 60,
+            confidence: 70,
+            rapport: 65
+        },
+        feedback: {
+            strengths: ['Completed the call', 'Showed up to practice'],
+            improvements: ['Ask more questions', 'Work on objection handling'],
+            insights: [{
+                type: 'opportunity',
+                title: 'More Practice Needed',
+                desc: 'Keep practicing to build consistency'
+            }]
         }
+    };
+}
+
+// =============================================================================
+// RESULTS DISPLAY
+// =============================================================================
+
+function displayResults(score) {
+    document.getElementById('overallScore').textContent = score.overall;
+    document.getElementById('outcomeIcon').textContent = session.closed ? '✅ CLOSED' : '❌ NO SALE';
+    
+    const mins = Math.floor(duration / 60);
+    const secs = duration % 60;
+    document.getElementById('callDuration').textContent = `${mins}:${String(secs).padStart(2, '0')}`;
+    document.getElementById('commissionEarned').textContent = 
+        session.closed ? '+$' + session.commission.toLocaleString() : '$0';
+    
+    // Display KPIs
+    ['closing', 'objection', 'confidence', 'rapport'].forEach(m => {
+        const val = score.metrics[m];
+        const cap = m.charAt(0).toUpperCase() + m.slice(1);
+        document.getElementById('kpi' + cap).textContent = val;
+        
+        setTimeout(() => {
+            document.getElementById('bar' + cap).style.width = val + '%';
+        }, 100);
     });
+    
+    // Display strengths
+    const strengthsList = document.getElementById('strengthsList');
+    strengthsList.innerHTML = '';
+    score.feedback.strengths.forEach(s => {
+        strengthsList.innerHTML += 
+            `<div class="breakdown-item positive"><div class="breakdown-label">✅ ${s}</div></div>`;
+    });
+    
+    // Display improvements
+    const improvementsList = document.getElementById('improvementsList');
+    improvementsList.innerHTML = '';
+    score.feedback.improvements.forEach(i => {
+        improvementsList.innerHTML += 
+            `<div class="breakdown-item negative"><div class="breakdown-label">💡 ${i}</div></div>`;
+    });
+    
+    // Display insights
+    const insightsList = document.getElementById('insightsList');
+    insightsList.innerHTML = '';
+    score.feedback.insights.forEach(ins => {
+        const icons = { strength: '💪', weakness: '⚠️', opportunity: '🎯' };
+        insightsList.innerHTML += 
+            `<div class="insight-item ${ins.type}">
+                <div class="insight-icon">${icons[ins.type] || '💡'}</div>
+                <div class="insight-content">
+                    <div class="insight-title">${ins.title}</div>
+                    <div class="insight-desc">${ins.desc}</div>
+                </div>
+            </div>`;
+    });
+}
+
+// =============================================================================
+// DASHBOARD
+// =============================================================================
+
+function updateDashboard() {
+    const closeRate = stats.totalCalls > 0 
+        ? Math.round((stats.totalSales / stats.totalCalls) * 100) 
+        : 0;
+    
+    document.getElementById('dCloseRate').textContent = closeRate + '%';
+    document.getElementById('dCloseSub').textContent = `${stats.totalSales} / ${stats.totalCalls} calls`;
+    document.getElementById('dEarnings').textContent = '$' + stats.totalEarnings.toLocaleString();
+    document.getElementById('dEarningSub').textContent = `${stats.totalSales} closed`;
+    
+    if (stats.scores.length > 0) {
+        const avg = Math.round(stats.scores.reduce((a, b) => a + b, 0) / stats.scores.length);
+        document.getElementById('dAvgScore').textContent = avg;
+        
+        if (stats.scores.length >= 2) {
+            const recent = stats.scores.slice(-3).reduce((a, b) => a + b, 0) / Math.min(3, stats.scores.length);
+            const overall = stats.scores.reduce((a, b) => a + b, 0) / stats.scores.length;
+            const trend = recent > overall ? '📈 Improving' : recent < overall ? '📉 Declining' : '➡️ Stable';
+            document.getElementById('dScoreTrend').textContent = trend;
+        } else {
+            document.getElementById('dScoreTrend').textContent = 'Getting started';
+        }
+    } else {
+        document.getElementById('dAvgScore').textContent = '--';
+        document.getElementById('dScoreTrend').textContent = 'No data';
+    }
+    
+    const hours = Math.floor(stats.totalTime / 3600);
+    const mins = Math.floor((stats.totalTime % 3600) / 60);
+    document.getElementById('dTime').textContent = hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+    document.getElementById('dCallCount').textContent = `${stats.totalCalls} calls`;
+    
+    const expectancy = stats.totalCalls > 0 ? (stats.totalEarnings / stats.totalCalls) : 0;
+    document.getElementById('dExpectancy').textContent = 
+        expectancy > 0 ? '+$' + Math.round(expectancy).toLocaleString() : '$0';
+    
+    document.getElementById('dWinStreak').textContent = stats.maxWinStreak;
+    document.getElementById('dStreakSub').textContent = `Current: ${stats.currentStreak}`;
+    
+    // Display call history
+    const historyList = document.getElementById('historyList');
+    
+    if (stats.history.length === 0) {
+        historyList.innerHTML = 
+            `<div class="empty">
+                <div class="empty-icon">📊</div>
+                <p>No calls yet</p>
+                <button class="btn btn-primary" onclick="practiceAgain()" style="margin-top: 1rem;">Start Practicing</button>
+            </div>`;
+    } else {
+        historyList.innerHTML = '';
+        stats.history.slice(0, 20).forEach(s => {
+            const date = new Date(s.timestamp);
+            const earnClass = s.closed ? 'positive' : 'negative';
+            const earnText = s.closed ? '+$' + s.commission.toLocaleString() : '$0';
+            
+            historyList.innerHTML += 
+                `<div class="history-item">
+                    <div>
+                        <div class="history-date">${date.toLocaleDateString()} ${date.toLocaleTimeString()}</div>
+                        <div class="history-details">${s.product} • ${Math.floor(s.duration / 60)}:${String(s.duration % 60).padStart(2, '0')}</div>
+                    </div>
+                    <div class="history-score">${s.score.overall}</div>
+                    <div class="history-outcome">${s.closed ? '✅' : '❌'}</div>
+                    <div class="history-earnings ${earnClass}">${earnText}</div>
+                </div>`;
+        });
+    }
+}
+
+// =============================================================================
+// MESSAGING
+// =============================================================================
+
+function addMessage(speaker, text) {
+    const transcript = document.getElementById('transcript');
+    const msg = document.createElement('div');
+    msg.className = `message ${speaker}`;
+    msg.innerHTML = 
+        `<div class="speaker">${speaker === 'user' ? 'You' : 'Customer'}</div>
+         <div>${text}</div>`;
+    transcript.appendChild(msg);
+    transcript.scrollTop = transcript.scrollHeight;
+    
+    conversation.push({ speaker, text });
+}
+
+// =============================================================================
+// INITIALIZATION ON LOAD
+// =============================================================================
+
+window.addEventListener('load', () => {
+    init();
+    
+    // Load voices for speech synthesis
+    if (window.speechSynthesis) {
+        speechSynthesis.getVoices();
+        window.speechSynthesis.onvoiceschanged = () => {
+            speechSynthesis.getVoices();
+        };
+    }
+});
     </script>
 </body>
 </html>
