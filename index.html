@@ -210,7 +210,7 @@
         <div class="top-bar-right">
             <div class="user-badge" id="userBadge" style="display: none;">
                 <span class="dot"></span>
-                <span id="userEmail">user@email.com</span>
+                <span id="userEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="225751475062474f434b4e0c414d4f">[email&#160;protected]</a></span>
             </div>
             <button class="top-btn" id="authBtn" onclick="showAuthModal()">Sign In</button>
             <button class="top-btn" onclick="showAPIKeyModal()">🔑 API</button>
@@ -395,8 +395,8 @@
     <!-- API KEY MODAL -->
     <div class="modal-overlay" id="apiKeyModal">
         <div class="modal">
-            <h2>🔑 API Key Settings</h2>
-            <p>Configure your OpenAI API key for voice transcription.</p>
+            <h2>🔑 OpenAI API Key</h2>
+            <p>Your OpenAI key powers both voice input AND the AI prospect.</p>
             <div id="apiKeyStatus"></div>
             <label style="display: block; color: var(--text-dim); margin-bottom: 0.5rem; font-size: 0.9rem;">OpenAI API Key</label>
             <input type="password" id="apiKeyInput" class="modal-input" placeholder="sk-..." />
@@ -406,14 +406,14 @@
                 <button class="btn btn-danger" onclick="clearAPIKey()">Clear Key</button>
                 <button class="btn btn-secondary" onclick="closeAPIKeyModal()">Close</button>
             </div>
-            <p style="margin-top: 1.5rem; color: var(--text-dimmer); font-size: 0.85rem;"><strong>Note:</strong> Voice input requires an OpenAI key. You can still use text input without it.</p>
+            <p style="margin-top: 1.5rem; color: var(--text-dimmer); font-size: 0.85rem;"><strong>Required for:</strong> Voice transcription (Whisper) + AI responses (GPT-4o) + Scoring analysis</p>
         </div>
     </div>
     
     <div class="sale-banner" id="saleBanner">🎉 SALE CLOSED! 🎉</div>
     <div class="prompt-toggle" id="promptToggle"><span>💡 Prompts:</span><div class="toggle active" id="toggle" onclick="togglePrompts()"><div class="toggle-slider"></div></div></div>
 
-    <script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     // ============================================
     // SUPABASE CONFIG
     // ============================================
@@ -974,6 +974,14 @@
     // ============================================
     function handleUserSpeech(text) {
         if (!callActive || isProcessing) return;
+        
+        // Check for API key
+        if (!openaiKey) {
+            showAPIKeyModal();
+            alert('Please set your OpenAI API key to use the AI features.');
+            return;
+        }
+        
         addMessage('user', text);
         updateStage(text);
         isProcessing = true;
@@ -1038,39 +1046,72 @@
     }
 
     // ============================================
-    // AI RESPONSE (CLAUDE API)
+    // AI RESPONSE (OPENAI API)
     // ============================================
     async function getAIResponse(userText) {
+        if (!openaiKey) {
+            console.error('No OpenAI key');
+            const fallback = "I'm sorry, could you repeat that?";
+            addMessage('ai', fallback);
+            speak(fallback, () => { isProcessing = false; if (callActive) setInputsEnabled(true); });
+            return;
+        }
+        
         const avgScore = stats.scores.length > 0 ? stats.scores.reduce((a, b) => a + b, 0) / stats.scores.length : 50;
         let difficulty = 'medium';
         if (avgScore > 75) difficulty = 'hard';
         else if (avgScore < 50) difficulty = 'easy';
         const c = INDUSTRIES[selectedIndustry];
-        const systemPrompt = `You are a ${difficulty} sales prospect in a cold call simulation.
+        
+        const systemPrompt = `You are a ${difficulty} sales prospect receiving a cold call. Stay in character.
 
 CONTEXT:
 - Industry: ${selectedIndustry}
-- Product: ${c.product}
+- Product being sold: ${c.product}
 - Price: $${c.price.toLocaleString()}
 
 PERSONALITY (${difficulty}):
-${difficulty === 'easy' ? '- Receptive and friendly, open to hearing more' : difficulty === 'medium' ? '- Skeptical but professional, needs convincing' : '- Very busy, impatient, may hang up'}
+${difficulty === 'easy' ? '- Receptive and friendly, open to hearing more, ask questions about the product' : difficulty === 'medium' ? '- Skeptical but professional, need convincing with proof and benefits' : '- Very busy, impatient, may hang up if not impressed quickly'}
 
-CONVERSATION:
-${conversation.map(x => `${x.speaker.toUpperCase()}: ${x.text}`).join('\n')}
+RULES:
+- Respond in 1-2 sentences ONLY as the prospect
+- You may ask questions, give objections, show interest, or end the call
+- If the salesperson does well, show more interest
+- If they fumble or are pushy, push back or end the call
+${Math.random() > 0.7 ? '- Give an objection in this response' : ''}`;
 
-Respond in 1-2 sentences as the prospect. You may ask questions, give objections, show interest, or end the call if it's going poorly.${Math.random() > 0.7 ? ' Consider giving an objection.' : ''}`;
+        const messages = [
+            { role: 'system', content: systemPrompt },
+            ...conversation.map(x => ({
+                role: x.speaker === 'user' ? 'user' : 'assistant',
+                content: x.text
+            }))
+        ];
 
         try {
-            const r = await fetch('https://api.anthropic.com/v1/messages', {
+            const r = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'anthropic-version': '2023-06-01' },
-                body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 150, messages: [{ role: 'user', content: systemPrompt }] })
+                headers: { 
+                    'Content-Type': 'application/json', 
+                    'Authorization': `Bearer ${openaiKey}`
+                },
+                body: JSON.stringify({ 
+                    model: 'gpt-4o', 
+                    max_tokens: 150, 
+                    messages: messages,
+                    temperature: 0.8
+                })
             });
+            
+            if (!r.ok) {
+                const errData = await r.json().catch(() => ({}));
+                throw new Error(errData.error?.message || `HTTP ${r.status}`);
+            }
+            
             const d = await r.json();
-            if (d.error) throw new Error(d.error.message);
-            if (!d.content?.[0]?.text) throw new Error('Invalid response');
-            const aiText = d.content[0].text.trim();
+            if (!d.choices?.[0]?.message?.content) throw new Error('Invalid response');
+            
+            const aiText = d.choices[0].message.content.trim();
             addMessage('ai', aiText);
             const lower = aiText.toLowerCase();
             if (SALE_PATTERNS.some(p => lower.includes(p))) { handleSale(); return; }
@@ -1140,7 +1181,8 @@ Respond in 1-2 sentences as the prospect. You may ask questions, give objections
 
     async function calculateScore() {
         const transcript = conversation.map(c => `${c.speaker.toUpperCase()}: ${c.text}`).join('\n');
-        if (transcript.length < 20) return getDefaultScore();
+        if (transcript.length < 20 || !openaiKey) return getDefaultScore();
+        
         const prompt = `Analyze this sales call and score 0-100 on each metric.
 
 TRANSCRIPT:
@@ -1155,18 +1197,30 @@ CONTEXT:
 Score: closing, objection, confidence, rapport (0-100 each)
 Provide: 2 strengths, 2 improvements, 3 insights
 
-Respond with ONLY JSON:
-{"closing":N,"objection":N,"confidence":N,"rapport":N,"strengths":["...","..."],"improvements":["...","..."],"insights":[{"type":"strength|weakness|opportunity","title":"...","desc":"..."},{"type":"...","title":"...","desc":"..."},{"type":"...","title":"...","desc":"..."}]}`;
+Respond with ONLY valid JSON, no markdown:
+{"closing":N,"objection":N,"confidence":N,"rapport":N,"strengths":["...","..."],"improvements":["...","..."],"insights":[{"type":"strength","title":"...","desc":"..."},{"type":"weakness","title":"...","desc":"..."},{"type":"opportunity","title":"...","desc":"..."}]}`;
 
         try {
-            const r = await fetch('https://api.anthropic.com/v1/messages', {
+            const r = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'anthropic-version': '2023-06-01' },
-                body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 800, messages: [{ role: 'user', content: prompt }] })
+                headers: { 
+                    'Content-Type': 'application/json', 
+                    'Authorization': `Bearer ${openaiKey}`
+                },
+                body: JSON.stringify({ 
+                    model: 'gpt-4o', 
+                    max_tokens: 800, 
+                    messages: [{ role: 'user', content: prompt }],
+                    temperature: 0.3
+                })
             });
+            
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            
             const d = await r.json();
-            if (d.error || !d.content?.[0]?.text) throw new Error('API error');
-            const text = d.content[0].text;
+            if (!d.choices?.[0]?.message?.content) throw new Error('Invalid response');
+            
+            const text = d.choices[0].message.content;
             const start = text.indexOf('{'), end = text.lastIndexOf('}');
             if (start === -1 || end === -1) throw new Error('No JSON');
             const analysis = JSON.parse(text.substring(start, end + 1));
@@ -1290,14 +1344,4 @@ Respond with ONLY JSON:
 
     // ============================================
     // INITIALIZATION
-    // ============================================
-    window.addEventListener('load', () => {
-        init();
-        if (synthesis) {
-            synthesis.getVoices();
-            synthesis.onvoiceschanged = loadVoices;
-        }
-    });
-    </script>
-</body>
-</html>
+    // ========================================
