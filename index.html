@@ -210,7 +210,7 @@
         <div class="top-bar-right">
             <div class="user-badge" id="userBadge" style="display: none;">
                 <span class="dot"></span>
-                <span id="userEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="225751475062474f434b4e0c414d4f">[email&#160;protected]</a></span>
+                <span id="userEmail">user@email.com</span>
             </div>
             <button class="top-btn" id="authBtn" onclick="showAuthModal()">Sign In</button>
             <button class="top-btn" onclick="showAPIKeyModal()">🔑 API</button>
@@ -413,7 +413,7 @@
     <div class="sale-banner" id="saleBanner">🎉 SALE CLOSED! 🎉</div>
     <div class="prompt-toggle" id="promptToggle"><span>💡 Prompts:</span><div class="toggle active" id="toggle" onclick="togglePrompts()"><div class="toggle-slider"></div></div></div>
 
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    <script>
     // ============================================
     // SUPABASE CONFIG
     // ============================================
@@ -1344,4 +1344,14 @@ Respond with ONLY valid JSON, no markdown:
 
     // ============================================
     // INITIALIZATION
-    // ========================================
+    // ============================================
+    window.addEventListener('load', () => {
+        init();
+        if (synthesis) {
+            synthesis.getVoices();
+            synthesis.onvoiceschanged = loadVoices;
+        }
+    });
+    </script>
+</body>
+</html>
