@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Valtori AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <header class="header">
+        <a href="index.html" class="logo">Valtori AI</a>
+        <nav class="nav">
+            <a href="index.html" class="nav-link">Home</a>
+            <a href="setup.html" class="nav-link">Practice</a>
+            <a href="dashboard.html" class="nav-link active">Dashboard</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="dashboard-page">
+            <div class="dashboard-header">
+                <h1>Performance Dashboard</h1>
+                <p class="dashboard-subtitle">Track your progress over time</p>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Close Rate</div>
+                    <div class="stat-value" id="closeRate">0%</div>
+                    <div class="stat-sub" id="closeSub">0 / 0 calls</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Earnings</div>
+                    <div class="stat-value" id="totalEarnings">$0</div>
+                    <div class="stat-sub" id="earningsSub">0 sales closed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Average Score</div>
+                    <div class="stat-value" id="avgScore">--</div>
+                    <div class="stat-sub" id="scoreTrend">--</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Practice Time</div>
+                    <div class="stat-value" id="totalTime">0m</div>
+                    <div class="stat-sub" id="callCount">0 calls</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Avg Per Call</div>
+                    <div class="stat-value" id="avgPerCall">$0</div>
+                    <div class="stat-sub">Expected earnings</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Best Streak</div>
+                    <div class="stat-value" id="maxStreak">0</div>
+                    <div class="stat-sub" id="currentStreak">Current: 0</div>
+                </div>
+            </div>
+
+            <!-- History -->
+            <div class="history-section">
+                <div class="history-header">
+                    <h3>Call History</h3>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-secondary btn-sm" onclick="exportData()">Export Data</button>
+                        <button class="btn btn-danger btn-sm" onclick="confirmReset()">Reset All</button>
+                    </div>
+                </div>
+                <div id="historyList">
+                    <div class="empty-state">
+                        <div class="empty-icon">📊</div>
+                        <p>No practice sessions yet</p>
+                        <a href="setup.html" class="btn btn-primary" style="margin-top: 1rem;">Start Practicing</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="action-buttons">
+                <a href="setup.html" class="btn btn-primary">New Practice Call</a>
+                <a href="index.html" class="btn btn-secondary">Back to Home</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Confirm Modal -->
+    <div class="modal-overlay" id="resetModal">
+        <div class="modal">
+            <h2>⚠️ Reset All Data?</h2>
+            <p>This will permanently delete all your practice history, scores, and earnings. This action cannot be undone.</p>
+            <div class="modal-actions">
+                <button class="btn btn-danger" onclick="resetData()">Yes, Reset Everything</button>
+                <button class="btn btn-secondary" onclick="closeResetModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script src="js/stats.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDashboard();
+        });
+
+        function loadDashboard() {
+            const data = Stats.getDashboardData();
+            
+            // Update stats
+            document.getElementById('closeRate').textContent = data.closeRate + '%';
+            document.getElementById('closeSub').textContent = `${data.totalSales} / ${data.totalCalls} calls`;
+            
+            document.getElementById('totalEarnings').textContent = Valtori.Utils.formatCurrency(data.totalEarnings);
+            document.getElementById('earningsSub').textContent = `${data.totalSales} sales closed`;
+            
+            document.getElementById('avgScore').textContent = data.avgScore !== null ? data.avgScore : '--';
+            document.getElementById('scoreTrend').textContent = data.scoreTrend;
+            
+            document.getElementById('totalTime').textContent = data.timeFormatted;
+            document.getElementById('callCount').textContent = `${data.totalCalls} calls`;
+            
+            document.getElementById('avgPerCall').textContent = data.avgPerCall > 0 
+                ? '+' + Valtori.Utils.formatCurrency(data.avgPerCall) 
+                : '$0';
+            
+            document.getElementById('maxStreak').textContent = data.maxStreak;
+            document.getElementById('currentStreak').textContent = `Current: ${data.currentStreak}`;
+            
+            // Update history
+            const historyList = document.getElementById('historyList');
+            
+            if (!data.history || data.history.length === 0) {
+                historyList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📊</div>
+                        <p>No practice sessions yet</p>
+                        <a href="setup.html" class="btn btn-primary" style="margin-top: 1rem;">Start Practicing</a>
+                    </div>
+                `;
+                return;
+            }
+            
+            historyList.innerHTML = '';
+            
+            data.history.slice(0, 20).forEach(item => {
+                const date = new Date(item.timestamp);
+                const dateStr = date.toLocaleDateString();
+                const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const duration = Valtori.Utils.formatTime(item.duration);
+                const earningsClass = item.closed ? 'positive' : 'negative';
+                const earningsStr = item.closed ? '+' + Valtori.Utils.formatCurrency(item.commission) : '$0';
+                
+                historyList.innerHTML += `
+                    <div class="history-item">
+                        <div>
+                            <div class="history-date">${dateStr} ${timeStr}</div>
+                            <div class="history-details">${item.product} • ${duration}</div>
+                        </div>
+                        <div class="history-score">${item.score?.overall || '--'}</div>
+                        <div class="history-outcome">${item.closed ? '✅' : '❌'}</div>
+                        <div class="history-earnings ${earningsClass}">${earningsStr}</div>
+                    </div>
+                `;
+            });
+        }
+
+        function exportData() {
+            Stats.exportStats();
+            Valtori.Toast.success('Data exported');
+        }
+
+        function confirmReset() {
+            document.getElementById('resetModal').classList.add('active');
+        }
+
+        function closeResetModal() {
+            document.getElementById('resetModal').classList.remove('active');
+        }
+
+        function resetData() {
+            Stats.resetStats();
+            closeResetModal();
+            Valtori.Toast.success('All data reset');
+            loadDashboard();
+        }
+    </script>
+</body>
+</html>

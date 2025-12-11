@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valtori AI - Sales Practice Simulator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <header class="header">
+        <a href="index.html" class="logo">Valtori AI</a>
+        <nav class="nav">
+            <a href="index.html" class="nav-link active">Home</a>
+            <a href="setup.html" class="nav-link">Practice</a>
+            <a href="dashboard.html" class="nav-link">Dashboard</a>
+        </nav>
+        <div class="badges">
+            <div class="badge" onclick="Valtori.showAPIModal()">🔑 API</div>
+            <div class="badge"><span class="status-dot offline"></span>Smart AI</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="hero">
+            <h1>Master Sales.<br><span class="gradient">Without The Risk.</span></h1>
+            <p class="subtitle">Practice with AI customers. Get detailed analytics. Track your improvement over time.</p>
+            <a href="setup.html" class="btn btn-primary btn-lg">Get Started</a>
+            
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">🎤</div>
+                    <div class="feature-title">Voice & Text Input</div>
+                    <div class="feature-desc">Speak naturally or type - practice your pitch exactly how you'll deliver it</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🤖</div>
+                    <div class="feature-title">Smart AI Prospects</div>
+                    <div class="feature-desc">Context-aware responses that react to what you say, not random scripts</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📊</div>
+                    <div class="feature-title">Detailed Analytics</div>
+                    <div class="feature-desc">Track closing rate, earnings, scores, and improvement trends over time</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- API Modal -->
+    <div class="modal-overlay" id="apiModal">
+        <div class="modal">
+            <h2>🔑 Voice Settings</h2>
+            <div id="apiKeyStatus"></div>
+            <input type="password" id="apiKeyInput" class="modal-input" placeholder="sk-... (OpenAI key for voice input)">
+            <p class="modal-note">OpenAI key enables voice input via Whisper. Get yours at <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com</a></p>
+            <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                <button class="btn btn-primary btn-sm" onclick="Valtori.saveAPIKey()">Save</button>
+                <button class="btn btn-danger btn-sm" onclick="Valtori.clearAPIKey()">Clear</button>
+            </div>
+            <p style="margin-top: 1.5rem; padding: 1rem; background: var(--cyan-dim); border-radius: 8px; font-size: 0.9rem;">
+                💡 <strong>Smart AI Mode:</strong> This app uses intelligent pattern-matching for realistic conversations. No external AI API needed!
+            </p>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="Valtori.closeAPIModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

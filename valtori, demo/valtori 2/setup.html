@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Practice Call - Valtori AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <header class="header">
+        <a href="index.html" class="logo">Valtori AI</a>
+        <nav class="nav">
+            <a href="index.html" class="nav-link">Home</a>
+            <a href="setup.html" class="nav-link active">Practice</a>
+            <a href="dashboard.html" class="nav-link">Dashboard</a>
+        </nav>
+        <div class="badges">
+            <div class="badge" onclick="Valtori.showAPIModal()">🔑 API</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="selection-page">
+            <h1>Setup Practice Call</h1>
+            <p>Choose an industry and difficulty to start your sales practice</p>
+
+            <select id="industrySelect" class="form-select industry-select" onchange="updateProduct()">
+                <option value="">-- Select Industry --</option>
+            </select>
+
+            <div class="product-card" id="productCard">
+                <div class="product-label">Product</div>
+                <div class="product-value" id="productName">--</div>
+                <div class="product-label">Price</div>
+                <div class="product-value" id="productPrice">--</div>
+                <div class="commission-box">
+                    <span class="commission-label">Your Commission</span>
+                    <div class="commission-value" id="commissionValue">--</div>
+                </div>
+            </div>
+
+            <div class="difficulty-selector">
+                <button class="diff-btn easy" data-diff="easy" onclick="setDifficulty('easy')">😊 Easy</button>
+                <button class="diff-btn active" data-diff="medium" onclick="setDifficulty('medium')">🎯 Medium</button>
+                <button class="diff-btn hard" data-diff="hard" onclick="setDifficulty('hard')">😤 Hard</button>
+            </div>
+
+            <button class="btn btn-primary btn-lg" id="startBtn" onclick="startCall()" disabled>
+                Begin Practice Call
+            </button>
+        </div>
+    </div>
+
+    <!-- Tutorial Modal -->
+    <div class="modal-overlay" id="tutorialModal">
+        <div class="modal">
+            <h2>Welcome to Practice!</h2>
+            <p>You're about to start a simulated sales call with a smart AI prospect.</p>
+            <p><strong>How it works:</strong></p>
+            <ul>
+                <li>🎤 Click the mic to speak OR type your response</li>
+                <li>🤖 The AI responds based on what you say</li>
+                <li>💡 Watch for coaching prompts at each stage</li>
+                <li>📊 Get detailed feedback after the call</li>
+            </ul>
+            <p><strong>Tips for success:</strong></p>
+            <ul>
+                <li>Introduce yourself and your company</li>
+                <li>Ask questions to understand their needs</li>
+                <li>Handle objections calmly with proof</li>
+                <li>Always ask for the next step!</li>
+            </ul>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="confirmStart()">Start Call</button>
+                <button class="btn btn-secondary" onclick="skipTutorial()">Skip Tutorial</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- API Modal -->
+    <div class="modal-overlay" id="apiModal">
+        <div class="modal">
+            <h2>🔑 Voice Settings</h2>
+            <div id="apiKeyStatus"></div>
+            <input type="password" id="apiKeyInput" class="modal-input" placeholder="sk-... (OpenAI key for voice)">
+            <p class="modal-note">Voice input requires an OpenAI API key. <a href="https://platform.openai.com/api-keys" target="_blank">Get one here</a></p>
+            <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                <button class="btn btn-primary btn-sm" onclick="Valtori.saveAPIKey()">Save</button>
+                <button class="btn btn-danger btn-sm" onclick="Valtori.clearAPIKey()">Clear</button>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="Valtori.closeAPIModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        let selectedIndustry = null;
+        let selectedDifficulty = 'medium';
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            populateIndustries();
+            loadPreferences();
+        });
+
+        function populateIndustries() {
+            const select = document.getElementById('industrySelect');
+            const industries = Valtori.CONFIG.industries;
+            
+            for (const [key, value] of Object.entries(industries)) {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = value.name;
+                select.appendChild(option);
+            }
+        }
+
+        function loadPreferences() {
+            const prefs = Valtori.State.getPrefs();
+            selectedDifficulty = prefs.difficulty || 'medium';
+            
+            // Update UI
+            document.querySelectorAll('.diff-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.diff === selectedDifficulty);
+            });
+        }
+
+        function updateProduct() {
+            const select = document.getElementById('industrySelect');
+            const key = select.value;
+            
+            if (!key || !Valtori.CONFIG.industries[key]) {
+                document.getElementById('productCard').classList.remove('show');
+                document.getElementById('startBtn').disabled = true;
+                selectedIndustry = null;
+                return;
+            }
+            
+            selectedIndustry = key;
+            const industry = Valtori.CONFIG.industries[key];
+            
+            document.getElementById('productName').textContent = industry.product;
+            document.getElementById('productPrice').textContent = Valtori.Utils.formatCurrency(industry.price);
+            document.getElementById('commissionValue').textContent = Valtori.Utils.formatCurrency(industry.price * industry.commission);
+            document.getElementById('productCard').classList.add('show');
+            document.getElementById('startBtn').disabled = false;
+        }
+
+        function setDifficulty(diff) {
+            selectedDifficulty = diff;
+            
+            document.querySelectorAll('.diff-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.diff === diff);
+            });
+            
+            // Save preference
+            const prefs = Valtori.State.getPrefs();
+            prefs.difficulty = diff;
+            Valtori.State.savePrefs(prefs);
+        }
+
+        function startCall() {
+            if (!selectedIndustry) {
+                Valtori.Toast.error('Please select an industry');
+                return;
+            }
+            
+            const prefs = Valtori.State.getPrefs();
+            
+            if (prefs.isFirstCall) {
+                document.getElementById('tutorialModal').classList.add('active');
+            } else {
+                confirmStart();
+            }
+        }
+
+        function confirmStart() {
+            document.getElementById('tutorialModal').classList.remove('active');
+            
+            // Save session data
+            const industry = Valtori.CONFIG.industries[selectedIndustry];
+            const session = {
+                industry: selectedIndustry,
+                product: industry.product,
+                price: industry.price,
+                commission: industry.price * industry.commission,
+                difficulty: selectedDifficulty,
+                timestamp: new Date().toISOString()
+            };
+            
+            Valtori.State.saveSession(session);
+            
+            // Mark first call done
+            const prefs = Valtori.State.getPrefs();
+            prefs.isFirstCall = false;
+            Valtori.State.savePrefs(prefs);
+            
+            // Navigate to call page
+            window.location.href = 'call.html';
+        }
+
+        function skipTutorial() {
+            const prefs = Valtori.State.getPrefs();
+            prefs.isFirstCall = false;
+            Valtori.State.savePrefs(prefs);
+            confirmStart();
+        }
+    </script>
+</body>
+</html>

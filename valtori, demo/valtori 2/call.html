@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Practice Call - Valtori AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <header class="header">
+        <a href="index.html" class="logo">Valtori AI</a>
+        <nav class="nav">
+            <a href="index.html" class="nav-link">Home</a>
+            <a href="setup.html" class="nav-link">Practice</a>
+            <a href="dashboard.html" class="nav-link">Dashboard</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="call-page">
+            <!-- Call Header -->
+            <div class="call-header">
+                <div class="call-info">
+                    <div class="call-status" id="callStatus">
+                        <span class="pulse"></span>
+                        Call in Progress
+                    </div>
+                    <div class="call-type">Cold Call Practice</div>
+                </div>
+                <div class="timer" id="timer">00:00</div>
+            </div>
+
+            <!-- Warning Box -->
+            <div id="warningContainer"></div>
+
+            <!-- Avatar -->
+            <div class="avatar-container">
+                <div class="avatar" id="avatar">🤖</div>
+                <div class="avatar-status" id="avatarStatus">AI Customer</div>
+            </div>
+
+            <!-- Coaching Prompt -->
+            <div id="promptContainer"></div>
+
+            <!-- Transcript -->
+            <div class="transcript" id="transcript"></div>
+
+            <!-- Controls -->
+            <div class="controls">
+                <div style="position: relative;">
+                    <button class="mic-btn" id="micBtn" onclick="toggleMic()">
+                        🎤
+                        <div class="mic-label" id="micLabel">Click to Speak</div>
+                    </button>
+                </div>
+                
+                <div class="or-divider">— or type below —</div>
+                
+                <div class="input-row">
+                    <input type="text" id="textInput" class="text-input" placeholder="Type your response..." maxlength="500">
+                    <button class="btn btn-primary" id="sendBtn" onclick="sendText()">Send</button>
+                </div>
+                
+                <div class="control-buttons">
+                    <button class="btn btn-secondary" onclick="endCall()">End Call</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Bar -->
+    <div class="bottom-bar" id="bottomBar">
+        <div class="toggle-group">
+            <span>💡 Prompts</span>
+            <div class="toggle active" id="promptToggle" onclick="togglePrompts()">
+                <div class="toggle-slider"></div>
+            </div>
+        </div>
+        <div class="toggle-group">
+            <span>🔊 Voice</span>
+            <div class="toggle active" id="voiceToggle" onclick="toggleVoice()">
+                <div class="toggle-slider"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sale Banner -->
+    <div class="sale-banner" id="saleBanner">🎉 SALE CLOSED! 🎉</div>
+
+    <script src="js/app.js"></script>
+    <script src="js/ai-engine.js"></script>
+    <script src="js/speech.js"></script>
+    <script src="js/stats.js"></script>
+    <script>
+        // ============================================
+        // CALL STATE
+        // ============================================
+        let callState = {
+            active: false,
+            duration: 0,
+            timer: null,
+            conversation: [],
+            stage: 'opening',
+            processing: false,
+            warned: false,
+            promptsOn: true,
+            session: null
+        };
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        document.addEventListener('DOMContentLoaded', () => {
+            initCall();
+        });
+
+        function initCall() {
+            // Load session
+            callState.session = Valtori.State.getSession();
+            
+            if (!callState.session) {
+                Valtori.Toast.error('No session found');
+                setTimeout(() => window.location.href = 'setup.html', 1500);
+                return;
+            }
+            
+            // Load preferences
+            const prefs = Valtori.State.getPrefs();
+            callState.promptsOn = prefs.promptsOn !== false;
+            
+            // Update toggle UI
+            document.getElementById('promptToggle').classList.toggle('active', callState.promptsOn);
+            document.getElementById('voiceToggle').classList.toggle('active', prefs.voiceOn !== false);
+            
+            // Initialize speech
+            Speech.init();
+            Speech.setVoiceEnabled(prefs.voiceOn !== false);
+            
+            // Set up speech callbacks
+            Speech.onTranscription = (text) => handleInput(text);
+            Speech.onRecordingStart = () => {
+                document.getElementById('micBtn').classList.add('recording');
+                document.getElementById('micLabel').textContent = 'Click to Stop';
+            };
+            Speech.onRecordingEnd = () => {
+                document.getElementById('micBtn').classList.remove('recording');
+                document.getElementById('micLabel').textContent = 'Processing...';
+                setTimeout(() => {
+                    document.getElementById('micLabel').textContent = 'Click to Speak';
+                }, 500);
+            };
+            Speech.onSpeakingStart = () => {
+                document.getElementById('avatar').classList.remove('thinking');
+                document.getElementById('avatar').classList.add('speaking');
+                document.getElementById('avatarStatus').textContent = 'Speaking...';
+            };
+            Speech.onSpeakingEnd = () => {
+                document.getElementById('avatar').classList.remove('speaking');
+                document.getElementById('avatarStatus').textContent = 'AI Customer';
+            };
+            
+            // Initialize AI engine
+            AIEngine.reset(callState.session.difficulty);
+            
+            // Set up input handlers
+            document.getElementById('textInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendText();
+            });
+            
+            // Start call
+            startCall();
+        }
+
+        function startCall() {
+            callState.active = true;
+            callState.duration = 0;
+            callState.conversation = [];
+            callState.stage = 'opening';
+            callState.processing = false;
+            callState.warned = false;
+            
+            setInputsEnabled(true);
+            startTimer();
+            
+            // Initial greeting after delay
+            setTimeout(() => {
+                const greeting = AIEngine.getInitialGreeting(callState.session.difficulty);
+                addMessage('ai', greeting);
+                Speech.speak(greeting, () => {
+                    updatePrompt();
+                });
+            }, 1000);
+        }
+
+        // ============================================
+        // TIMER
+        // ============================================
+        function startTimer() {
+            callState.timer = setInterval(() => {
+                callState.duration++;
+                document.getElementById('timer').textContent = Valtori.Utils.formatTime(callState.duration);
+                
+                // Warning at 60 seconds
+                if (callState.duration === 60 && !callState.warned) {
+                    callState.warned = true;
+                    document.getElementById('warningContainer').innerHTML = 
+                        '<div class="warning-box">⚠️ 60 seconds - Consider moving towards closing</div>';
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (callState.timer) {
+                clearInterval(callState.timer);
+                callState.timer = null;
+            }
+        }
+
+        // ============================================
+        // INPUT HANDLING
+        // ============================================
+        function setInputsEnabled(enabled) {
+            document.getElementById('micBtn').disabled = !enabled;
+            document.getElementById('textInput').disabled = !enabled;
+            document.getElementById('sendBtn').disabled = !enabled;
+        }
+
+        function toggleMic() {
+            if (!callState.active || callState.processing) return;
+            Speech.toggleRecording();
+        }
+
+        function sendText() {
+            const input = document.getElementById('textInput');
+            const text = input.value.trim();
+            
+            if (!text || !callState.active || callState.processing) return;
+            
+            input.value = '';
+            handleInput(text);
+        }
+
+        function handleInput(text) {
+            if (!callState.active || callState.processing) return;
+            
+            addMessage('user', text);
+            updateStage(text);
+            
+            callState.processing = true;
+            setInputsEnabled(false);
+            
+            // Show thinking state
+            document.getElementById('avatar').classList.add('thinking');
+            document.getElementById('avatarStatus').textContent = 'Thinking...';
+            
+            // Generate response after delay
+            setTimeout(() => getAIResponse(text), 800 + Math.random() * 500);
+        }
+
+        // ============================================
+        // MESSAGES
+        // ============================================
+        function addMessage(who, text) {
+            const transcript = document.getElementById('transcript');
+            
+            const msg = document.createElement('div');
+            msg.className = `message ${who}`;
+            
+            const label = who === 'user' ? 'You' : who === 'ai' ? 'Customer' : 'System';
+            msg.innerHTML = `
+                <div class="speaker">${label}</div>
+                <div class="message-text">${Valtori.Utils.escapeHtml(text)}</div>
+            `;
+            
+            transcript.appendChild(msg);
+            transcript.scrollTop = transcript.scrollHeight;
+            
+            callState.conversation.push({ who, txt: text, time: callState.duration });
+        }
+
+        // ============================================
+        // AI RESPONSE
+        // ============================================
+        function getAIResponse(userText) {
+            const context = {
+                messageCount: callState.conversation.length,
+                product: callState.session.product,
+                price: callState.session.price,
+                difficulty: callState.session.difficulty
+            };
+            
+            const response = AIEngine.generateResponse(userText, context);
+            processAIResponse(response);
+        }
+
+        function processAIResponse(response) {
+            addMessage('ai', response);
+            
+            // Check for sale
+            if (AIEngine.isSaleResponse(response)) {
+                handleSale();
+                return;
+            }
+            
+            // Check for hangup
+            if (AIEngine.isHangupResponse(response)) {
+                Speech.speak(response, () => {
+                    setTimeout(handleHangup, 1500);
+                });
+                return;
+            }
+            
+            // Normal response
+            Speech.speak(response, () => {
+                callState.processing = false;
+                if (callState.active) {
+                    setInputsEnabled(true);
+                }
+            });
+        }
+
+        // ============================================
+        // SALE & HANGUP
+        // ============================================
+        function handleSale() {
+            callState.session.closed = true;
+            
+            // Play sound
+            try {
+                new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuAy/DajTwJEmiy6OyNPwwSVa7n77BLDQw7k9fzx3UjBSt8x+3akD0IEGCv5+WcUAwMUKXh8bJQDgsxhcXtypRBAw==').play().catch(() => {});
+            } catch (e) {}
+            
+            // Show banner
+            const banner = document.getElementById('saleBanner');
+            banner.classList.add('active');
+            setTimeout(() => banner.classList.remove('active'), 2500);
+            
+            // Close message
+            const closeMsg = "Great! I'll have my team send over the details. Looking forward to working together!";
+            addMessage('ai', closeMsg);
+            
+            Speech.speak(closeMsg, () => {
+                setTimeout(() => {
+                    stopTimer();
+                    callState.active = false;
+                    finishCall();
+                }, 2000);
+            });
+        }
+
+        function handleHangup() {
+            stopTimer();
+            callState.active = false;
+            callState.session.closed = false;
+            document.getElementById('callStatus').innerHTML = 'Call Ended';
+            
+            setTimeout(finishCall, 1000);
+        }
+
+        function endCall() {
+            if (!callState.active) return;
+            
+            stopTimer();
+            callState.active = false;
+            callState.session.closed = false;
+            setInputsEnabled(false);
+            document.getElementById('callStatus').innerHTML = 'Call Ended';
+            
+            finishCall();
+        }
+
+        function finishCall() {
+            addMessage('system', 'Analyzing your performance...');
+            
+            // Calculate score
+            const aiData = AIEngine.getAnalysisData();
+            const score = Stats.calculateScore(callState.conversation, callState.session, aiData);
+            
+            // Update session
+            callState.session.duration = callState.duration;
+            callState.session.conversation = [...callState.conversation];
+            
+            // Record stats
+            Stats.recordSession(callState.session, score);
+            
+            // Save results for results page
+            Valtori.State.saveLastResults({
+                session: callState.session,
+                score: score
+            });
+            
+            // Navigate to results
+            setTimeout(() => {
+                window.location.href = 'results.html';
+            }, 1500);
+        }
+
+        // ============================================
+        // STAGE & PROMPTS
+        // ============================================
+        function updateStage(text) {
+            const lower = text.toLowerCase();
+            
+            if (callState.stage === 'opening' && (lower.includes('my name') || lower.includes('calling from') || lower.includes('this is'))) {
+                callState.stage = 'permission';
+            } else if (callState.stage === 'permission' && (lower.includes('help') || lower.includes('benefit') || lower.includes('save') || lower.includes('minute'))) {
+                callState.stage = 'value';
+            } else if (callState.stage === 'value' && (lower.includes('?') || lower.includes('tell me') || lower.includes('how'))) {
+                callState.stage = 'discovery';
+            } else if (callState.stage === 'discovery' && (lower.includes('understand') || lower.includes('i hear') || lower.includes('actually'))) {
+                callState.stage = 'objection';
+            }
+            
+            if (lower.includes('next step') || lower.includes('schedule') || lower.includes('demo') || lower.includes('get started')) {
+                callState.stage = 'close';
+            }
+            
+            updatePrompt();
+        }
+
+        function updatePrompt() {
+            if (!callState.promptsOn) return;
+            
+            const prompts = Valtori.CONFIG.stages[callState.stage];
+            if (!prompts) return;
+            
+            const prompt = Valtori.Utils.randomPick(prompts);
+            
+            document.getElementById('promptContainer').innerHTML = `
+                <div class="prompt-box">
+                    <div class="prompt-label">💡 ${callState.stage.toUpperCase()}</div>
+                    <div class="prompt-text">${prompt}</div>
+                </div>
+            `;
+            
+            // Auto-hide after 8 seconds
+            setTimeout(() => {
+                const container = document.getElementById('promptContainer');
+                if (container) container.innerHTML = '';
+            }, 8000);
+        }
+
+        // ============================================
+        // TOGGLES
+        // ============================================
+        function togglePrompts() {
+            callState.promptsOn = !callState.promptsOn;
+            document.getElementById('promptToggle').classList.toggle('active', callState.promptsOn);
+            
+            if (!callState.promptsOn) {
+                document.getElementById('promptContainer').innerHTML = '';
+            }
+            
+            const prefs = Valtori.State.getPrefs();
+            prefs.promptsOn = callState.promptsOn;
+            Valtori.State.savePrefs(prefs);
+        }
+
+        function toggleVoice() {
+            const enabled = !Speech.voiceEnabled;
+            Speech.setVoiceEnabled(enabled);
+            document.getElementById('voiceToggle').classList.toggle('active', enabled);
+        }
+    </script>
+</body>
+</html>
