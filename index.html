@@ -726,16 +726,6 @@ function startCall() {
     console.log('Starting call...');
     
     // Check if Anthropic key is set
-    if (!anthropicKey) {
-        alert(
-            '❌ Anthropic API Key Required\n\n' +
-            'You need an Anthropic API key for AI responses.\n\n' +
-            'Click the 🔑 button and select option 2 to set it up.\n\n' +
-            'Get your free key at:\n' +
-            'https://console.anthropic.com/'
-        );
-        return;
-    }
     
     document.getElementById('tutorialModal').classList.remove('active');
     switchScreen('call');
@@ -1059,13 +1049,6 @@ function togglePrompts() {
 // =============================================================================
 
 async function getAIResponse(userText) {
-    // Check if Anthropic key is set
-    if (!anthropicKey) {
-        const fallback = "I need an Anthropic API key to respond. Click the 🔑 button to set it.";
-        addMessage('ai', fallback);
-        speak(fallback);
-        return;
-    }
     
     const avgScore = stats.scores.length > 0 
         ? stats.scores.reduce((a, b) => a + b, 0) / stats.scores.length 
@@ -1171,7 +1154,6 @@ Only say YES if:
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'x-api-key': anthropicKey,
                 'anthropic-version': '2023-06-01'
             },
             body: JSON.stringify({
@@ -1284,24 +1266,6 @@ JSON only:
   ]
 }`;
     
-    // Check if Anthropic key is set
-    if (!anthropicKey) {
-        console.error('No Anthropic API key for scoring');
-        // Return fallback scores
-        return {
-            overall: 65,
-            metrics: {
-                closing: session.closed ? 85 : 50,
-                objection: 60,
-                confidence: 70,
-                rapport: 65
-            },
-            feedback: {
-                strengths: ['Completed the call', 'Showed up to practice'],
-                improvements: ['Ask more questions', 'Work on objection handling'],
-                insights: [{
-                    type: 'opportunity',
-                    title: 'More Practice Needed',
                     desc: 'Keep practicing to build consistency'
                 }]
             }
@@ -1313,7 +1277,6 @@ JSON only:
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'x-api-key': anthropicKey,
                 'anthropic-version': '2023-06-01'
             },
             body: JSON.stringify({
