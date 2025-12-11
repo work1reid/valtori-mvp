@@ -377,6 +377,8 @@
             
             try {
                 state.mediaStream = await navigator.mediaDevices.getUserMedia({ 
+                    let audioQueue = [];
+                    let isPlaying = false;
                     audio: {
                         sampleRate: 24000,
                         channelCount: 1,
@@ -506,27 +508,45 @@
         }
         
         async function playAudioChunk(base64Audio) {
-            const binaryString = atob(base64Audio);
-            const len = binaryString.length;
-            const bytes = new Uint8Array(len);
-            for (let i = 0; i < len; i++) {
-                bytes[i] = binaryString.charCodeAt(i);
-            }
-            
-            const int16Array = new Int16Array(bytes.buffer);
-            const float32Array = new Float32Array(int16Array.length);
-            for (let i = 0; i < int16Array.length; i++) {
-                float32Array[i] = int16Array[i] / 32768;
-            }
-            
-            const audioBuffer = state.audioContext.createBuffer(1, float32Array.length, 24000);
-            audioBuffer.getChannelData(0).set(float32Array);
-            
-            const source = state.audioContext.createBufferSource();
-            source.buffer = audioBuffer;
-            source.connect(state.audioContext.destination);
-            source.start();
-        }
+    const binaryString = atob(base64Audio);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+    }
+    
+    const int16Array = new Int16Array(bytes.buffer);
+    const float32Array = new Float32Array(int16Array.length);
+    for (let i = 0; i < int16Array.length; i++) {
+        float32Array[i] = int16Array[i] / 32768;
+    }
+    
+    const audioBuffer = state.audioContext.createBuffer(1, float32Array.length, 24000);
+    audioBuffer.getChannelData(0).set(float32Array);
+    
+    // Queue the audio
+    audioQueue.push(audioBuffer);
+    
+    if (!isPlaying) {
+        playNextAudio();
+    }
+}
+
+function playNextAudio() {
+    if (audioQueue.length === 0) {
+        isPlaying = false;
+        return;
+    }
+    
+    isPlaying = true;
+    const audioBuffer = audioQueue.shift();
+    
+    const source = state.audioContext.createBufferSource();
+    source.buffer = audioBuffer;
+    source.connect(state.audioContext.destination);
+    source.onended = () => playNextAudio();
+    source.start();
+}
         
         function updateStatus(status) {
             const avatar = document.getElementById('avatar');
