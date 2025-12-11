@@ -1,12 +1,6 @@
-// api/whisper.js - Fixed version for Vercel
-import formidable from 'formidable';
-import fetch from 'node-fetch';
-import FormData from 'form-data';
-import fs from 'fs';
-
 export const config = {
     api: {
-        bodyParser: false, // Disable default body parser
+        bodyParser: false,
     },
 };
 
@@ -26,61 +20,38 @@ export default async function handler(req, res) {
     const apiKey = process.env.OPENAI_API_KEY;
     
     if (!apiKey) {
-        console.error('Missing OPENAI_API_KEY environment variable');
-        return res.status(500).json({ error: 'Server configuration error' });
+        console.error('Missing OPENAI_API_KEY');
+        return res.status(500).json({ error: 'Missing API key' });
     }
     
     try {
-        // Parse the incoming FormData
-        const form = formidable({ multiples: false });
-        
-        const { files } = await new Promise((resolve, reject) => {
-            form.parse(req, (err, fields, files) => {
-                if (err) reject(err);
-                else resolve({ fields, files });
-            });
-        });
-        
-        const audioFile = files.file;
-        if (!audioFile) {
-            return res.status(400).json({ error: 'No audio file provided' });
+        // Get the raw body as buffer
+        const chunks = [];
+        for await (const chunk of req) {
+            chunks.push(chunk);
         }
+        const buffer = Buffer.concat(chunks);
         
-        // Create new FormData for OpenAI API
-        const formData = new FormData();
-        formData.append('file', fs.createReadStream(audioFile.filepath), {
-            filename: 'audio.webm',
-            contentType: 'audio/webm',
-        });
-        formData.append('model', 'whisper-1');
-        
-        // Send to OpenAI
+        // Forward to OpenAI
         const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${apiKey}`,
-                ...formData.getHeaders(),
+                'Content-Type': req.headers['content-type'],
             },
-            body: formData,
+            body: buffer,
         });
         
         const data = await response.json();
         
-        // Clean up temp file
-        try {
-            fs.unlinkSync(audioFile.filepath);
-        } catch (e) {
-            console.error('Failed to delete temp file:', e);
-        }
-        
         if (!response.ok) {
-            console.error('OpenAI API error:', data);
+            console.error('OpenAI error:', data);
             return res.status(response.status).json(data);
         }
         
         return res.status(200).json(data);
     } catch (error) {
-        console.error('Whisper proxy error:', error);
-        return res.status(500).json({ error: 'Internal server error', details: error.message });
+        console.error('Whisper error:', error);
+        return res.status(500).json({ error: error.message });
     }
 }
