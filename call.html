@@ -336,7 +336,7 @@
         
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
-        let state = {
+let state = {
             userId: null,
             userEmail: null,
             callActive: false,
@@ -349,6 +349,9 @@
             mediaStream: null,
             audioWorklet: null
         };
+        
+        let audioQueue = [];
+        let isPlaying = false;
         
         window.addEventListener('load', async () => {
             const { data: { session } } = await supabase.auth.getSession();
@@ -377,8 +380,6 @@
             
             try {
                 state.mediaStream = await navigator.mediaDevices.getUserMedia({ 
-                    let audioQueue = [];
-                    let isPlaying = false;
                     audio: {
                         sampleRate: 24000,
                         channelCount: 1,
