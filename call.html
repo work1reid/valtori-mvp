@@ -487,14 +487,11 @@
             state.audioWorklet = new AudioWorkletNode(state.audioContext, 'audio-processor');
             
             state.audioWorklet.port.onmessage = (event) => {
-                if (state.ws && state.ws.readyState === WebSocket.OPEN && !state.isMuted) {
-                    const base64Audio = arrayBufferToBase64(event.data);
-                    state.ws.send(JSON.stringify({
-                        type: 'input_audio_buffer.append',
-                        audio: base64Audio
-                    }));
-                }
-            };
+    if (state.ws && state.ws.readyState === WebSocket.OPEN && !state.isMuted) {
+        // Send raw binary audio instead of JSON
+        state.ws.send(event.data);
+    }
+};
             
             source.connect(state.audioWorklet);
         }
