@@ -3,868 +3,334 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Valtori AI - Sales Practice Simulator</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Valtori AI - Sales Call Simulator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         :root {
-            --bg-dark: #0a0e1a; --bg-darker: #060811; --bg-card: #141824;
-            --cyan: #00f5ff; --green: #00ff88; --yellow: #ffd500;
-            --orange: #ff8800; --red: #ff3366;
-            --text: #e8ecf8; --text-dim: #8b93b0; --text-dimmer: #5a6279;
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #141824;
+            --bg-tertiary: #1a1f2e;
+            
+            --accent-cyan: #00f5ff;
+            --accent-green: #00ff88;
+            
+            --text-primary: #e8ecf8;
+            --text-secondary: #8b93b0;
+            --text-tertiary: #5a6279;
+            
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --border-medium: rgba(255, 255, 255, 0.12);
+            
+            --glow-cyan: 0 0 30px rgba(0, 245, 255, 0.3);
         }
-        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text); line-height: 1.6; }
-        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
-        .screen { display: none; animation: fadeIn 0.4s ease; }
-        .screen.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .hero { text-align: center; padding: 6rem 0; }
-        h1 { font-size: 4rem; font-weight: 900; line-height: 1.1; margin-bottom: 1.5rem; }
-        .gradient { background: linear-gradient(135deg, var(--cyan), var(--green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .subtitle { font-size: 1.3rem; color: var(--text-dim); margin-bottom: 3rem; }
-        .btn { padding: 1rem 2.5rem; border: none; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.3s; text-transform: uppercase; }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-primary { background: var(--cyan); color: var(--bg-dark); box-shadow: 0 0 30px rgba(0, 245, 255, 0.3); }
-        .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 40px rgba(0, 245, 255, 0.5); }
-        .btn-secondary { background: var(--bg-card); color: var(--text); border: 1px solid var(--cyan); }
-        .btn-secondary:hover:not(:disabled) { background: rgba(0, 245, 255, 0.1); }
-        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-top: 4rem; }
-        .feature { background: var(--bg-card); padding: 2rem; border-radius: 12px; border: 1px solid rgba(0, 245, 255, 0.1); transition: all 0.3s; }
-        .feature:hover { border-color: var(--cyan); transform: translateY(-5px); }
-        .feature-icon { font-size: 2.5rem; margin-bottom: 1rem; }
-        .feature-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; }
-        .feature-desc { color: var(--text-dim); font-size: 0.95rem; }
-        .selection-screen { max-width: 700px; margin: 4rem auto; text-align: center; }
-        .selection-screen h2 { font-size: 2.5rem; margin-bottom: 1rem; }
-        .selection-screen p { color: var(--text-dim); margin-bottom: 3rem; font-size: 1.1rem; }
-        select { width: 100%; max-width: 400px; padding: 1rem 1.5rem; font-size: 1.1rem; background: var(--bg-card); border: 2px solid var(--cyan); border-radius: 8px; color: var(--text); cursor: pointer; margin-bottom: 2rem; }
-        select option { background: var(--bg-card); color: var(--text); }
-        .product-card { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 2rem; margin: 2rem auto; max-width: 500px; opacity: 0; transform: translateY(20px); transition: all 0.5s; }
-        .product-card.show { opacity: 1; transform: translateY(0); }
-        .product-label { font-size: 0.85rem; color: var(--text-dimmer); text-transform: uppercase; margin-bottom: 0.5rem; }
-        .product-value { font-size: 1.8rem; font-weight: 700; color: var(--cyan); margin-bottom: 1.5rem; font-family: 'JetBrains Mono', monospace; }
-        .commission-box { background: rgba(0, 255, 136, 0.1); padding: 1rem 1.5rem; border-radius: 8px; border: 1px solid var(--green); display: flex; justify-content: space-between; align-items: center; }
-        .commission-value { font-size: 1.5rem; font-weight: 700; color: var(--green); font-family: 'JetBrains Mono', monospace; }
-        .call-screen { max-width: 900px; margin: 0 auto; }
-        .call-header { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; }
-        .timer { font-size: 2.5rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--cyan); }
-        .status { font-size: 1.1rem; color: var(--green); font-weight: 600; }
-        .avatar { width: 120px; height: 120px; margin: 2rem auto; border-radius: 50%; background: linear-gradient(135deg, var(--cyan), var(--green)); display: flex; align-items: center; justify-content: center; font-size: 3.5rem; animation: pulse 2s ease-in-out infinite; }
-        @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(0, 245, 255, 0.4); } 50% { box-shadow: 0 0 0 30px rgba(0, 245, 255, 0); } }
-        .avatar.speaking { animation: speaking 0.4s ease-in-out infinite; }
-        .avatar.thinking { animation: thinking 1.5s ease-in-out infinite; }
-        @keyframes speaking { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
-        @keyframes thinking { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .transcript { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 1.5rem; max-height: 400px; overflow-y: auto; margin: 2rem 0; min-height: 150px; }
-        .message { margin-bottom: 1rem; padding: 1rem; border-radius: 8px; animation: slideIn 0.3s ease; }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
-        .message.user { background: rgba(0, 245, 255, 0.08); border-left: 3px solid var(--cyan); }
-        .message.ai { background: rgba(0, 255, 136, 0.08); border-left: 3px solid var(--green); }
-        .message.system { background: rgba(255, 213, 0, 0.08); border-left: 3px solid var(--yellow); font-style: italic; }
-        .speaker { font-weight: 700; font-size: 0.85rem; margin-bottom: 0.4rem; text-transform: uppercase; }
-        .message.user .speaker { color: var(--cyan); }
-        .message.ai .speaker { color: var(--green); }
-        .message.system .speaker { color: var(--yellow); }
-        .prompt-box { background: linear-gradient(135deg, rgba(0, 245, 255, 0.15), rgba(0, 255, 136, 0.15)); border: 2px solid var(--cyan); border-radius: 8px; padding: 1.5rem; margin: 1rem 0; animation: fadeIn 0.3s ease; }
-        .prompt-label { font-size: 0.8rem; text-transform: uppercase; color: var(--cyan); margin-bottom: 0.5rem; font-weight: 700; }
-        .controls { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; margin: 2rem 0; padding-bottom: 2rem; }
-        .mic-btn { width: 100px; height: 100px; border-radius: 50%; border: none; background: var(--red); color: white; font-size: 2.5rem; cursor: pointer; transition: all 0.3s; box-shadow: 0 5px 30px rgba(255, 51, 102, 0.4); position: relative; }
-        .mic-btn:hover:not(:disabled) { transform: scale(1.05); }
-        .mic-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .mic-btn.recording { background: var(--cyan); animation: recordPulse 1.5s ease-in-out infinite; }
-        @keyframes recordPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(0, 245, 255, 0.6); } 50% { box-shadow: 0 0 0 25px rgba(0, 245, 255, 0); } }
-        .mic-label { position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%); font-size: 0.85rem; color: var(--text-dim); white-space: nowrap; }
-        .input-row { display: flex; gap: 0.5rem; width: 100%; max-width: 600px; }
-        .text-input { flex: 1; padding: 1rem; font-size: 1rem; border-radius: 8px; border: 2px solid var(--cyan); background: var(--bg-card); color: var(--text); font-family: 'Inter', sans-serif; }
-        .text-input:focus { outline: none; border-color: var(--green); }
-        .text-input:disabled { opacity: 0.5; }
-        .or-divider { color: var(--text-dimmer); font-size: 0.9rem; }
-        .warning { background: rgba(255, 213, 0, 0.15); border: 1px solid var(--yellow); color: var(--yellow); padding: 1rem; border-radius: 8px; text-align: center; margin: 1rem 0; animation: fadeIn 0.3s ease; }
-        .results { max-width: 1400px; margin: 0 auto; }
-        .results-header { text-align: center; margin-bottom: 3rem; }
-        .results-header h2 { font-size: 3rem; margin-bottom: 0.5rem; }
-        .session-summary { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 16px; padding: 2rem; margin-bottom: 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; }
-        .summary-item { text-align: center; }
-        .summary-label { font-size: 0.85rem; color: var(--text-dimmer); text-transform: uppercase; margin-bottom: 0.5rem; }
-        .summary-value { font-size: 2.5rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
-        .summary-value.cyan { color: var(--cyan); }
-        .summary-value.green { color: var(--green); }
-        .summary-value.yellow { color: var(--yellow); }
-        .summary-value.red { color: var(--red); }
-        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-        .kpi-card { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 1.5rem; }
-        .kpi-title { font-size: 0.9rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
-        .kpi-value { font-size: 3rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; margin-bottom: 0.5rem; }
-        .kpi-subtitle { font-size: 0.85rem; color: var(--text-dimmer); }
-        .kpi-bar { height: 8px; background: var(--bg-darker); border-radius: 4px; margin-top: 1rem; overflow: hidden; }
-        .kpi-bar-fill { height: 100%; background: linear-gradient(90deg, var(--cyan), var(--green)); transition: width 1.5s ease; width: 0; }
-        .breakdown-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem; margin-bottom: 2rem; }
-        .breakdown-card { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 2rem; }
-        .breakdown-card h3 { margin-bottom: 1.5rem; font-size: 1.3rem; }
-        .breakdown-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--bg-darker); border-radius: 8px; margin-bottom: 0.8rem; border-left: 3px solid transparent; }
-        .breakdown-item.positive { border-left-color: var(--green); }
-        .breakdown-item.negative { border-left-color: var(--red); }
-        .breakdown-label { font-size: 1rem; }
-        .insights { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 2rem; margin-bottom: 2rem; }
-        .insights h3 { margin-bottom: 1.5rem; font-size: 1.4rem; }
-        .insight-item { display: flex; gap: 1rem; margin-bottom: 1rem; padding: 1.2rem; background: var(--bg-darker); border-radius: 8px; border-left: 4px solid transparent; }
-        .insight-item.strength { border-left-color: var(--green); background: rgba(0, 255, 136, 0.05); }
-        .insight-item.weakness { border-left-color: var(--orange); background: rgba(255, 136, 0, 0.05); }
-        .insight-item.opportunity { border-left-color: var(--cyan); background: rgba(0, 245, 255, 0.05); }
-        .insight-icon { font-size: 1.8rem; }
-        .insight-content { flex: 1; }
-        .insight-title { font-weight: 700; margin-bottom: 0.3rem; font-size: 1.1rem; }
-        .insight-desc { color: var(--text-dim); font-size: 0.95rem; }
-        .action-buttons { display: flex; gap: 1rem; justify-content: center; margin-top: 3rem; flex-wrap: wrap; }
-        .dashboard { max-width: 1400px; margin: 0 auto; }
-        .dashboard h2 { text-align: center; font-size: 2.5rem; margin-bottom: 0.5rem; }
-        .dashboard-subtitle { text-align: center; color: var(--text-dim); margin-bottom: 3rem; }
-        .performance-overview { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
-        .perf-card { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 2rem; transition: all 0.3s; }
-        .perf-card:hover { border-color: var(--cyan); transform: translateY(-5px); }
-        .perf-label { font-size: 0.85rem; color: var(--text-dimmer); text-transform: uppercase; margin-bottom: 0.8rem; }
-        .perf-value { font-size: 3rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; background: linear-gradient(135deg, var(--cyan), var(--green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .perf-sub { font-size: 1rem; color: var(--text-dim); margin-top: 0.5rem; }
-        .history { background: var(--bg-card); border: 1px solid rgba(0, 245, 255, 0.1); border-radius: 12px; padding: 2rem; }
-        .history h3 { margin-bottom: 1.5rem; font-size: 1.4rem; }
-        .history-item { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 1rem; align-items: center; padding: 1rem; background: var(--bg-darker); border-radius: 8px; border: 1px solid rgba(0, 245, 255, 0.1); margin-bottom: 1rem; transition: all 0.3s; }
-        .history-item:hover { border-color: var(--cyan); transform: translateX(5px); }
-        .history-date { font-size: 0.85rem; color: var(--text-dimmer); margin-bottom: 0.3rem; }
-        .history-details { color: var(--text-dim); font-size: 0.95rem; }
-        .history-score { font-size: 1.8rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--cyan); text-align: center; }
-        .history-outcome { font-size: 1.5rem; text-align: center; }
-        .history-earnings { text-align: right; font-size: 1.2rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
-        .history-earnings.positive { color: var(--green); }
-        .history-earnings.negative { color: var(--red); }
-        .empty { text-align: center; padding: 4rem 2rem; color: var(--text-dimmer); }
-        .empty-icon { font-size: 4rem; margin-bottom: 1rem; opacity: 0.5; }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(6, 8, 17, 0.95); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 2000; }
-        .modal-overlay.active { display: flex; }
-        .modal { background: var(--bg-card); border: 1px solid var(--cyan); border-radius: 16px; padding: 3rem; max-width: 600px; width: 90%; box-shadow: 0 20px 60px rgba(0, 245, 255, 0.3); max-height: 90vh; overflow-y: auto; }
-        .modal h2 { font-size: 2rem; margin-bottom: 1rem; background: linear-gradient(135deg, var(--cyan), var(--green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .modal p { color: var(--text-dim); margin-bottom: 1rem; font-size: 1.05rem; }
-        .modal ul { color: var(--text-dim); margin-left: 1.5rem; margin-bottom: 1rem; }
-        .modal ul li { margin-bottom: 0.5rem; }
-        .modal-actions { display: flex; gap: 1rem; margin-top: 2rem; flex-wrap: wrap; }
-        .sale-banner { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: linear-gradient(135deg, var(--green), var(--cyan)); padding: 2rem 4rem; border-radius: 16px; font-size: 2.5rem; font-weight: 700; color: var(--bg-dark); z-index: 4000; box-shadow: 0 20px 60px rgba(0, 255, 136, 0.6); animation: salePopIn 0.5s ease; display: none; }
-        .sale-banner.active { display: block; }
-        @keyframes salePopIn { 0% { transform: translate(-50%, -50%) scale(0); } 50% { transform: translate(-50%, -50%) scale(1.1); } 100% { transform: translate(-50%, -50%) scale(1); } }
-        .prompt-toggle { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-card); border-top: 1px solid rgba(0, 245, 255, 0.1); padding: 1rem; display: none; justify-content: center; align-items: center; gap: 1rem; z-index: 100; }
-        .toggle { width: 60px; height: 30px; background: var(--bg-darker); border-radius: 15px; cursor: pointer; border: 1px solid rgba(0, 245, 255, 0.1); position: relative; transition: all 0.3s; }
-        .toggle.active { background: var(--cyan); }
-        .toggle-slider { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; background: white; border-radius: 50%; transition: all 0.3s; }
-        .toggle.active .toggle-slider { transform: translateX(30px); }
+        
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 600px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(0, 245, 255, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .logo {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-green) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .tagline {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            font-weight: 500;
+        }
+        
+        .signup-form {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .form-label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            display: block;
+            font-weight: 600;
+        }
+        
+        .email-input {
+            width: 100%;
+            padding: 1.2rem;
+            font-size: 1.1rem;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-medium);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: 'DM Sans', sans-serif;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .email-input:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: var(--glow-cyan);
+        }
+        
+        .submit-button {
+            width: 100%;
+            padding: 1.3rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-green));
+            color: var(--bg-primary);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .submit-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(0, 245, 255, 0.4);
+        }
+        
+        .submit-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+            display: none;
+        }
+        
+        .message.show {
+            display: block;
+        }
+        
+        .message.success {
+            background: rgba(0, 255, 136, 0.15);
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+        }
+        
+        .message.error {
+            background: rgba(255, 51, 102, 0.15);
+            border: 1px solid #ff3366;
+            color: #ff3366;
+        }
+        
+        .privacy-note {
+            font-size: 0.85rem;
+            color: var(--text-tertiary);
+            line-height: 1.5;
+        }
+        
+        .features-mini {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 3rem;
+            flex-wrap: wrap;
+        }
+        
+        .feature-mini {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+        
+        .feature-mini-icon {
+            font-size: 1.3rem;
+        }
+        
         @media (max-width: 768px) {
             h1 { font-size: 2.5rem; }
-            .subtitle { font-size: 1.1rem; }
-            .kpi-value { font-size: 2rem; }
-            .timer { font-size: 2rem; }
-            .mic-btn { width: 80px; height: 80px; font-size: 2rem; }
-            .breakdown-grid { grid-template-columns: 1fr; }
-            .history-item { grid-template-columns: 1fr; text-align: center; }
-            .modal { padding: 2rem; }
-            .container { padding: 1rem; }
+            .tagline { font-size: 1.1rem; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="screen active" id="landing">
-            <div class="hero">
-                <h1>Master Sales.<br><span class="gradient">Without The Risk.</span></h1>
-                <p class="subtitle">Practice with AI customers. Get FXReplay-style analytics. Improve with data.</p>
-                <button class="btn btn-primary" onclick="goToIndustry()">Get Started</button>
-                <div class="features">
-                    <div class="feature"><div class="feature-icon">🎤</div><div class="feature-title">Real Voice Calls</div><div class="feature-desc">Speak naturally with AI customers who respond, object, and challenge</div></div>
-                    <div class="feature"><div class="feature-icon">📊</div><div class="feature-title">FXReplay-Style Analytics</div><div class="feature-desc">Win rate, expectancy, drawdowns, performance curves - everything traders use</div></div>
-                    <div class="feature"><div class="feature-icon">🎯</div><div class="feature-title">Adaptive Difficulty</div><div class="feature-desc">AI gets harder as you improve, pushing you to master every scenario</div></div>
-                </div>
-            </div>
+        <div class="logo">📞</div>
+        <h1>Master Cold Calling.<br><span class="gradient-text">Practice With AI.</span></h1>
+        <p class="tagline">Real-time voice conversations. Instant performance analytics. Get better at sales.</p>
+        
+        <div class="signup-form">
+            <div class="message" id="message"></div>
+            
+            <label class="form-label">Enter your email to try the demo</label>
+            <input 
+                type="email" 
+                class="email-input" 
+                id="emailInput" 
+                placeholder="your@email.com"
+                required
+            />
+            <button class="submit-button" id="submitBtn" onclick="handleSignup()">
+                Start Free Demo
+            </button>
         </div>
         
-        <div class="screen" id="industry">
-            <div class="selection-screen">
-                <h2>Choose Your Industry</h2>
-                <p>Select the industry you're selling in</p>
-                <select id="industrySelect" onchange="showProduct()">
-                    <option value="">-- Select Industry --</option>
-                    <option value="saas">SaaS / Software</option>
-                    <option value="realestate">Real Estate</option>
-                    <option value="financial">Financial Services</option>
-                    <option value="consulting">Consulting</option>
-                    <option value="insurance">Insurance</option>
-                    <option value="healthcare">Healthcare</option>
-                    <option value="manufacturing">Manufacturing</option>
-                    <option value="ecommerce">E-commerce</option>
-                    <option value="marketing">Marketing Services</option>
-                    <option value="business">Business Services</option>
-                </select>
-                <div class="product-card" id="productCard">
-                    <div class="product-label">Your Product</div>
-                    <div class="product-value" id="productName">--</div>
-                    <div class="product-label">Price</div>
-                    <div class="product-value" id="productPrice">--</div>
-                    <div class="commission-box">
-                        <div class="commission-label">Your Commission Per Sale</div>
-                        <div class="commission-value" id="commissionValue">--</div>
-                    </div>
-                </div>
-                <button class="btn btn-primary" id="startBtn" onclick="showTutorial()" disabled>Begin Practice Call</button>
-            </div>
-        </div>
+        <p class="privacy-note">
+            By continuing, you agree to receive product updates. We respect your privacy.
+        </p>
         
-        <div class="screen" id="call">
-            <div class="call-screen">
-                <div class="call-header">
-                    <div><div class="status" id="callStatus">Call in Progress</div><div style="font-size: 0.9rem; color: var(--text-dimmer); margin-top: 0.3rem;">Cold Call</div></div>
-                    <div class="timer" id="timer">00:00</div>
-                </div>
-                <div id="warning"></div>
-                <div style="text-align: center;">
-                    <div class="avatar" id="avatar">🤖</div>
-                    <div id="avatarStatus" style="color: var(--text-dim); margin-top: 1rem;">AI Customer</div>
-                </div>
-                <div id="prompt"></div>
-                <div class="transcript" id="transcript"></div>
-                <div class="controls">
-                    <button class="mic-btn" id="micBtn" onclick="toggleMic()">🎤<div class="mic-label">Click to Speak</div></button>
-                    <div class="or-divider">— or type —</div>
-                    <div class="input-row">
-                        <input type="text" id="textInput" class="text-input" placeholder="Type your response..." maxlength="500" onkeypress="if(event.key==='Enter') sendTextInput()"/>
-                        <button class="btn btn-primary" id="sendBtn" onclick="sendTextInput()">Send</button>
-                    </div>
-                    <button class="btn btn-secondary" onclick="endCall()">End Call</button>
-                </div>
+        <div class="features-mini">
+            <div class="feature-mini">
+                <span class="feature-mini-icon">🎤</span>
+                <span>Real Voice AI</span>
             </div>
-        </div>
-        
-        <div class="screen" id="results">
-            <div class="results">
-                <div class="results-header">
-                    <h2>Session Analysis</h2>
-                    <p style="color: var(--text-dim); font-size: 1.1rem;">FXReplay-Style Performance Breakdown</p>
-                </div>
-                <div class="session-summary">
-                    <div class="summary-item"><div class="summary-label">Overall Score</div><div class="summary-value cyan" id="overallScore">--</div></div>
-                    <div class="summary-item"><div class="summary-label">Outcome</div><div class="summary-value" id="outcomeIcon">--</div></div>
-                    <div class="summary-item"><div class="summary-label">Duration</div><div class="summary-value yellow" id="callDuration">--</div></div>
-                    <div class="summary-item"><div class="summary-label">Commission</div><div class="summary-value green" id="commissionEarned">--</div></div>
-                </div>
-                <div class="kpi-grid">
-                    <div class="kpi-card"><div class="kpi-title">📞 Closing Ability</div><div class="kpi-value" style="color: var(--cyan);" id="kpiClosing">--</div><div class="kpi-subtitle">How well you asked for the sale</div><div class="kpi-bar"><div class="kpi-bar-fill" id="barClosing"></div></div></div>
-                    <div class="kpi-card"><div class="kpi-title">🛡️ Objection Handling</div><div class="kpi-value" style="color: var(--green);" id="kpiObjection">--</div><div class="kpi-subtitle">Response to pushback</div><div class="kpi-bar"><div class="kpi-bar-fill" id="barObjection"></div></div></div>
-                    <div class="kpi-card"><div class="kpi-title">⚡ Confidence & Energy</div><div class="kpi-value" style="color: var(--yellow);" id="kpiConfidence">--</div><div class="kpi-subtitle">Tone and conviction</div><div class="kpi-bar"><div class="kpi-bar-fill" id="barConfidence"></div></div></div>
-                    <div class="kpi-card"><div class="kpi-title">🤝 Rapport Building</div><div class="kpi-value" style="color: var(--orange);" id="kpiRapport">--</div><div class="kpi-subtitle">Connection with prospect</div><div class="kpi-bar"><div class="kpi-bar-fill" id="barRapport"></div></div></div>
-                </div>
-                <div class="breakdown-grid">
-                    <div class="breakdown-card"><h3>💪 What Worked</h3><div id="strengthsList"></div></div>
-                    <div class="breakdown-card"><h3>🎯 Areas to Improve</h3><div id="improvementsList"></div></div>
-                </div>
-                <div class="insights"><h3>🧠 AI-Powered Insights</h3><div id="insightsList"></div></div>
-                <div class="action-buttons">
-                    <button class="btn btn-primary" onclick="practiceAgain()">Practice Again</button>
-                    <button class="btn btn-secondary" onclick="goToDashboard()">View Full Dashboard</button>
-                </div>
+            <div class="feature-mini">
+                <span class="feature-mini-icon">📊</span>
+                <span>Instant Analytics</span>
             </div>
-        </div>
-        
-        <div class="screen" id="dashboard">
-            <div class="dashboard">
-                <h2>Performance Dashboard</h2>
-                <p class="dashboard-subtitle">Track your progress with FXReplay-style analytics</p>
-                <div class="performance-overview">
-                    <div class="perf-card"><div class="perf-label">Close Rate</div><div class="perf-value" id="dCloseRate">0%</div><div class="perf-sub" id="dCloseSub">0 / 0 calls</div></div>
-                    <div class="perf-card"><div class="perf-label">Total Earnings</div><div class="perf-value" id="dEarnings">$0</div><div class="perf-sub" id="dEarningSub">0 sales closed</div></div>
-                    <div class="perf-card"><div class="perf-label">Average Score</div><div class="perf-value" id="dAvgScore">--</div><div class="perf-sub" id="dScoreTrend">--</div></div>
-                    <div class="perf-card"><div class="perf-label">Practice Time</div><div class="perf-value" id="dTime">0m</div><div class="perf-sub" id="dCallCount">0 calls</div></div>
-                    <div class="perf-card"><div class="perf-label">Avg Per Call</div><div class="perf-value" id="dExpectancy">$0</div><div class="perf-sub">Expected earnings</div></div>
-                    <div class="perf-card"><div class="perf-label">Best Streak</div><div class="perf-value" id="dWinStreak">0</div><div class="perf-sub" id="dStreakSub">Current: 0</div></div>
-                </div>
-                <div class="history"><h3>Call History</h3><div id="historyList"><div class="empty"><div class="empty-icon">📊</div><p>No practice sessions yet</p><button class="btn btn-primary" onclick="practiceAgain()" style="margin-top: 1rem;">Start Practicing</button></div></div></div>
-                <div class="action-buttons">
-                    <button class="btn btn-primary" onclick="practiceAgain()">New Practice Call</button>
-                    <button class="btn btn-secondary" onclick="switchScreen('landing')">Back to Home</button>
-                </div>
+            <div class="feature-mini">
+                <span class="feature-mini-icon">⚡</span>
+                <span>2 Min Demo</span>
             </div>
         </div>
     </div>
-    
-    <div class="modal-overlay" id="tutorialModal">
-        <div class="modal">
-            <h2>Welcome to Valtori AI</h2>
-            <p>You're about to practice a real sales call with an AI customer.</p>
-            <p><strong>How it works:</strong></p>
-            <ul>
-                <li>Click the mic to speak OR type your response</li>
-                <li>AI responds with voice and may throw objections</li>
-                <li>Watch for helpful coaching prompts</li>
-                <li>Get detailed analytics after each call</li>
-            </ul>
-            <div class="modal-actions">
-                <button class="btn btn-primary" onclick="startCall()">Let's Go!</button>
-                <button class="btn btn-secondary" onclick="skipTutorial()">Skip Tutorial</button>
-            </div>
-        </div>
-    </div>
-    
-    <div class="sale-banner" id="saleBanner">🎉 SALE CLOSED! 🎉</div>
-    <div class="prompt-toggle" id="promptToggle"><span>💡 Prompts:</span><div class="toggle active" id="toggle" onclick="togglePrompts()"><div class="toggle-slider"></div></div></div>
 
     <script>
-    const INDUSTRIES = {
-        saas: { product: 'Enterprise CRM Software', price: 8500, commission: 0.15 },
-        realestate: { product: 'Premium Property Listing', price: 450000, commission: 0.03 },
-        financial: { product: 'Wealth Management Package', price: 25000, commission: 0.08 },
-        consulting: { product: 'Business Strategy Engagement', price: 15000, commission: 0.20 },
-        insurance: { product: 'Commercial Insurance Policy', price: 12000, commission: 0.10 },
-        healthcare: { product: 'Medical Equipment System', price: 35000, commission: 0.12 },
-        manufacturing: { product: 'Industrial Automation Solution', price: 75000, commission: 0.08 },
-        ecommerce: { product: 'E-commerce Platform Package', price: 18000, commission: 0.15 },
-        marketing: { product: 'Annual Marketing Retainer', price: 48000, commission: 0.18 },
-        business: { product: 'Managed Services Contract', price: 24000, commission: 0.15 }
-    };
-
-    const STAGES = {
-        opening: ['Introduce yourself professionally', 'State your company clearly', 'Ask if now is a good time'],
-        permission: ['Respect their time', 'Ask for 2-3 minutes', 'Create curiosity'],
-        value: ['Mention a pain point', 'Share a result', 'Make them curious'],
-        discovery: ['Ask about their situation', 'Listen more than talk', 'Dig deeper'],
-        objection: ['Acknowledge concern', 'Ask clarifying questions', 'Provide proof'],
-        close: ['Ask for next step', 'Suggest specific time', 'Be confident']
-    };
-
-    const SALE_PATTERNS = ["let's do it", "yes, i'm interested", "i'll buy", "sounds good", "sign me up", "let's proceed", "i'll take it", "we have a deal", "count me in", "let's move forward", "i'm in", "send me the contract", "yes, let's go"];
-    const HANGUP_PATTERNS = ["goodbye", "have to go", "not interested right now", "can't talk right now", "too busy for this", "don't call again", "remove me from your list", "i'm hanging up"];
-
-    let currentScreen = 'landing';
-    let selectedIndustry = null;
-    let isFirstCall = true;
-    let promptsOn = true;
-    let stage = 'opening';
-    let callActive = false;
-    let timerInterval = null;
-    let duration = 0;
-    let warningShown = false;
-    let promptTimeout = null;
-    let synthesis = window.speechSynthesis;
-    let voices = [];
-    let conversation = [];
-    let session = null;
-    let isProcessing = false;
-    let stats = { totalCalls: 0, totalSales: 0, totalEarnings: 0, totalTime: 0, scores: [], history: [], currentStreak: 0, maxWinStreak: 0 };
-    let mediaRecorder = null;
-    let audioChunks = [];
-    let isRecording = false;
-
-    function init() {
-        console.log('🚀 Valtori AI initializing - API keys from Vercel');
-        loadStats();
-        loadPreferences();
-        updateDashboard();
-        console.log('✅ Ready to go!');
-    }
-
-    function loadStats() {
-        try {
-            const saved = localStorage.getItem('valtoriStats');
-            if (saved) stats = { ...stats, ...JSON.parse(saved) };
-        } catch (e) {
-            console.error('Stats load error:', e);
-            localStorage.removeItem('valtoriStats');
-        }
-    }
-
-    function saveStats() {
-        try { localStorage.setItem('valtoriStats', JSON.stringify(stats)); } catch (e) { console.error('Stats save error:', e); }
-    }
-
-    function loadPreferences() {
-        try {
-            const sp = localStorage.getItem('valtoriPromptsOn');
-            if (sp !== null) { promptsOn = sp === 'true'; document.getElementById('toggle')?.classList.toggle('active', promptsOn); }
-            const sf = localStorage.getItem('valtoriFirstCall');
-            if (sf !== null) isFirstCall = sf === 'true';
-        } catch (e) {}
-    }
-
-    function savePreferences() {
-        try { localStorage.setItem('valtoriPromptsOn', String(promptsOn)); localStorage.setItem('valtoriFirstCall', String(isFirstCall)); } catch (e) {}
-    }
-
-    function loadVoices() { voices = synthesis.getVoices(); }
-
-    function speak(text, callback) {
-        if (!synthesis) { if (callback) callback(); return; }
-        synthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        if (voices.length === 0) voices = synthesis.getVoices();
-        const eng = voices.filter(v => v.lang.startsWith('en'));
-        if (eng.length > 0) utterance.voice = eng[0];
-        utterance.rate = 0.95;
-        utterance.pitch = 1;
-        const avatar = document.getElementById('avatar');
-        const avatarStatus = document.getElementById('avatarStatus');
-        utterance.onstart = () => { avatar?.classList.remove('thinking'); avatar?.classList.add('speaking'); if (avatarStatus) avatarStatus.textContent = 'Speaking...'; };
-        utterance.onend = () => { avatar?.classList.remove('speaking'); if (avatarStatus) avatarStatus.textContent = 'AI Customer'; if (callback) callback(); };
-        utterance.onerror = () => { avatar?.classList.remove('speaking'); if (avatarStatus) avatarStatus.textContent = 'AI Customer'; if (callback) callback(); };
-        synthesis.speak(utterance);
-    }
-
-    function switchScreen(screen) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(screen)?.classList.add('active');
-        currentScreen = screen;
-        const pt = document.getElementById('promptToggle');
-        if (pt) pt.style.display = screen === 'call' ? 'flex' : 'none';
-    }
-
-    function goToIndustry() { switchScreen('industry'); }
-    function goToDashboard() { updateDashboard(); switchScreen('dashboard'); }
-
-    function showProduct() {
-        const industry = document.getElementById('industrySelect').value;
-        if (!industry || !INDUSTRIES[industry]) {
-            document.getElementById('productCard').classList.remove('show');
-            document.getElementById('startBtn').disabled = true;
-            return;
-        }
-        selectedIndustry = industry;
-        const c = INDUSTRIES[industry];
-        document.getElementById('productName').textContent = c.product;
-        document.getElementById('productPrice').textContent = '$' + c.price.toLocaleString();
-        document.getElementById('commissionValue').textContent = '$' + (c.price * c.commission).toLocaleString();
-        document.getElementById('productCard').classList.add('show');
-        document.getElementById('startBtn').disabled = false;
-    }
-
-    function showTutorial() { if (isFirstCall) document.getElementById('tutorialModal').classList.add('active'); else startCall(); }
-    function skipTutorial() { document.getElementById('tutorialModal').classList.remove('active'); isFirstCall = false; savePreferences(); startCall(); }
-
-    function startCall() {
-        console.log('📞 Starting call...');
-        document.getElementById('tutorialModal').classList.remove('active');
-        switchScreen('call');
-        callActive = true;
-        duration = 0;
-        warningShown = false;
-        conversation = [];
-        stage = 'opening';
-        isProcessing = false;
-        const c = INDUSTRIES[selectedIndustry];
-        session = { timestamp: new Date().toISOString(), industry: selectedIndustry, product: c.product, price: c.price, commission: c.price * c.commission, conversation: [], closed: false, saleAmount: 0 };
-        document.getElementById('transcript').innerHTML = '';
-        document.getElementById('warning').innerHTML = '';
-        document.getElementById('prompt').innerHTML = '';
-        document.getElementById('timer').textContent = '00:00';
-        document.getElementById('callStatus').textContent = 'Call in Progress';
-        setInputsEnabled(true);
-        startTimer();
-        setTimeout(() => {
-            const greetings = ["Hello?", "Yes, this is speaking.", "Hi, who's calling?", "Hello, how can I help you?"];
-            const g = greetings[Math.floor(Math.random() * greetings.length)];
-            addMessage('ai', g);
-            speak(g, () => updatePrompt());
-        }, 1000);
-    }
-
-    function startTimer() {
-        if (timerInterval) clearInterval(timerInterval);
-        timerInterval = setInterval(() => {
-            duration++;
-            const m = Math.floor(duration / 60), s = duration % 60;
-            const t = document.getElementById('timer');
-            if (t) t.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-            if (duration === 60 && !warningShown) {
-                warningShown = true;
-                const w = document.getElementById('warning');
-                if (w) w.innerHTML = '<div class="warning">⚠️ 60 seconds - Consider closing soon</div>';
-            }
-        }, 1000);
-    }
-
-    function stopTimer() { if (timerInterval) { clearInterval(timerInterval); timerInterval = null; } }
-
-    function setInputsEnabled(enabled) {
-        const m = document.getElementById('micBtn'), t = document.getElementById('textInput'), s = document.getElementById('sendBtn');
-        if (m) m.disabled = !enabled;
-        if (t) t.disabled = !enabled;
-        if (s) s.disabled = !enabled;
-    }
-
-    function endCall() {
-        if (!callActive) return;
-        console.log('📴 Ending call...');
-        stopTimer();
-        callActive = false;
-        setInputsEnabled(false);
-        document.getElementById('callStatus').textContent = 'Call Ended';
-        endCallScore();
-    }
-
-    async function toggleMic() {
-        if (!callActive || isProcessing) return;
-        const btn = document.getElementById('micBtn');
-        if (isRecording) {
-            isRecording = false;
-            btn.classList.remove('recording');
-            btn.innerHTML = '🎤<div class="mic-label">Processing...</div>';
-            if (mediaRecorder?.state === 'recording') mediaRecorder.stop();
-        } else {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-                audioChunks = [];
-                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-                mediaRecorder.onstop = async () => {
-                    const blob = new Blob(audioChunks, { type: 'audio/webm' });
-                    stream.getTracks().forEach(t => t.stop());
-                    await transcribeAudio(blob);
-                    btn.innerHTML = '🎤<div class="mic-label">Click to Speak</div>';
-                };
-                mediaRecorder.onerror = () => {
-                    stream.getTracks().forEach(t => t.stop());
-                    btn.innerHTML = '🎤<div class="mic-label">Click to Speak</div>';
-                    alert('Recording error. Try text input.');
-                };
-                mediaRecorder.start();
-                isRecording = true;
-                btn.classList.add('recording');
-                btn.innerHTML = '🎤<div class="mic-label">Recording... Click to Stop</div>';
-            } catch (e) {
-                console.error('Mic error:', e);
-                alert('Could not access microphone. Use text input.');
-            }
-        }
-    }
-
-    async function transcribeAudio(blob) {
-        try {
-            const fd = new FormData();
-            fd.append('file', blob, 'audio.webm');
-            fd.append('model', 'whisper-1');
-            const r = await fetch('/api/whisper', { method: 'POST', body: fd });
-            if (!r.ok) {
-                console.error('Transcription failed');
-                alert('Voice unavailable. Use text input.');
+        // Initialize Supabase
+        const SUPABASE_URL = 'https://aqzjxlxdjhegypnhsdcp.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxemp4bHhkamhlZ3lwbmhzZGNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxMzk2OTYsImV4cCI6MjA4MDcxNTY5Nn0.oNwuIyrqwNAA4PfT4Nxgm869d6nKMZseFLJQAkJxbNM';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        async function handleSignup() {
+            const emailInput = document.getElementById('emailInput');
+            const submitBtn = document.getElementById('submitBtn');
+            const message = document.getElementById('message');
+            const email = emailInput.value.trim();
+            
+            // Validate email
+            if (!email || !email.includes('@')) {
+                showMessage('Please enter a valid email address', 'error');
                 return;
             }
-            const d = await r.json();
-            if (d.text?.trim()) handleUserSpeech(d.text.trim());
-            else alert('Could not understand audio. Try again.');
-        } catch (e) {
-            console.error('Whisper error:', e);
-            alert('Voice unavailable. Use text input.');
-        }
-    }
-
-    function sendTextInput() {
-        const input = document.getElementById('textInput');
-        const text = input.value.trim();
-        if (!text || !callActive || isProcessing) return;
-        input.value = '';
-        handleUserSpeech(text);
-    }
-
-    function handleUserSpeech(text) {
-        if (!callActive || isProcessing) return;
-        addMessage('user', text);
-        updateStage(text);
-        isProcessing = true;
-        setInputsEnabled(false);
-        const avatar = document.getElementById('avatar'), avatarStatus = document.getElementById('avatarStatus');
-        if (avatar) avatar.classList.add('thinking');
-        if (avatarStatus) avatarStatus.textContent = 'Thinking...';
-        setTimeout(() => getAIResponse(text), 500);
-    }
-
-    function addMessage(speaker, text) {
-        const transcript = document.getElementById('transcript');
-        if (!transcript) return;
-        const msg = document.createElement('div');
-        msg.className = `message ${speaker}`;
-        const label = speaker === 'user' ? 'You' : speaker === 'ai' ? 'Customer' : 'System';
-        const sp = document.createElement('div');
-        sp.className = 'speaker';
-        sp.textContent = label;
-        const tx = document.createElement('div');
-        tx.textContent = text;
-        msg.appendChild(sp);
-        msg.appendChild(tx);
-        transcript.appendChild(msg);
-        transcript.scrollTop = transcript.scrollHeight;
-        conversation.push({ speaker, text, timestamp: duration });
-    }
-
-    function updateStage(text) {
-        const l = text.toLowerCase();
-        if (stage === 'opening' && (l.includes('my name is') || l.includes('calling from') || l.includes('this is'))) stage = 'permission';
-        else if (stage === 'permission' && (l.includes('help') || l.includes('benefit') || l.includes('save'))) stage = 'value';
-        else if (stage === 'value' && (l.includes('?') || l.includes('tell me'))) stage = 'discovery';
-        else if (stage === 'discovery' && (l.includes('understand') || l.includes('i hear'))) stage = 'objection';
-        if (l.includes('buy') || l.includes('purchase') || l.includes('sign up') || l.includes('get started')) stage = 'close';
-        updatePrompt();
-    }
-
-    function updatePrompt() {
-        if (!promptsOn) return;
-        const prompts = STAGES[stage];
-        if (!prompts) return;
-        if (promptTimeout) clearTimeout(promptTimeout);
-        const p = prompts[Math.floor(Math.random() * prompts.length)];
-        const el = document.getElementById('prompt');
-        if (el) {
-            el.innerHTML = `<div class="prompt-box"><div class="prompt-label">💡 ${stage.toUpperCase()}</div><div>${p}</div></div>`;
-            promptTimeout = setTimeout(() => { el.innerHTML = ''; }, 8000);
-        }
-    }
-
-    function togglePrompts() {
-        promptsOn = !promptsOn;
-        const toggle = document.getElementById('toggle'), prompt = document.getElementById('prompt');
-        if (toggle) toggle.classList.toggle('active', promptsOn);
-        if (promptsOn) updatePrompt();
-        else if (prompt) prompt.innerHTML = '';
-        savePreferences();
-    }
-
-    async function getAIResponse(userText) {
-        const avgScore = stats.scores.length > 0 ? stats.scores.reduce((a, b) => a + b, 0) / stats.scores.length : 50;
-        let difficulty = 'medium';
-        if (avgScore > 75) difficulty = 'hard';
-        else if (avgScore < 50) difficulty = 'easy';
-        const c = INDUSTRIES[selectedIndustry];
-        const systemPrompt = `You are a ${difficulty} sales prospect in a cold call simulation.
-
-CONTEXT:
-- Industry: ${selectedIndustry}
-- Product: ${c.product}
-- Price: $${c.price.toLocaleString()}
-
-PERSONALITY (${difficulty}):
-${difficulty === 'easy' ? '- Receptive and friendly, open to hearing more' : difficulty === 'medium' ? '- Skeptical but professional, needs convincing' : '- Very busy, impatient, may hang up'}
-
-CONVERSATION:
-${conversation.map(x => `${x.speaker.toUpperCase()}: ${x.text}`).join('\n')}
-
-Respond in 1-2 sentences as the prospect. You may ask questions, give objections, show interest, or end the call if it's going poorly.${Math.random() > 0.7 ? ' Consider giving an objection.' : ''}`;
-
-        try {
-            const r = await fetch('/api/anthropic', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 150, messages: [{ role: 'user', content: systemPrompt }] })
-            });
-            const d = await r.json();
-            if (d.error) throw new Error(d.error.message);
-            if (!d.content?.[0]?.text) throw new Error('Invalid response');
-            const aiText = d.content[0].text.trim();
-            addMessage('ai', aiText);
-            const lower = aiText.toLowerCase();
-            if (SALE_PATTERNS.some(p => lower.includes(p))) { handleSale(); return; }
-            if (HANGUP_PATTERNS.some(p => lower.includes(p))) { speak(aiText, () => setTimeout(handleHangUp, 1500)); return; }
-            speak(aiText, () => { isProcessing = false; if (callActive) setInputsEnabled(true); });
-        } catch (e) {
-            console.error('AI error:', e);
-            document.getElementById('avatar')?.classList.remove('thinking');
-            const fallback = "I'm sorry, could you repeat that?";
-            addMessage('ai', fallback);
-            speak(fallback, () => { isProcessing = false; if (callActive) setInputsEnabled(true); });
-        }
-    }
-
-    function handleSale() {
-        console.log('🎉 SALE CLOSED!');
-        session.closed = true;
-        session.saleAmount = INDUSTRIES[selectedIndustry].price;
-        const banner = document.getElementById('saleBanner');
-        if (banner) { banner.classList.add('active'); setTimeout(() => banner.classList.remove('active'), 2000); }
-        stats.totalSales++;
-        stats.totalEarnings += session.commission;
-        stats.currentStreak++;
-        if (stats.currentStreak > stats.maxWinStreak) stats.maxWinStreak = stats.currentStreak;
-        saveStats();
-        const msgs = ["Great! I'll send the details.", "Perfect! Let me set that up.", "Excellent choice!"];
-        const msg = msgs[Math.floor(Math.random() * msgs.length)];
-        addMessage('ai', msg);
-        speak(msg, () => setTimeout(() => { stopTimer(); callActive = false; endCallScore(); }, 2000));
-    }
-
-    function handleHangUp() {
-        console.log('📵 Hung up');
-        stopTimer();
-        callActive = false;
-        stats.currentStreak = 0;
-        saveStats();
-        document.getElementById('callStatus').textContent = 'Call Ended';
-        setTimeout(endCallScore, 1000);
-    }
-
-    async function endCallScore() {
-        console.log('📊 Calculating score...');
-        addMessage('system', 'Analyzing performance...');
-        let score;
-        try { score = await calculateScore(); } catch (e) { console.error('Score error:', e); score = getDefaultScore(); }
-        session.score = score;
-        session.duration = duration;
-        session.conversation = [...conversation];
-        stats.totalCalls++;
-        stats.totalTime += duration;
-        stats.scores.push(score.overall);
-        stats.history.unshift(session);
-        if (stats.history.length > 100) stats.history = stats.history.slice(0, 100);
-        saveStats();
-        if (isFirstCall) { isFirstCall = false; savePreferences(); }
-        displayResults(score);
-        switchScreen('results');
-    }
-
-    async function calculateScore() {
-        const transcript = conversation.map(c => `${c.speaker.toUpperCase()}: ${c.text}`).join('\n');
-        if (transcript.length < 20) return getDefaultScore();
-        const prompt = `Analyze this sales call and score 0-100 on each metric.
-
-TRANSCRIPT:
-${transcript}
-
-CONTEXT:
-- Product: ${session.product}
-- Price: $${session.price.toLocaleString()}
-- Duration: ${duration}s
-- Outcome: ${session.closed ? 'CLOSED' : 'No sale'}
-
-Score: closing, objection, confidence, rapport (0-100 each)
-Provide: 2 strengths, 2 improvements, 3 insights
-
-Respond with ONLY JSON:
-{"closing":N,"objection":N,"confidence":N,"rapport":N,"strengths":["...","..."],"improvements":["...","..."],"insights":[{"type":"strength|weakness|opportunity","title":"...","desc":"..."},{"type":"...","title":"...","desc":"..."},{"type":"...","title":"...","desc":"..."}]}`;
-
-        try {
-            const r = await fetch('/api/anthropic', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 800, messages: [{ role: 'user', content: prompt }] })
-            });
-            const d = await r.json();
-            if (d.error || !d.content?.[0]?.text) throw new Error('API error');
-            const text = d.content[0].text;
-            const start = text.indexOf('{'), end = text.lastIndexOf('}');
-            if (start === -1 || end === -1) throw new Error('No JSON');
-            const analysis = JSON.parse(text.substring(start, end + 1));
-            return processAnalysis(analysis);
-        } catch (e) {
-            console.error('Score calc error:', e);
-            return getDefaultScore();
-        }
-    }
-
-    function processAnalysis(a) {
-        const clamp = (v) => Math.max(0, Math.min(100, Number(v) || 50));
-        const closing = clamp(a.closing), objection = clamp(a.objection), confidence = clamp(a.confidence), rapport = clamp(a.rapport);
-        return {
-            overall: Math.round((closing + objection + confidence + rapport) / 4),
-            metrics: { closing, objection, confidence, rapport },
-            feedback: {
-                strengths: a.strengths || ['Completed the call', 'Showed initiative'],
-                improvements: a.improvements || ['Ask more questions', 'Handle objections better'],
-                insights: a.insights || [{ type: 'opportunity', title: 'Keep Practicing', desc: 'Consistency is key' }]
+            
+            // Disable button
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating Account...';
+            
+            try {
+                // Sign up with Supabase
+                const { data, error } = await supabase.auth.signUp({
+                    email: email,
+                    password: generateRandomPassword(),
+                    options: {
+                        emailRedirectTo: `${window.location.origin}/call.html`
+                    }
+                });
+                
+                if (error) throw error;
+                
+                // Store email in localStorage
+                localStorage.setItem('valtoriEmail', email);
+                
+                // Also store in database table
+                await supabase.from('users').insert([
+                    { email: email, created_at: new Date().toISOString() }
+                ]);
+                
+                // Show success message
+                showMessage('✅ Account created! Redirecting to demo...', 'success');
+                
+                // Redirect to call page
+                setTimeout(() => {
+                    window.location.href = 'call.html';
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Signup error:', error);
+                showMessage('Error: ' + error.message, 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Start Free Demo';
             }
-        };
-    }
-
-    function getDefaultScore() {
-        const base = session.closed ? 75 : 55;
-        return {
-            overall: base,
-            metrics: { closing: session.closed ? 85 : 45, objection: 60, confidence: 65, rapport: 60 },
-            feedback: {
-                strengths: ['Completed the call', 'Took initiative to practice'],
-                improvements: ['Ask more discovery questions', 'Work on handling objections'],
-                insights: [{ type: 'opportunity', title: 'Keep Practicing', desc: 'Consistency builds skill' }]
+        }
+        
+        function generateRandomPassword() {
+            return Math.random().toString(36).slice(-12) + Math.random().toString(36).slice(-12);
+        }
+        
+        function showMessage(text, type) {
+            const message = document.getElementById('message');
+            message.textContent = text;
+            message.className = `message ${type} show`;
+        }
+        
+        // Allow Enter key to submit
+        document.getElementById('emailInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                handleSignup();
             }
-        };
-    }
-
-    function displayResults(score) {
-        document.getElementById('overallScore').textContent = score.overall;
-        document.getElementById('outcomeIcon').textContent = session.closed ? '✅ CLOSED' : '❌ NO SALE';
-        const m = Math.floor(duration / 60), s = duration % 60;
-        document.getElementById('callDuration').textContent = `${m}:${String(s).padStart(2, '0')}`;
-        document.getElementById('commissionEarned').textContent = session.closed ? '+$' + session.commission.toLocaleString() : '$0';
-        ['closing', 'objection', 'confidence', 'rapport'].forEach(metric => {
-            const val = score.metrics[metric];
-            const cap = metric.charAt(0).toUpperCase() + metric.slice(1);
-            document.getElementById('kpi' + cap).textContent = val;
-            setTimeout(() => { document.getElementById('bar' + cap).style.width = val + '%'; }, 100);
         });
-        const sl = document.getElementById('strengthsList');
-        sl.innerHTML = '';
-        score.feedback.strengths.forEach(s => { sl.innerHTML += `<div class="breakdown-item positive"><div class="breakdown-label">✅ ${s}</div></div>`; });
-        const il = document.getElementById('improvementsList');
-        il.innerHTML = '';
-        score.feedback.improvements.forEach(i => { il.innerHTML += `<div class="breakdown-item negative"><div class="breakdown-label">💡 ${i}</div></div>`; });
-        const inl = document.getElementById('insightsList');
-        inl.innerHTML = '';
-        const icons = { strength: '💪', weakness: '⚠️', opportunity: '🎯' };
-        score.feedback.insights.forEach(ins => {
-            inl.innerHTML += `<div class="insight-item ${ins.type}"><div class="insight-icon">${icons[ins.type] || '💡'}</div><div class="insight-content"><div class="insight-title">${ins.title}</div><div class="insight-desc">${ins.desc}</div></div></div>`;
+        
+        // Check if already logged in
+        window.addEventListener('load', async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                window.location.href = 'call.html';
+            }
         });
-    }
-
-    function updateDashboard() {
-        const cr = stats.totalCalls > 0 ? Math.round((stats.totalSales / stats.totalCalls) * 100) : 0;
-        document.getElementById('dCloseRate').textContent = cr + '%';
-        document.getElementById('dCloseSub').textContent = `${stats.totalSales} / ${stats.totalCalls} calls`;
-        document.getElementById('dEarnings').textContent = '$' + stats.totalEarnings.toLocaleString();
-        document.getElementById('dEarningSub').textContent = `${stats.totalSales} closed`;
-        if (stats.scores.length > 0) {
-            const avg = Math.round(stats.scores.reduce((a, b) => a + b, 0) / stats.scores.length);
-            document.getElementById('dAvgScore').textContent = avg;
-            if (stats.scores.length >= 2) {
-                const recentScores = stats.scores.slice(-3);
-                const recent = recentScores.reduce((a, b) => a + b, 0) / recentScores.length;
-                const overall = stats.scores.reduce((a, b) => a + b, 0) / stats.scores.length;
-                document.getElementById('dScoreTrend').textContent = recent > overall ? '📈 Improving' : recent < overall ? '📉 Declining' : '➡️ Stable';
-            } else document.getElementById('dScoreTrend').textContent = 'Getting started';
-        } else {
-            document.getElementById('dAvgScore').textContent = '--';
-            document.getElementById('dScoreTrend').textContent = 'No data';
-        }
-        const h = Math.floor(stats.totalTime / 3600), min = Math.floor((stats.totalTime % 3600) / 60);
-        document.getElementById('dTime').textContent = h > 0 ? `${h}h ${min}m` : `${min}m`;
-        document.getElementById('dCallCount').textContent = `${stats.totalCalls} calls`;
-        const exp = stats.totalCalls > 0 ? Math.round(stats.totalEarnings / stats.totalCalls) : 0;
-        document.getElementById('dExpectancy').textContent = exp > 0 ? '+$' + exp.toLocaleString() : '$0';
-        document.getElementById('dWinStreak').textContent = stats.maxWinStreak;
-        document.getElementById('dStreakSub').textContent = `Current: ${stats.currentStreak}`;
-        const hl = document.getElementById('historyList');
-        if (stats.history.length === 0) {
-            hl.innerHTML = '<div class="empty"><div class="empty-icon">📊</div><p>No calls yet</p><button class="btn btn-primary" onclick="practiceAgain()" style="margin-top:1rem">Start Practicing</button></div>';
-        } else {
-            hl.innerHTML = '';
-            stats.history.slice(0, 20).forEach(s => {
-                const d = new Date(s.timestamp);
-                const ec = s.closed ? 'positive' : 'negative';
-                const et = s.closed ? '+$' + s.commission.toLocaleString() : '$0';
-                hl.innerHTML += `<div class="history-item"><div><div class="history-date">${d.toLocaleDateString()} ${d.toLocaleTimeString()}</div><div class="history-details">${s.product} • ${Math.floor(s.duration / 60)}:${String(s.duration % 60).padStart(2, '0')}</div></div><div class="history-score">${s.score?.overall || '--'}</div><div class="history-outcome">${s.closed ? '✅' : '❌'}</div><div class="history-earnings ${ec}">${et}</div></div>`;
-            });
-        }
-    }
-
-    function practiceAgain() {
-        document.getElementById('transcript').innerHTML = '';
-        document.getElementById('warning').innerHTML = '';
-        document.getElementById('prompt').innerHTML = '';
-        if (selectedIndustry) startCall();
-        else switchScreen('industry');
-    }
-
-    window.addEventListener('load', () => {
-        init();
-        if (synthesis) {
-            synthesis.getVoices();
-            synthesis.onvoiceschanged = loadVoices;
-        }
-    });
     </script>
 </body>
 </html>
