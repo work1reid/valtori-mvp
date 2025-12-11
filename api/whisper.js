@@ -1,5 +1,5 @@
-// api/anthropic.js
-// Backend proxy with hardcoded API key from environment
+// api/whisper.js
+// Backend proxy for OpenAI Whisper (voice transcription)
 
 export default async function handler(req, res) {
     // Enable CORS
@@ -18,34 +18,32 @@ export default async function handler(req, res) {
     
     try {
         // Use server-side environment variable (SECURE!)
-        const apiKey = process.env.ANTHROPIC_API_KEY;
+        const apiKey = process.env.OPENAI_API_KEY;
         
         if (!apiKey) {
-            console.error('Missing ANTHROPIC_API_KEY environment variable');
+            console.error('Missing OPENAI_API_KEY environment variable');
             return res.status(500).json({ error: 'Server configuration error' });
         }
         
-        // Forward request to Anthropic
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
+        // Forward audio to OpenAI Whisper
+        const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'x-api-key': apiKey,
-                'anthropic-version': '2023-06-01'
+                'Authorization': `Bearer ${apiKey}`
             },
-            body: JSON.stringify(req.body)
+            body: req.body
         });
         
         const data = await response.json();
         
         if (!response.ok) {
-            console.error('Anthropic API error:', data);
+            console.error('OpenAI API error:', data);
             return res.status(response.status).json(data);
         }
         
         return res.status(200).json(data);
     } catch (error) {
-        console.error('Proxy error:', error);
+        console.error('Whisper proxy error:', error);
         return res.status(500).json({ error: 'Internal server error' });
     }
 }
