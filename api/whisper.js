@@ -1,13 +1,8 @@
-// api/whisper.js
-// Backend proxy for OpenAI Whisper (voice transcription)
-
 export default async function handler(req, res) {
-    // Enable CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     
-    // Handle preflight
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
     }
@@ -17,7 +12,6 @@ export default async function handler(req, res) {
     }
     
     try {
-        // Use server-side environment variable (SECURE!)
         const apiKey = process.env.OPENAI_API_KEY;
         
         if (!apiKey) {
@@ -25,13 +19,13 @@ export default async function handler(req, res) {
             return res.status(500).json({ error: 'Server configuration error' });
         }
         
-        // Forward audio to OpenAI Whisper
+        // Forward the entire request body (FormData) to OpenAI
         const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${apiKey}`
             },
-            body: req.body
+            body: req
         });
         
         const data = await response.json();
