@@ -198,27 +198,25 @@
         <h1>Start Your Free Trial</h1>
         <p class="subtitle">Practice your first cold call in 60 seconds</p>
 
-        <div id="errorMessage" class="error-message"></div>
-        <div id="successMessage" class="success-message"></div>
+        <div id="errorMsg" class="error-message"></div>
+        <div id="successMsg" class="success-message"></div>
 
-        <form id="signupForm" onsubmit="handleSignup(event)">
+        <form id="signupForm">
             <div class="form-group">
-                <label for="name">Full Name</label>
+                <label for="fullName">Full Name</label>
                 <input 
                     type="text" 
-                    id="name" 
-                    name="name" 
+                    id="fullName" 
                     placeholder="John Smith" 
                     required
                 >
             </div>
 
             <div class="form-group">
-                <label for="email">Work Email</label>
+                <label for="userEmail">Work Email</label>
                 <input 
                     type="email" 
-                    id="email" 
-                    name="email" 
+                    id="userEmail" 
                     placeholder="john@company.com" 
                     required
                 >
@@ -250,61 +248,54 @@
     </div>
 
     <script>
-        const SUPABASE_URL = 'https://aqzjxlxdjhegypnhsdcp.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxemp4bHhkamhlZ3lwbmhzZGNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxMzk2OTYsImV4cCI6MjA4MDcxNTY5Nn0.oNwuIyrqwNAA4PfT4Nxgm869d6nKMZseFLJQAkJxbNM';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabaseClient = window.supabase.createClient(
+            'https://aqzjxlxdjhegypnhsdcp.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxemp4bHhkamhlZ3lwbmhzZGNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxMzk2OTYsImV4cCI6MjA4MDcxNTY5Nn0.oNwuIyrqwNAA4PfT4Nxgm869d6nKMZseFLJQAkJxbNM'
+        );
 
-        async function handleSignup(event) {
-            event.preventDefault();
+        document.getElementById('signupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
 
             const submitBtn = document.getElementById('submitBtn');
-            const errorMessage = document.getElementById('errorMessage');
-            const successMessage = document.getElementById('successMessage');
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
+            const errorMsg = document.getElementById('errorMsg');
+            const successMsg = document.getElementById('successMsg');
+            const fullName = document.getElementById('fullName').value;
+            const userEmail = document.getElementById('userEmail').value;
 
-            // Hide messages
-            errorMessage.style.display = 'none';
-            successMessage.style.display = 'none';
-
-            // Disable button
+            errorMsg.style.display = 'none';
+            successMsg.style.display = 'none';
             submitBtn.disabled = true;
             submitBtn.textContent = 'Creating account...';
 
             try {
-                // Create account with random password
-                const password = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+                const randomPassword = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
                 
-                const { data, error } = await supabase.auth.signUp({
-                    email: email,
-                    password: password,
+                const { data, error } = await supabaseClient.auth.signUp({
+                    email: userEmail,
+                    password: randomPassword,
                     options: {
-                        data: {
-                            full_name: name
-                        }
+                        data: { full_name: fullName }
                     }
                 });
 
                 if (error) throw error;
 
-                // Show success
-                successMessage.textContent = 'Account created! Starting your first call...';
-                successMessage.style.display = 'block';
+                successMsg.textContent = 'Account created! Starting your first call...';
+                successMsg.style.display = 'block';
 
-                // Redirect to call page
                 setTimeout(() => {
                     window.location.href = 'call.html';
                 }, 1500);
 
             } catch (error) {
                 console.error('Signup error:', error);
-                errorMessage.textContent = error.message || 'Something went wrong. Please try again.';
-                errorMessage.style.display = 'block';
+                errorMsg.textContent = error.message || 'Something went wrong. Please try again.';
+                errorMsg.style.display = 'block';
                 
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Start Free Trial →';
             }
-        }
+        });
     </script>
 </body>
 </html>
