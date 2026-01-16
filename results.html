@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valtori AI - Call Analysis</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #141824;
+            --bg-tertiary: #1a1f2e;
+            
+            --accent-cyan: #00f5ff;
+            --accent-green: #00ff88;
+            --accent-yellow: #ffd500;
+            --accent-orange: #ff8800;
+            --accent-red: #ff3366;
+            
+            --text-primary: #e8ecf8;
+            --text-secondary: #8b93b0;
+            --text-tertiary: #5a6279;
+            
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --border-medium: rgba(255, 255, 255, 0.12);
+            
+            --glow-cyan: 0 0 30px rgba(0, 245, 255, 0.3);
+        }
+        
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 4rem 2rem;
+        }
+        
+        .results-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .results-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .results-header h2 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 0.8rem;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-green) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .results-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+        }
+        
+        .session-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        
+        .summary-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .summary-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-cyan);
+        }
+        
+        .summary-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-tertiary);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        .summary-value {
+            font-size: 3rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .summary-value.cyan { color: var(--accent-cyan); }
+        .summary-value.green { color: var(--accent-green); }
+        .summary-value.yellow { color: var(--accent-yellow); }
+        .summary-value.red { color: var(--accent-red); }
+        
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .analytics-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 2rem;
+        }
+        
+        .analytics-title {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .analytics-score {
+            font-size: 3.5rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 1rem;
+        }
+        
+        .analytics-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-tertiary);
+            margin-bottom: 1.5rem;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-green));
+            border-radius: 4px;
+            transition: width 1.5s ease;
+            width: 0;
+        }
+        
+        .breakdown-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .breakdown-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 2rem;
+        }
+        
+        .breakdown-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .breakdown-item {
+            background: var(--bg-tertiary);
+            padding: 1rem 1.2rem;
+            border-radius: 8px;
+            margin-bottom: 0.8rem;
+            border-left: 3px solid transparent;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.8rem;
+        }
+        
+        .breakdown-item.positive { border-left-color: var(--accent-green); }
+        .breakdown-item.negative { border-left-color: var(--accent-red); }
+        
+        .breakdown-icon {
+            font-size: 1.2rem;
+            margin-top: 0.2rem;
+        }
+        
+        .breakdown-text {
+            flex: 1;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            margin-top: 3rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn-primary {
+            padding: 1.2rem 2.5rem;
+            font-size: 1rem;
+            font-weight: 700;
+            background: var(--accent-cyan);
+            color: var(--bg-primary);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--glow-cyan);
+        }
+        
+        .btn-secondary {
+            padding: 1.2rem 2.5rem;
+            font-size: 1rem;
+            font-weight: 700;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-medium);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .btn-secondary:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--accent-cyan);
+        }
+        
+        @media (max-width: 768px) {
+            .summary-value { font-size: 2.2rem; }
+            .analytics-score { font-size: 2.5rem; }
+            .breakdown-section { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="results-container">
+        <div class="results-header">
+            <h2>Call <span class="gradient-text">Analysis</span></h2>
+            <p class="results-subtitle">Your performance breakdown</p>
+        </div>
+        
+        <div class="session-summary">
+            <div class="summary-card">
+                <div class="summary-label">Overall Score</div>
+                <div class="summary-value cyan" id="overallScore">--</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-label">Outcome</div>
+                <div class="summary-value green" id="outcomeIcon">--</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-label">Duration</div>
+                <div class="summary-value yellow" id="callDuration">--</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-label">Commission</div>
+                <div class="summary-value green" id="commissionEarned">--</div>
+            </div>
+        </div>
+        
+        <div class="analytics-grid">
+            <div class="analytics-card">
+                <div class="analytics-title">🎯 Confidence Score</div>
+                <div class="analytics-score" style="color: var(--accent-cyan);" id="confidenceScore">--</div>
+                <div class="analytics-subtitle">Voice stability and conviction</div>
+                <div class="progress-bar"><div class="progress-fill" id="confidenceBar"></div></div>
+            </div>
+            <div class="analytics-card">
+                <div class="analytics-title">💬 Clarity Rating</div>
+                <div class="analytics-score" style="color: var(--accent-green);" id="clarityScore">--</div>
+                <div class="analytics-subtitle">Pronunciation and articulation</div>
+                <div class="progress-bar"><div class="progress-fill" id="clarityBar"></div></div>
+            </div>
+            <div class="analytics-card">
+                <div class="analytics-title">⚡ Pacing Score</div>
+                <div class="analytics-score" style="color: var(--accent-yellow);" id="pacingScore">--</div>
+                <div class="analytics-subtitle">Speaking speed and rhythm</div>
+                <div class="progress-bar"><div class="progress-fill" id="pacingBar"></div></div>
+            </div>
+            <div class="analytics-card">
+                <div class="analytics-title">🎤 Filler Words</div>
+                <div class="analytics-score" style="color: var(--accent-orange);" id="fillerCount">--</div>
+                <div class="analytics-subtitle">Um, uh, like per minute</div>
+                <div class="progress-bar"><div class="progress-fill" id="fillerBar"></div></div>
+            </div>
+        </div>
+        
+        <div class="breakdown-section">
+            <div class="breakdown-card">
+                <div class="breakdown-title">💪 What Worked</div>
+                <div id="strengthsList"></div>
+            </div>
+            <div class="breakdown-card">
+                <div class="breakdown-title">🎯 Areas to Improve</div>
+                <div id="improvementsList"></div>
+            </div>
+        </div>
+        
+        <div class="action-buttons">
+            <button class="btn-primary" onclick="tryAgain()">Try Again</button>
+            <button class="btn-secondary" onclick="goHome()">Back to Home</button>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://aqzjxlxdjhegypnhsdcp.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxemp4bHhkamhlZ3lwbmhzZGNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxMzk2OTYsImV4cCI6MjA4MDcxNTY5Nn0.oNwuIyrqwNAA4PfT4Nxgm869d6nKMZseFLJQAkJxbNM';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        window.addEventListener('load', async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            if (!session) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            const results = sessionStorage.getItem('lastCallResults');
+            
+            if (!results) {
+                window.location.href = 'call.html';
+                return;
+            }
+            
+            const data = JSON.parse(results);
+            displayResults(data);
+        });
+        
+        function displayResults(data) {
+            const { duration, scores, closed } = data;
+            const commission = closed ? 1275 : 0;
+            
+            document.getElementById('overallScore').textContent = scores.overall;
+            document.getElementById('outcomeIcon').textContent = closed ? '✅' : '❌';
+            
+            const mins = Math.floor(duration / 60);
+            const secs = duration % 60;
+            document.getElementById('callDuration').textContent = `${mins}:${String(secs).padStart(2, '0')}`;
+            document.getElementById('commissionEarned').textContent = closed ? '+$' + commission.toLocaleString() : '$0';
+            
+            document.getElementById('confidenceScore').textContent = scores.confidence;
+            document.getElementById('clarityScore').textContent = scores.clarity;
+            document.getElementById('pacingScore').textContent = scores.pacing;
+            document.getElementById('fillerCount').textContent = scores.fillers;
+            
+            setTimeout(() => {
+                document.getElementById('confidenceBar').style.width = scores.confidence + '%';
+                document.getElementById('clarityBar').style.width = scores.clarity + '%';
+                document.getElementById('pacingBar').style.width = scores.pacing + '%';
+                document.getElementById('fillerBar').style.width = Math.max(0, 100 - scores.fillers * 5) + '%';
+            }, 100);
+            
+            populateBreakdown(closed);
+        }
+        
+        function populateBreakdown(closed) {
+            const strengthsList = document.getElementById('strengthsList');
+            const improvementsList = document.getElementById('improvementsList');
+            
+            strengthsList.innerHTML = '';
+            improvementsList.innerHTML = '';
+            
+            const strengths = [
+                { icon: '✅', text: 'Strong opening that captured attention' },
+                { icon: '✅', text: 'Good use of probing questions' }
+            ];
+            
+            if (closed) {
+                strengths.push({ icon: '✅', text: 'Successfully closed the sale' });
+            }
+            
+            strengths.forEach(strength => {
+                const item = document.createElement('div');
+                item.className = 'breakdown-item positive';
+                item.innerHTML = `
+                    <div class="breakdown-icon">${strength.icon}</div>
+                    <div class="breakdown-text">${strength.text}</div>
+                `;
+                strengthsList.appendChild(item);
+            });
+            
+            const improvements = [
+                { icon: '💡', text: 'Reduce filler words to sound more confident' },
+                { icon: '💡', text: 'Ask more discovery questions before pitching' }
+            ];
+            
+            improvements.forEach(improvement => {
+                const item = document.createElement('div');
+                item.className = 'breakdown-item negative';
+                item.innerHTML = `
+                    <div class="breakdown-icon">${improvement.icon}</div>
+                    <div class="breakdown-text">${improvement.text}</div>
+                `;
+                improvementsList.appendChild(item);
+            });
+        }
+        
+        function tryAgain() {
+            window.location.href = 'call.html';
+        }
+        
+        function goHome() {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

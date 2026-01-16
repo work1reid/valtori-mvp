@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valtori AI - Live Call</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #141824;
+            --bg-tertiary: #1a1f2e;
+            --bg-elevated: #1f2535;
+            
+            --accent-cyan: #00f5ff;
+            --accent-green: #00ff88;
+            --accent-red: #ff3366;
+            
+            --text-primary: #e8ecf8;
+            --text-secondary: #8b93b0;
+            --text-tertiary: #5a6279;
+            
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            
+            --glow-red: 0 0 30px rgba(255, 51, 102, 0.3);
+        }
+        
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .phone-container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            min-height: 100vh;
+        }
+        
+        .call-header {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .call-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+        
+        .call-status {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent-green);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        .call-type {
+            font-size: 0.9rem;
+            color: var(--text-tertiary);
+        }
+        
+        .call-timer {
+            font-size: 2.5rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent-cyan);
+        }
+        
+        .call-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 0;
+        }
+        
+        .avatar-container {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-green));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .avatar-container.speaking {
+            animation: avatarPulse 0.6s ease-in-out infinite;
+        }
+        
+        .avatar-container.listening {
+            box-shadow: 0 0 0 0 rgba(0, 245, 255, 0.6);
+            animation: listeningPulse 2s infinite;
+        }
+        
+        @keyframes avatarPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        @keyframes listeningPulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 245, 255, 0.6); }
+            70% { box-shadow: 0 0 0 30px rgba(0, 245, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 245, 255, 0); }
+        }
+        
+        .avatar-status {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 2rem;
+        }
+        
+        .waveform-container {
+            width: 100%;
+            max-width: 600px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            margin-bottom: 2rem;
+        }
+        
+        .waveform-bar {
+            width: 6px;
+            background: var(--accent-cyan);
+            border-radius: 3px;
+            transition: height 0.1s ease;
+            opacity: 0.3;
+        }
+        
+        .waveform-bar.active {
+            opacity: 1;
+            animation: waveAnimate 0.8s ease-in-out infinite;
+        }
+        
+        @keyframes waveAnimate {
+            0%, 100% { height: 20px; }
+            50% { height: 80px; }
+        }
+        
+        .transcript-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 1.5rem;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 2rem 0;
+            min-height: 200px;
+        }
+        
+        .transcript-message {
+            margin-bottom: 1.2rem;
+            padding: 1rem 1.2rem;
+            border-radius: 12px;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .transcript-message.user {
+            background: rgba(0, 245, 255, 0.1);
+            border-left: 3px solid var(--accent-cyan);
+        }
+        
+        .transcript-message.ai {
+            background: rgba(0, 255, 136, 0.1);
+            border-left: 3px solid var(--accent-green);
+        }
+        
+        .message-speaker {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+        
+        .message-speaker.user { color: var(--accent-cyan); }
+        .message-speaker.ai { color: var(--accent-green); }
+        
+        .message-text {
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        
+        .call-controls {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+        }
+        
+        .control-button {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .control-button.mute {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+        
+        .control-button.mute:hover {
+            background: var(--bg-elevated);
+        }
+        
+        .control-button.mute.active {
+            background: var(--accent-red);
+            color: white;
+        }
+        
+        .control-button.end-call {
+            background: var(--accent-red);
+            color: white;
+            width: 90px;
+            height: 90px;
+            font-size: 2.2rem;
+            box-shadow: var(--glow-red);
+        }
+        
+        .control-button.end-call:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 40px rgba(255, 51, 102, 0.5);
+        }
+        
+        .control-label {
+            position: absolute;
+            bottom: -30px;
+            font-size: 0.8rem;
+            color: var(--text-tertiary);
+            white-space: nowrap;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            .call-timer { font-size: 2rem; }
+            .avatar-container { width: 140px; height: 140px; font-size: 4rem; }
+            .control-button.end-call { width: 80px; height: 80px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-container">
+        <div class="call-header">
+            <div class="call-info">
+                <div class="call-status">
+                    <span class="status-indicator"></span>
+                    <span>Live Call</span>
+                </div>
+                <div class="call-type">Cold Call Demo - Real Voice</div>
+            </div>
+            <div class="call-timer" id="callTimer">00:00</div>
+        </div>
+        
+        <div class="call-center">
+            <div class="avatar-container" id="avatar">🤖</div>
+            <div class="avatar-status" id="avatarStatus">AI Prospect</div>
+            
+            <div class="waveform-container" id="waveform"></div>
+            
+            <div class="transcript-container" id="transcript"></div>
+        </div>
+        
+        <div class="call-controls">
+            <button class="control-button mute" id="muteBtn" onclick="toggleMute()">
+                🎤
+                <span class="control-label">Mute</span>
+            </button>
+            <button class="control-button end-call" onclick="endCall()">
+                📞
+                <span class="control-label">End Call</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const { data: { session } } = await supabase.auth.getSession();
+
+if (!session) {
+  window.location.href = 'index.html';
+}
+
+        const SUPABASE_URL = 'https://aqzjxlxdjhegypnhsdcp.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxemp4bHhkamhlZ3lwbmhzZGNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxMzk2OTYsImV4cCI6MjA4MDcxNTY5Nn0.oNwuIyrqwNAA4PfT4Nxgm869d6nKMZseFLJQAkJxbNM';
+        const WEBSOCKET_URL = 'wss://valtori-realtime-server-production.up.railway.app';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+let state = {
+            userId: null,
+            userEmail: null,
+            callActive: false,
+            callStartTime: null,
+            timerInterval: null,
+            isMuted: false,
+            messages: [],
+            ws: null,
+            audioContext: null,
+            mediaStream: null,
+            audioWorklet: null
+        };
+        
+        let audioQueue = [];
+        let isPlaying = false;
+        
+        window.addEventListener('load', async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            if (!session) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            state.userId = session.user.id;
+            state.userEmail = session.user.email;
+            
+            console.log('✅ Authenticated user:', state.userEmail);
+            setTimeout(startCall, 1000);
+        });
+        
+        async function startCall() {
+            console.log('📞 Starting real-time call...');
+            
+            state.callActive = true;
+            state.callStartTime = Date.now();
+            state.messages = [];
+            
+            initializeWaveform();
+            startCallTimer();
+            
+            try {
+                state.mediaStream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        sampleRate: 24000,
+                        channelCount: 1,
+                        echoCancellation: true,
+                        noiseSuppression: true
+                    } 
+                });
+                
+                state.audioContext = new (window.AudioContext || window.webkitAudioContext)({
+                    sampleRate: 24000
+                });
+                
+                connectWebSocket();
+                console.log('🎤 Microphone access granted');
+                
+            } catch (error) {
+                console.error('❌ Microphone access denied:', error);
+                alert('Please allow microphone access to make calls');
+                window.location.href = 'index.html';
+            }
+        }
+        
+        function connectWebSocket() {
+            console.log('🔗 Connecting to WebSocket server...');
+            
+            state.ws = new WebSocket(WEBSOCKET_URL);
+            
+            state.ws.onopen = () => {
+                console.log('✅ Connected to server');
+                state.ws.send(JSON.stringify({ type: 'start' }));
+                startAudioStream();
+            };
+            
+            state.ws.onmessage = async (event) => {
+                const message = JSON.parse(event.data);
+                
+                if (message.type === 'session.created') {
+                    console.log('✅ Session created');
+                    updateStatus('listening');
+                    
+                } else if (message.type === 'response.audio.delta') {
+                    if (message.delta) {
+                        playAudioChunk(message.delta);
+                    }
+                    
+                } else if (message.type === 'response.text.delta') {
+                    updateTranscript('ai', message.delta, false);
+                    
+                } else if (message.type === 'response.text.done') {
+                    updateTranscript('ai', message.text, true);
+                    
+                } else if (message.type === 'conversation.item.created') {
+                    if (message.item.type === 'message' && message.item.role === 'user') {
+                        const text = message.item.content[0]?.transcript || '';
+                        if (text) {
+                            addMessage('user', text);
+                        }
+                    }
+                    
+                } else if (message.type === 'input_audio_buffer.speech_started') {
+                    updateStatus('user_speaking');
+                    
+                } else if (message.type === 'input_audio_buffer.speech_stopped') {
+                    updateStatus('listening');
+                    
+                } else if (message.type === 'response.done') {
+                    updateStatus('listening');
+                    
+                } else if (message.type === 'error') {
+                    console.error('❌ Server error:', message.error);
+                }
+            };
+            
+            state.ws.onerror = (error) => {
+                console.error('❌ WebSocket error:', error);
+            };
+            
+            state.ws.onclose = () => {
+                console.log('🔌 WebSocket closed');
+            };
+        }
+        
+        async function startAudioStream() {
+            const source = state.audioContext.createMediaStreamSource(state.mediaStream);
+            
+            await state.audioContext.audioWorklet.addModule(
+                'data:text/javascript,' + encodeURIComponent(`
+                    class AudioProcessor extends AudioWorkletProcessor {
+                        process(inputs, outputs, parameters) {
+                            const input = inputs[0];
+                            if (input.length > 0) {
+                                const audioData = input[0];
+                                const int16Array = new Int16Array(audioData.length);
+                                
+                                for (let i = 0; i < audioData.length; i++) {
+                                    int16Array[i] = Math.max(-32768, Math.min(32767, audioData[i] * 32768));
+                                }
+                                
+                                this.port.postMessage(int16Array.buffer, [int16Array.buffer]);
+                            }
+                            return true;
+                        }
+                    }
+                    registerProcessor('audio-processor', AudioProcessor);
+                `)
+            );
+            
+            state.audioWorklet = new AudioWorkletNode(state.audioContext, 'audio-processor');
+            
+            state.audioWorklet.port.onmessage = (event) => {
+    if (state.ws && state.ws.readyState === WebSocket.OPEN && !state.isMuted) {
+        // Send raw binary audio instead of JSON
+        state.ws.send(event.data);
+    }
+};
+            
+            source.connect(state.audioWorklet);
+        }
+        
+        function arrayBufferToBase64(buffer) {
+            let binary = '';
+            const bytes = new Uint8Array(buffer);
+            for (let i = 0; i < bytes.byteLength; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return btoa(binary);
+        }
+        
+        async function playAudioChunk(base64Audio) {
+    const binaryString = atob(base64Audio);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+    }
+    
+    const int16Array = new Int16Array(bytes.buffer);
+    const float32Array = new Float32Array(int16Array.length);
+    for (let i = 0; i < int16Array.length; i++) {
+        float32Array[i] = int16Array[i] / 32768;
+    }
+    
+    const audioBuffer = state.audioContext.createBuffer(1, float32Array.length, 24000);
+    audioBuffer.getChannelData(0).set(float32Array);
+    
+    // Queue the audio
+    audioQueue.push(audioBuffer);
+    
+    if (!isPlaying) {
+        playNextAudio();
+    }
+}
+
+function playNextAudio() {
+    if (audioQueue.length === 0) {
+        isPlaying = false;
+        return;
+    }
+    
+    isPlaying = true;
+    const audioBuffer = audioQueue.shift();
+    
+    const source = state.audioContext.createBufferSource();
+    source.buffer = audioBuffer;
+    source.connect(state.audioContext.destination);
+    source.onended = () => playNextAudio();
+    source.start();
+}
+        
+        function updateStatus(status) {
+            const avatar = document.getElementById('avatar');
+            const statusText = document.getElementById('avatarStatus');
+            
+            avatar.classList.remove('speaking', 'listening');
+            
+            if (status === 'listening') {
+                avatar.classList.add('listening');
+                statusText.textContent = 'Listening...';
+                activateWaveform(true);
+            } else if (status === 'user_speaking') {
+                statusText.textContent = 'You\'re speaking...';
+                activateWaveform(true);
+            } else if (status === 'ai_speaking') {
+                avatar.classList.add('speaking');
+                statusText.textContent = 'AI speaking...';
+                activateWaveform(true);
+            }
+        }
+        
+        let currentAIMessage = '';
+        function updateTranscript(speaker, text, final) {
+            if (speaker === 'ai') {
+                if (final) {
+                    if (currentAIMessage) {
+                        addMessage('ai', currentAIMessage + text);
+                        currentAIMessage = '';
+                    }
+                } else {
+                    currentAIMessage += text;
+                }
+            }
+        }
+        function initializeWaveform() {
+            const waveform = document.getElementById('waveform');
+            waveform.innerHTML = '';
+            
+            for (let i = 0; i < 40; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'waveform-bar';
+                bar.style.animationDelay = `${i * 0.05}s`;
+                waveform.appendChild(bar);
+            }
+        }
+        
+        function activateWaveform(active) {
+            document.querySelectorAll('.waveform-bar').forEach(bar => {
+                if (active) {
+                    bar.classList.add('active');
+                } else {
+                    bar.classList.remove('active');
+                }
+            });
+        }
+        
+        function startCallTimer() {
+            state.timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - state.callStartTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                
+                document.getElementById('callTimer').textContent = 
+                    `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }, 1000);
+        }
+        
+        function addMessage(speaker, text) {
+            const transcript = document.getElementById('transcript');
+            
+            const msg = document.createElement('div');
+            msg.className = `transcript-message ${speaker}`;
+            
+            const speakerLabel = document.createElement('div');
+            speakerLabel.className = `message-speaker ${speaker}`;
+            speakerLabel.textContent = speaker === 'user' ? 'YOU' : 'PROSPECT';
+            
+            const messageText = document.createElement('div');
+            messageText.className = 'message-text';
+            messageText.textContent = text;
+            
+            msg.appendChild(speakerLabel);
+            msg.appendChild(messageText);
+            transcript.appendChild(msg);
+            
+            transcript.scrollTop = transcript.scrollHeight;
+            
+            state.messages.push({ speaker, text, timestamp: Date.now() });
+        }
+        
+        function toggleMute() {
+            state.isMuted = !state.isMuted;
+            const muteBtn = document.getElementById('muteBtn');
+            
+            if (state.isMuted) {
+                muteBtn.classList.add('active');
+                muteBtn.innerHTML = '🔇<span class="control-label">Unmute</span>';
+            } else {
+                muteBtn.classList.remove('active');
+                muteBtn.innerHTML = '🎤<span class="control-label">Mute</span>';
+            }
+        }
+        
+        async function endCall() {
+            console.log('📴 Ending call...');
+            
+            state.callActive = false;
+            
+            if (state.timerInterval) {
+                clearInterval(state.timerInterval);
+            }
+            
+            if (state.ws) {
+                state.ws.close();
+            }
+            
+            if (state.mediaStream) {
+                state.mediaStream.getTracks().forEach(track => track.stop());
+            }
+            
+            if (state.audioContext) {
+                state.audioContext.close();
+            }
+            
+            activateWaveform(false);
+            
+            const duration = Math.floor((Date.now() - state.callStartTime) / 1000);
+            const scores = {
+                overall: Math.floor(Math.random() * 30) + 60,
+                confidence: Math.floor(Math.random() * 30) + 65,
+                clarity: Math.floor(Math.random() * 25) + 70,
+                pacing: Math.floor(Math.random() * 35) + 55,
+                fillers: Math.floor(Math.random() * 15) + 5
+            };
+            const closed = Math.random() > 0.5;
+            
+            try {
+                await supabase.from('call_sessions').insert([{
+                    user_id: state.userId,
+                    user_email: state.userEmail,
+                    duration: duration,
+                    overall_score: scores.overall,
+                    confidence_score: scores.confidence,
+                    clarity_score: scores.clarity,
+                    pacing_score: scores.pacing,
+                    filler_count: scores.fillers,
+                    sale_closed: closed,
+                    messages: state.messages,
+                    created_at: new Date().toISOString()
+                }]);
+                
+                console.log('✅ Session saved to Supabase');
+            } catch (error) {
+                console.error('Error saving session:', error);
+            }
+            
+            sessionStorage.setItem('lastCallResults', JSON.stringify({
+                duration,
+                scores,
+                closed,
+                messages: state.messages
+            }));
+            
+            setTimeout(() => {
+                window.location.href = 'results.html';
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
