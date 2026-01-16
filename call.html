@@ -6,79 +6,73 @@
     <title>Valtori AI - Live Call</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         :root {
-            --bg-primary: #0a0e1a;
-            --bg-secondary: #141824;
-            --bg-tertiary: #1a1f2e;
-            --bg-elevated: #1f2535;
-            
-            --accent-cyan: #00f5ff;
-            --accent-green: #00ff88;
+            --gold: #D4AF37;
+            --gold-light: #F4E4B5;
+            --gold-dark: #B8941F;
+            --black: #000000;
+            --gray-900: #0a0a0a;
+            --gray-800: #1a1a1a;
+            --gray-700: #2a2a2a;
+            --white: #ffffff;
+            --text-secondary: #a0a0a0;
             --accent-red: #ff3366;
-            
-            --text-primary: #e8ecf8;
-            --text-secondary: #8b93b0;
-            --text-tertiary: #5a6279;
-            
-            --border-subtle: rgba(255, 255, 255, 0.08);
-            
-            --glow-red: 0 0 30px rgba(255, 51, 102, 0.3);
+            --accent-green: #4ade80;
         }
         
         body {
-            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.6;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--gray-900);
+            color: var(--white);
             margin: 0;
             padding: 0;
+            overflow: hidden;
         }
         
-        .phone-container {
-            max-width: 1200px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 2rem;
-            display: grid;
-            grid-template-rows: auto 1fr auto;
-            min-height: 100vh;
+        /* Main Call Container */
+        .call-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
         }
         
-        .call-header {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-subtle);
-            border-radius: 16px;
-            padding: 1.5rem 2rem;
+        /* Top Bar */
+        .top-bar {
+            background: var(--black);
+            padding: 1rem 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+            z-index: 10;
         }
         
-        .call-info {
-            display: flex;
-            flex-direction: column;
-            gap: 0.3rem;
+        .logo {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--gold);
+            letter-spacing: 0.05em;
         }
         
-        .call-status {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--accent-green);
+        .call-timer {
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
         }
         
-        .status-indicator {
+        .recording-dot {
             width: 8px;
             height: 8px;
-            background: var(--accent-green);
+            background: var(--accent-red);
             border-radius: 50%;
             animation: pulse 2s infinite;
         }
@@ -88,81 +82,127 @@
             50% { opacity: 0.3; }
         }
         
-        .call-type {
-            font-size: 0.9rem;
-            color: var(--text-tertiary);
+        /* Video Area */
+        .video-area {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gray-800);
+            position: relative;
+            overflow: hidden;
         }
         
-        .call-timer {
-            font-size: 2.5rem;
-            font-weight: 700;
-            font-family: 'JetBrains Mono', monospace;
-            color: var(--accent-cyan);
-        }
-        
-        .call-center {
+        /* Main Participant View */
+        .main-participant {
+            width: 100%;
+            height: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 3rem 0;
+            background: linear-gradient(135deg, var(--gray-900), var(--gray-800));
+            position: relative;
         }
         
-        .avatar-container {
+        .participant-avatar {
             width: 180px;
             height: 180px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-green));
+            background: linear-gradient(135deg, var(--gold-dark), var(--gold));
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 5rem;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 0 60px rgba(212, 175, 55, 0.3);
             transition: all 0.3s ease;
         }
         
-        .avatar-container.speaking {
-            animation: avatarPulse 0.6s ease-in-out infinite;
-        }
-        
-        .avatar-container.listening {
-            box-shadow: 0 0 0 0 rgba(0, 245, 255, 0.6);
-            animation: listeningPulse 2s infinite;
+        .participant-avatar.speaking {
+            animation: avatarPulse 0.5s ease-in-out infinite;
+            box-shadow: 0 0 80px rgba(212, 175, 55, 0.6);
         }
         
         @keyframes avatarPulse {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+            50% { transform: scale(1.08); }
         }
         
-        @keyframes listeningPulse {
-            0% { box-shadow: 0 0 0 0 rgba(0, 245, 255, 0.6); }
-            70% { box-shadow: 0 0 0 30px rgba(0, 245, 255, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(0, 245, 255, 0); }
-        }
-        
-        .avatar-status {
-            font-size: 1.2rem;
-            color: var(--text-secondary);
+        .participant-name {
+            font-size: 1.5rem;
             font-weight: 600;
-            margin-bottom: 2rem;
+            margin-bottom: 0.5rem;
         }
         
-        .waveform-container {
-            width: 100%;
-            max-width: 600px;
-            height: 120px;
+        .participant-status {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .status-icon {
+            width: 8px;
+            height: 8px;
+            background: var(--accent-green);
+            border-radius: 50%;
+        }
+        
+        /* Self View (Picture-in-Picture) */
+        .self-view {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 200px;
+            height: 150px;
+            background: var(--gray-700);
+            border-radius: 12px;
+            border: 2px solid var(--gray-800);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+            transition: all 0.3s ease;
+        }
+        
+        .self-view:hover {
+            border-color: var(--gold);
+        }
+        
+        .self-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--gold);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 4px;
-            margin-bottom: 2rem;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .self-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        
+        /* Waveform Indicator */
+        .waveform {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            margin-top: 1.5rem;
+            height: 40px;
         }
         
         .waveform-bar {
-            width: 6px;
-            background: var(--accent-cyan);
-            border-radius: 3px;
+            width: 4px;
+            background: var(--gold);
+            border-radius: 2px;
             transition: height 0.1s ease;
             opacity: 0.3;
         }
@@ -173,182 +213,338 @@
         }
         
         @keyframes waveAnimate {
-            0%, 100% { height: 20px; }
-            50% { height: 80px; }
+            0%, 100% { height: 12px; }
+            50% { height: 36px; }
         }
         
-        .transcript-container {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-subtle);
-            border-radius: 16px;
-            padding: 1.5rem;
-            max-height: 300px;
+        /* Transcript Sidebar */
+        .transcript-sidebar {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 350px;
+            height: 100%;
+            background: var(--black);
+            border-left: 1px solid rgba(212, 175, 55, 0.1);
+            display: flex;
+            flex-direction: column;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 8;
+        }
+        
+        .transcript-sidebar.active {
+            transform: translateX(0);
+        }
+        
+        .transcript-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .transcript-title {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .close-transcript {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        
+        .close-transcript:hover {
+            background: var(--gray-800);
+            color: var(--white);
+        }
+        
+        .transcript-content {
+            flex: 1;
             overflow-y: auto;
-            margin: 2rem 0;
-            min-height: 200px;
+            padding: 1rem 1.5rem;
         }
         
         .transcript-message {
-            margin-bottom: 1.2rem;
-            padding: 1rem 1.2rem;
-            border-radius: 12px;
+            margin-bottom: 1.5rem;
             animation: slideIn 0.3s ease;
         }
         
         @keyframes slideIn {
-            from { opacity: 0; transform: translateX(-10px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-        
-        .transcript-message.user {
-            background: rgba(0, 245, 255, 0.1);
-            border-left: 3px solid var(--accent-cyan);
-        }
-        
-        .transcript-message.ai {
-            background: rgba(0, 255, 136, 0.1);
-            border-left: 3px solid var(--accent-green);
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         .message-speaker {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.4rem;
         }
         
-        .message-speaker.user { color: var(--accent-cyan); }
-        .message-speaker.ai { color: var(--accent-green); }
+        .message-speaker.user { color: var(--gold); }
+        .message-speaker.ai { color: var(--text-secondary); }
         
         .message-text {
-            font-size: 1rem;
+            font-size: 0.9rem;
             line-height: 1.5;
+            color: var(--text-secondary);
         }
         
-        .call-controls {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-subtle);
-            border-radius: 16px;
-            padding: 2rem;
+        /* Bottom Control Bar */
+        .control-bar {
+            background: var(--black);
+            padding: 1.5rem 2rem;
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 2rem;
+            gap: 1rem;
+            border-top: 1px solid rgba(212, 175, 55, 0.1);
+            position: relative;
+            z-index: 10;
         }
         
         .control-button {
-            width: 70px;
-            height: 70px;
+            width: 56px;
+            height: 56px;
             border-radius: 50%;
             border: none;
-            font-size: 1.8rem;
             cursor: pointer;
-            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 1.4rem;
+            transition: all 0.2s ease;
             position: relative;
         }
         
-        .control-button.mute {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
+        .control-button:hover {
+            transform: translateY(-2px);
         }
         
-        .control-button.mute:hover {
-            background: var(--bg-elevated);
+        .control-button.mute {
+            background: var(--gray-800);
+            color: var(--white);
         }
         
         .control-button.mute.active {
             background: var(--accent-red);
-            color: white;
+            color: var(--white);
+        }
+        
+        .control-button.transcript {
+            background: var(--gray-800);
+            color: var(--gold);
+        }
+        
+        .control-button.transcript.active {
+            background: var(--gold);
+            color: var(--black);
         }
         
         .control-button.end-call {
             background: var(--accent-red);
-            color: white;
-            width: 90px;
-            height: 90px;
-            font-size: 2.2rem;
-            box-shadow: var(--glow-red);
+            color: var(--white);
+            width: 64px;
+            height: 64px;
+            font-size: 1.6rem;
+            box-shadow: 0 4px 20px rgba(255, 51, 102, 0.4);
         }
         
         .control-button.end-call:hover {
-            transform: scale(1.05);
-            box-shadow: 0 10px 40px rgba(255, 51, 102, 0.5);
+            box-shadow: 0 6px 30px rgba(255, 51, 102, 0.6);
         }
         
-        .control-label {
+        .control-tooltip {
             position: absolute;
-            bottom: -30px;
-            font-size: 0.8rem;
-            color: var(--text-tertiary);
+            bottom: 70px;
+            background: var(--gray-700);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
             white-space: nowrap;
-            font-weight: 600;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
         }
         
+        .control-button:hover .control-tooltip {
+            opacity: 1;
+        }
+        
+        /* Mobile Responsive */
         @media (max-width: 768px) {
-            .call-timer { font-size: 2rem; }
-            .avatar-container { width: 140px; height: 140px; font-size: 4rem; }
-            .control-button.end-call { width: 80px; height: 80px; }
+            .top-bar {
+                padding: 0.75rem 1rem;
+            }
+            
+            .logo {
+                font-size: 1rem;
+            }
+            
+            .participant-avatar {
+                width: 120px;
+                height: 120px;
+                font-size: 3.5rem;
+            }
+            
+            .participant-name {
+                font-size: 1.2rem;
+            }
+            
+            .self-view {
+                width: 120px;
+                height: 90px;
+                top: 0.5rem;
+                right: 0.5rem;
+            }
+            
+            .self-avatar {
+                width: 40px;
+                height: 40px;
+                font-size: 1.5rem;
+            }
+            
+            .self-name {
+                font-size: 0.7rem;
+            }
+            
+            .transcript-sidebar {
+                width: 100%;
+            }
+            
+            .control-bar {
+                padding: 1rem;
+                gap: 0.75rem;
+            }
+            
+            .control-button {
+                width: 48px;
+                height: 48px;
+                font-size: 1.2rem;
+            }
+            
+            .control-button.end-call {
+                width: 56px;
+                height: 56px;
+                font-size: 1.4rem;
+            }
+        }
+        
+        /* Loading State */
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+        
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(212, 175, 55, 0.2);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <div class="phone-container">
-        <div class="call-header">
-            <div class="call-info">
-                <div class="call-status">
-                    <span class="status-indicator"></span>
-                    <span>Live Call</span>
-                </div>
-                <div class="call-type">Cold Call Demo - Real Voice</div>
+    <div class="call-container">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="logo">VALTORI</div>
+            <div class="call-timer">
+                <span class="recording-dot"></span>
+                <span id="callTimer">00:00</span>
             </div>
-            <div class="call-timer" id="callTimer">00:00</div>
         </div>
         
-        <div class="call-center">
-            <div class="avatar-container" id="avatar">🤖</div>
-            <div class="avatar-status" id="avatarStatus">AI Prospect</div>
+        <!-- Video Area -->
+        <div class="video-area">
+            <!-- Main Participant -->
+            <div class="main-participant">
+                <div class="participant-avatar" id="avatar">🎯</div>
+                <div class="participant-name">AI Sales Prospect</div>
+                <div class="participant-status">
+                    <span class="status-icon"></span>
+                    <span id="participantStatus">Connected</span>
+                </div>
+                
+                <!-- Waveform -->
+                <div class="waveform" id="waveform"></div>
+            </div>
             
-            <div class="waveform-container" id="waveform"></div>
-            
-            <div class="transcript-container" id="transcript"></div>
+            <!-- Self View (Picture-in-Picture) -->
+            <div class="self-view">
+                <div class="self-avatar">👤</div>
+                <div class="self-name">You</div>
+            </div>
         </div>
         
-        <div class="call-controls">
+        <!-- Transcript Sidebar -->
+        <div class="transcript-sidebar" id="transcriptSidebar">
+            <div class="transcript-header">
+                <div class="transcript-title">Live Transcript</div>
+                <button class="close-transcript" onclick="toggleTranscript()">×</button>
+            </div>
+            <div class="transcript-content" id="transcriptContent"></div>
+        </div>
+        
+        <!-- Bottom Control Bar -->
+        <div class="control-bar">
             <button class="control-button mute" id="muteBtn" onclick="toggleMute()">
                 🎤
-                <span class="control-label">Mute</span>
+                <span class="control-tooltip">Mute</span>
             </button>
+            
+            <button class="control-button transcript" id="transcriptBtn" onclick="toggleTranscript()">
+                💬
+                <span class="control-tooltip">Transcript</span>
+            </button>
+            
             <button class="control-button end-call" onclick="endCall()">
                 📞
-                <span class="control-label">End Call</span>
+                <span class="control-tooltip">End Call</span>
             </button>
         </div>
     </div>
 
     <script>
-        const { data: { session } } = await supabase.auth.getSession();
-
-if (!session) {
-  window.location.href = 'index.html';
-}
-
         const SUPABASE_URL = 'https://aqzjxlxdjhegypnhsdcp.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxemp4bHhkamhlZ3lwbmhzZGNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxMzk2OTYsImV4cCI6MjA4MDcxNTY5Nn0.oNwuIyrqwNAA4PfT4Nxgm869d6nKMZseFLJQAkJxbNM';
         const WEBSOCKET_URL = 'wss://valtori-realtime-server-production.up.railway.app';
         
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
-let state = {
+        let state = {
             userId: null,
             userEmail: null,
             callActive: false,
             callStartTime: null,
             timerInterval: null,
             isMuted: false,
+            transcriptVisible: false,
             messages: [],
             ws: null,
             audioContext: null,
@@ -363,7 +559,7 @@ let state = {
             const { data: { session } } = await supabase.auth.getSession();
             
             if (!session) {
-                window.location.href = 'index.html';
+                window.location.href = 'signup.html';
                 return;
             }
             
@@ -404,7 +600,7 @@ let state = {
             } catch (error) {
                 console.error('❌ Microphone access denied:', error);
                 alert('Please allow microphone access to make calls');
-                window.location.href = 'index.html';
+                window.location.href = 'signup.html';
             }
         }
         
@@ -424,7 +620,7 @@ let state = {
                 
                 if (message.type === 'session.created') {
                     console.log('✅ Session created');
-                    updateStatus('listening');
+                    updateStatus('Listening...');
                     
                 } else if (message.type === 'response.audio.delta') {
                     if (message.delta) {
@@ -446,13 +642,19 @@ let state = {
                     }
                     
                 } else if (message.type === 'input_audio_buffer.speech_started') {
-                    updateStatus('user_speaking');
+                    updateStatus('You\'re speaking...');
+                    document.getElementById('avatar').classList.remove('speaking');
                     
                 } else if (message.type === 'input_audio_buffer.speech_stopped') {
-                    updateStatus('listening');
+                    updateStatus('Listening...');
+                    
+                } else if (message.type === 'response.audio.delta') {
+                    document.getElementById('avatar').classList.add('speaking');
+                    updateStatus('AI speaking...');
                     
                 } else if (message.type === 'response.done') {
-                    updateStatus('listening');
+                    updateStatus('Connected');
+                    document.getElementById('avatar').classList.remove('speaking');
                     
                 } else if (message.type === 'error') {
                     console.error('❌ Server error:', message.error);
@@ -496,82 +698,62 @@ let state = {
             state.audioWorklet = new AudioWorkletNode(state.audioContext, 'audio-processor');
             
             state.audioWorklet.port.onmessage = (event) => {
-    if (state.ws && state.ws.readyState === WebSocket.OPEN && !state.isMuted) {
-        // Send raw binary audio instead of JSON
-        state.ws.send(event.data);
-    }
-};
+                if (state.ws && state.ws.readyState === WebSocket.OPEN && !state.isMuted) {
+                    state.ws.send(event.data);
+                }
+            };
             
             source.connect(state.audioWorklet);
         }
         
-        function arrayBufferToBase64(buffer) {
-            let binary = '';
-            const bytes = new Uint8Array(buffer);
-            for (let i = 0; i < bytes.byteLength; i++) {
-                binary += String.fromCharCode(bytes[i]);
+        async function playAudioChunk(base64Audio) {
+            const binaryString = atob(base64Audio);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
             }
-            return btoa(binary);
+            
+            const int16Array = new Int16Array(bytes.buffer);
+            const float32Array = new Float32Array(int16Array.length);
+            for (let i = 0; i < int16Array.length; i++) {
+                float32Array[i] = int16Array[i] / 32768;
+            }
+            
+            const audioBuffer = state.audioContext.createBuffer(1, float32Array.length, 24000);
+            audioBuffer.getChannelData(0).set(float32Array);
+            
+            audioQueue.push(audioBuffer);
+            
+            if (!isPlaying) {
+                playNextAudio();
+            }
+        }
+
+        function playNextAudio() {
+            if (audioQueue.length === 0) {
+                isPlaying = false;
+                return;
+            }
+            
+            isPlaying = true;
+            const audioBuffer = audioQueue.shift();
+            
+            const source = state.audioContext.createBufferSource();
+            source.buffer = audioBuffer;
+            source.connect(state.audioContext.destination);
+            source.onended = () => playNextAudio();
+            source.start();
         }
         
-        async function playAudioChunk(base64Audio) {
-    const binaryString = atob(base64Audio);
-    const len = binaryString.length;
-    const bytes = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-    }
-    
-    const int16Array = new Int16Array(bytes.buffer);
-    const float32Array = new Float32Array(int16Array.length);
-    for (let i = 0; i < int16Array.length; i++) {
-        float32Array[i] = int16Array[i] / 32768;
-    }
-    
-    const audioBuffer = state.audioContext.createBuffer(1, float32Array.length, 24000);
-    audioBuffer.getChannelData(0).set(float32Array);
-    
-    // Queue the audio
-    audioQueue.push(audioBuffer);
-    
-    if (!isPlaying) {
-        playNextAudio();
-    }
-}
-
-function playNextAudio() {
-    if (audioQueue.length === 0) {
-        isPlaying = false;
-        return;
-    }
-    
-    isPlaying = true;
-    const audioBuffer = audioQueue.shift();
-    
-    const source = state.audioContext.createBufferSource();
-    source.buffer = audioBuffer;
-    source.connect(state.audioContext.destination);
-    source.onended = () => playNextAudio();
-    source.start();
-}
-        
         function updateStatus(status) {
-            const avatar = document.getElementById('avatar');
-            const statusText = document.getElementById('avatarStatus');
+            document.getElementById('participantStatus').textContent = status;
             
-            avatar.classList.remove('speaking', 'listening');
-            
-            if (status === 'listening') {
-                avatar.classList.add('listening');
-                statusText.textContent = 'Listening...';
-                activateWaveform(true);
-            } else if (status === 'user_speaking') {
-                statusText.textContent = 'You\'re speaking...';
-                activateWaveform(true);
-            } else if (status === 'ai_speaking') {
-                avatar.classList.add('speaking');
-                statusText.textContent = 'AI speaking...';
-                activateWaveform(true);
+            const waveform = document.querySelectorAll('.waveform-bar');
+            if (status.includes('speaking') || status.includes('Listening')) {
+                waveform.forEach(bar => bar.classList.add('active'));
+            } else {
+                waveform.forEach(bar => bar.classList.remove('active'));
             }
         }
         
@@ -588,26 +770,17 @@ function playNextAudio() {
                 }
             }
         }
+        
         function initializeWaveform() {
             const waveform = document.getElementById('waveform');
             waveform.innerHTML = '';
             
-            for (let i = 0; i < 40; i++) {
+            for (let i = 0; i < 20; i++) {
                 const bar = document.createElement('div');
                 bar.className = 'waveform-bar';
                 bar.style.animationDelay = `${i * 0.05}s`;
                 waveform.appendChild(bar);
             }
-        }
-        
-        function activateWaveform(active) {
-            document.querySelectorAll('.waveform-bar').forEach(bar => {
-                if (active) {
-                    bar.classList.add('active');
-                } else {
-                    bar.classList.remove('active');
-                }
-            });
         }
         
         function startCallTimer() {
@@ -622,10 +795,10 @@ function playNextAudio() {
         }
         
         function addMessage(speaker, text) {
-            const transcript = document.getElementById('transcript');
+            const transcript = document.getElementById('transcriptContent');
             
             const msg = document.createElement('div');
-            msg.className = `transcript-message ${speaker}`;
+            msg.className = 'transcript-message';
             
             const speakerLabel = document.createElement('div');
             speakerLabel.className = `message-speaker ${speaker}`;
@@ -650,10 +823,24 @@ function playNextAudio() {
             
             if (state.isMuted) {
                 muteBtn.classList.add('active');
-                muteBtn.innerHTML = '🔇<span class="control-label">Unmute</span>';
+                muteBtn.innerHTML = '🔇<span class="control-tooltip">Unmute</span>';
             } else {
                 muteBtn.classList.remove('active');
-                muteBtn.innerHTML = '🎤<span class="control-label">Mute</span>';
+                muteBtn.innerHTML = '🎤<span class="control-tooltip">Mute</span>';
+            }
+        }
+        
+        function toggleTranscript() {
+            state.transcriptVisible = !state.transcriptVisible;
+            const sidebar = document.getElementById('transcriptSidebar');
+            const btn = document.getElementById('transcriptBtn');
+            
+            if (state.transcriptVisible) {
+                sidebar.classList.add('active');
+                btn.classList.add('active');
+            } else {
+                sidebar.classList.remove('active');
+                btn.classList.remove('active');
             }
         }
         
@@ -677,8 +864,6 @@ function playNextAudio() {
             if (state.audioContext) {
                 state.audioContext.close();
             }
-            
-            activateWaveform(false);
             
             const duration = Math.floor((Date.now() - state.callStartTime) / 1000);
             const scores = {
