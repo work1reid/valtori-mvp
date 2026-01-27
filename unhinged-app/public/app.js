@@ -525,6 +525,9 @@ function updateSettingsUI() {
     const usernameSection = document.getElementById('username-section');
     const signoutBtn = document.getElementById('settings-signout-btn');
     const signinBtn = document.getElementById('settings-signin-btn');
+    const buyCreditsBtn = document.getElementById('settings-buy-credits-btn');
+    const creditsInfo = document.getElementById('settings-credits-info');
+    const creditsValue = document.getElementById('settings-credits-value');
 
     if (currentUser) {
         emailEl.textContent = currentUser.email;
@@ -532,11 +535,16 @@ function updateSettingsUI() {
         usernameSection.style.display = 'block';
         signoutBtn.style.display = 'block';
         signinBtn.style.display = 'none';
+        buyCreditsBtn.style.display = 'block';
+        creditsInfo.style.display = 'flex';
+        creditsValue.textContent = purchasedCredits;
     } else {
         emailEl.textContent = 'Not signed in';
         usernameSection.style.display = 'none';
         signoutBtn.style.display = 'none';
         signinBtn.style.display = 'block';
+        buyCreditsBtn.style.display = 'none';
+        creditsInfo.style.display = 'none';
     }
 }
 
